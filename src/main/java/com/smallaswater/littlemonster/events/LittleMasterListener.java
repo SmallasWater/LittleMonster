@@ -25,6 +25,7 @@ import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.items.DeathCommand;
 import com.smallaswater.littlemonster.items.DropItem;
 import com.smallaswater.littlemonster.manager.KeyHandleManager;
+import com.smallaswater.littlemonster.manager.TimerHandleManager;
 import com.smallaswater.littlemonster.utils.Utils;
 import com.smallaswater.littlemonster.windows.LittleWindow;
 
@@ -63,9 +64,11 @@ public class LittleMasterListener implements Listener {
     @EventHandler
     public void onMove(PlayerMoveEvent event){
         Player player = event.getPlayer();
-        if(KeyHandleManager.isKey(player,"Ice")){
+        if(KeyHandleManager.isKey(player,"Ice") && TimerHandleManager.getTimeHandle(player).hasCold("Ice")){
             player.sendPopup("你被冰冻啦");
             event.setCancelled();
+        }else{
+            KeyHandleManager.removeKey(player,"Ice");
         }
     }
 
