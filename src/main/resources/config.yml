@@ -1,0 +1,10 @@
+npcs:
+  autospawn-tick: 100
+  worlds-spawning: []
+
+# 格式
+# autospawn:
+# npc名称:
+#    maxCount: 20
+#    liveTime: 30
+autospawn: {}

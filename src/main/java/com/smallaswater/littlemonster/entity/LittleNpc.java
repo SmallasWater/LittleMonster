@@ -1,0 +1,597 @@
+package com.smallaswater.littlemonster.entity;
+
+import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.block.BlockRedstone;
+import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.EntityCreature;
+import cn.nukkit.entity.mob.EntityMob;
+import cn.nukkit.entity.projectile.EntityArrow;
+import cn.nukkit.entity.projectile.EntityProjectile;
+import cn.nukkit.event.entity.*;
+import cn.nukkit.item.Item;
+import cn.nukkit.level.ParticleEffect;
+import cn.nukkit.level.Sound;
+import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.particle.DestroyBlockParticle;
+import cn.nukkit.level.particle.HugeExplodeSeedParticle;
+import cn.nukkit.math.Vector3;
+import cn.nukkit.nbt.tag.CompoundTag;
+import cn.nukkit.network.protocol.EntityEventPacket;
+import cn.nukkit.potion.Effect;
+import cn.nukkit.utils.TextFormat;
+import com.smallaswater.littlemonster.config.MonsterConfig;
+import com.smallaswater.littlemonster.entity.baselib.BaseEntityMove;
+import com.smallaswater.littlemonster.handle.DamageHandle;
+import com.smallaswater.littlemonster.items.BaseItem;
+import com.smallaswater.littlemonster.items.DeathCommand;
+import com.smallaswater.littlemonster.items.DropItem;
+import com.smallaswater.littlemonster.manager.BossBarManager;
+import com.smallaswater.littlemonster.route.WalkerRouteFinder;
+import com.smallaswater.littlemonster.skill.BaseSkillAreaManager;
+import com.smallaswater.littlemonster.skill.BaseSkillManager;
+import com.smallaswater.littlemonster.skill.defaultskill.AttributeHealthSkill;
+import com.smallaswater.littlemonster.skill.defaultskill.MessageHealthSkill;
+import com.smallaswater.littlemonster.skill.defaultskill.SummonHealthSkill;
+import com.smallaswater.littlemonster.utils.Utils;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.*;
+
+/**
+ * @author SmallasWater
+ * Create on 2021/6/28 8:36
+ * Package com.smallaswater.littlemonster.entity
+ */
+public class LittleNpc extends BaseEntityMove {
+
+    public static final String TAG = "LittleMonster";
+
+    public String name;
+
+    @Setter
+    @Getter
+    private int liveTime = -1;
+
+
+    public int heal;
+
+    public int healSettingTime;
+
+
+    private ArrayList<Integer> healthList = new ArrayList<>();
+
+
+
+    public DamageHandle handle = new DamageHandle();
+
+
+
+    public LittleNpc(FullChunk chunk, CompoundTag nbt) {
+        super(chunk, nbt);
+        this.route = new WalkerRouteFinder(this);
+
+
+    }
+
+
+
+    private Player getDamageMax(){
+        double max = 0;
+        Player p = null;
+        for(Map.Entry<String, Double> player: handle.playerDamageList.entrySet()){
+            if(player.getValue() > max){
+                if(Server.getInstance().getPlayer(player.getKey()) != null){
+                    p = Server.getInstance().getPlayer(player.getKey());
+                }
+                max = player.getValue();
+            }
+        }
+        return p;
+    }
+
+    private void disCommand(String cmd){
+        disCommand(cmd,null,null);
+    }
+
+    private void disCommand(String cmd,String target,String name){
+        if(target != null) {
+            Server.getInstance().getCommandMap().dispatch(
+                    new EntityCommandSender(getName()), cmd.replace(target, name));
+        }else{
+            Server.getInstance().getCommandMap().dispatch(new EntityCommandSender(getName()),cmd);
+        }
+    }
+
+    public void onDeath(EntityDeathEvent event){
+        Entity damager = null;
+        EntityDamageEvent d = event.getEntity().getLastDamageCause();
+        if(d instanceof EntityDamageByEntityEvent){
+            damager = ((EntityDamageByEntityEvent) d).getDamager();
+        }
+        LinkedList<Item> items = new LinkedList<>();
+        for(DeathCommand command:getConfig().getDeathCommand()){
+            if(command.getRound() >= Utils.rand(1,100)){
+                String cmd = command.getCmd();
+                cmd = cmd.replace("{x}",String.format("%.2f",getX()))
+                          .replace("{y}",String.format("%.2f",getY()))
+                          .replace("{z}",String.format("%.2f",getZ()))
+                          .replace("{level}",getLevel().getFolderName());
+                if(cmd.contains("@"+ BaseItem.TARGETALL)){
+                    for(Player player: getDamagePlayers()){
+                        disCommand(cmd,"@"+BaseItem.TARGETALL,player.getName());
+                    }
+
+                }else{
+                    if(cmd.contains("@"+BaseItem.TARGET)){
+                        if(damager instanceof  Player){
+                            cmd = cmd.replace("@"+BaseItem.TARGET,damager.getName());
+                        }
+                    }
+                    if(cmd.contains("@"+BaseItem.DAMAGE)){
+                        Player player = getDamageMax();
+                        if(player != null){
+                            cmd = cmd.replace("@"+BaseItem.DAMAGE,player.getName());
+                        }
+                    }
+                    disCommand(cmd);
+
+
+                }
+            }
+        }
+        for(DropItem key: getConfig().getDeathItem()){
+            if(key.getRound() >= Utils.rand(1,100)){
+                items.add(key.getItem());
+            }
+        }
+        event.setDrops(items.toArray(new Item[0]));
+
+        String deathMessage = getConfig().getConfig().getString("公告.死亡.信息","&e[ &bBOSS &e] {name} 在坐标: x: {x} y: {y} z: {z} 处死亡");
+        if(getConfig().getConfig().getBoolean("公告.死亡.是否提示",true)){
+            Server.getInstance().broadcastMessage(TextFormat.colorize('&',deathMessage.replace("{name}",name)
+                    .replace("{x}",getFloorX()+"")
+                    .replace("{y}",getFloorY()+"")
+                    .replace("{z}",getFloorZ()+"")
+                    .replace("{level}",getLevel().getFolderName()+"")));
+        }
+        if(damager != null){
+            if(damager instanceof Player) {
+                String killMessage = getConfig().getConfig().getString("公告.击杀.信息", "&e[ &bBOSS提醒 &e] &d{name} 被 {player} 击杀");
+                if (getConfig().getConfig().getBoolean("公告.击杀.是否提示", true)) {
+                    Server.getInstance().broadcastMessage(TextFormat.colorize('&', killMessage.replace("{name}", name)
+
+                            .replace("{player}", damager.getName() + "")));
+                }
+            }
+        }
+
+
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void onClose() {
+        if(boss != null){
+            BossBarManager.BossBarApi.removeBossBar(boss);
+            boss = null;
+        }
+        if(config == null){
+            return;
+        }
+        if(config.isDisplayDamage()){
+            handle.display();
+        }
+    }
+
+    private ArrayList<Player> getDamagePlayers(){
+        ArrayList<Player> players = new ArrayList<>();
+        Player player;
+        for(String name: handle.playerDamageList.keySet()){
+            player = Server.getInstance().getPlayer(name);
+            if(player != null){
+                players.add(player);
+            }
+        }
+        return players;
+    }
+
+    private void loadSkill(){
+        BaseSkillManager baseSkillManager;
+        for(BaseSkillManager skillManager: config.getSkillManagers()){
+            baseSkillManager = skillManager.clone();
+            baseSkillManager.setMaster(this);
+            skillManagers.add(baseSkillManager);
+        }
+    }
+
+
+
+    public LittleNpc(FullChunk chunk,CompoundTag nbt,MonsterConfig config){
+        super(chunk, nbt);
+
+        this.config = config;
+        this.name = config.getName();
+        this.setNameTagAlwaysVisible();
+        this.setNameTagVisible();
+        loadSkill();
+        this.setDataFlag(Entity.DATA_LEAD_HOLDER_EID,-1);
+        this.setHealth(config.getHealth());
+        this.setMaxHealth(config.getHealth());
+        this.namedTag.putString(TAG,name);
+        this.route = new WalkerRouteFinder(this);
+    }
+
+
+
+
+    private ArrayList<BaseSkillManager> getHealthSkill(int health){
+
+        ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
+        for(BaseSkillManager skillManager:this.skillManagers){
+            if(skillManager.health >= health){
+                if(!healthList.contains(skillManager.health)) {
+                    skillManagers.add(skillManager);
+                    healthList.add(skillManager.health);
+                }
+            }
+        }
+
+        return skillManagers;
+    }
+
+    private Player boss = null;
+
+//    private String s2 = "9a469a61-c83b-4ba9-b507-bdbe64430582";
+//    private void displayEmote(String skin){
+//        EmotePacket packet = new EmotePacket();
+//        packet.runtimeId = this.getId();
+//        packet.emoteID = skin;
+//        packet.flags = 0;
+//        Server.broadcastPacket(Server.getInstance().getOnlinePlayers().values(), packet);
+//    }
+
+
+
+    private void onHealthListener(int health){
+        ArrayList<BaseSkillManager> skillAreaManagers = getHealthSkill(health);
+        if(skillAreaManagers.size() > 0) {
+//            this.setImmobile(true);
+//            this.disPlayAnim = true;
+//            Server.getInstance().getScheduler().scheduleDelayedTask(LittleMasterMainClass.getMasterMainClass(), new Runnable() {
+//                @Override
+//                public void run() {
+//                    displayEmote(s2);
+//                }
+//            },5);
+
+            for (BaseSkillManager skillManager : skillAreaManagers) {
+                if (skillManager instanceof BaseSkillAreaManager) {
+                    if (this.getFollowTarget() != null) {
+                        if (!targetOption(this.getFollowTarget(), distance(this.getFollowTarget()))) {
+
+                            if (skillManager.mode == 1) {
+                                skillManager.display(Utils.getAroundPlayers(this, config.getArea(),true,true,true).toArray(new Entity[0]));
+                            } else {
+                                if (this.getFollowTarget() instanceof Player) {
+                                    skillManager.display((Player) this.getFollowTarget());
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (skillManager instanceof AttributeHealthSkill || skillManager instanceof SummonHealthSkill) {
+                        skillManager.display((Player) null);
+                    }
+                    if (skillManager instanceof MessageHealthSkill) {
+                        skillManager.display(getDamagePlayers().toArray(new Player[0]));
+                    }
+                }
+            }
+        }
+//        if(emoteTime >= 50){
+//            emoteTime = 0;
+//            if(this.isImmobile() && !config.isImmobile() && disPlayAnim) {
+//                this.setImmobile(false);
+//                disPlayAnim = false;
+//            }
+//
+//        }
+
+    }
+
+    private int age = 0;
+
+    private int cacheAge = 0;
+
+
+    @Override
+    public void onUpdata() {
+        if(cacheAge >= 20){
+            age++;
+            cacheAge = 0;
+        }else{
+            cacheAge++;
+        }
+        if(liveTime != -1 && age >= liveTime){
+            this.getLevel().addParticleEffect(this, ParticleEffect.BASIC_SMOKE);
+            this.close();
+            return;
+        }
+//        if(isImmobile() && disPlayAnim && emoteTime < 1000) {
+//            ++emoteTime;
+//        }
+        if(config == null){
+            return;
+        }
+        this.setNameTag(config.getTag().replace("{名称}",name).replace("{血量}",getHealth()+"").replace("{最大血量}",getMaxHealth()+""));
+
+        onHealthListener((int) Math.floor(getHealth()));
+
+        if(this.getFollowTarget() != null && this.getFollowTarget() instanceof Player){
+            if(healTime >= healSettingTime && heal > 0 && !config.isUnFightHeal()){
+                healTime = 0;
+                this.heal(heal);
+            }
+
+            if(targetOption(this.getFollowTarget(), distance(this.getFollowTarget()))){
+                if(boss != null){
+                    BossBarManager.BossBarApi.removeBossBar(boss);
+                    boss = null;
+                }
+                setFollowTarget(null,false);
+
+
+
+
+                return;
+            }
+            if(this.getFollowTarget() instanceof Player){
+                boss = (Player) this.getFollowTarget();
+                if(!BossBarManager.BossBarApi.hasCreate((Player) this.getFollowTarget(),getId())) {
+                    BossBarManager.BossBarApi.createBossBar((Player) this.getFollowTarget(), getId());
+                }
+                BossBarManager.BossBarApi.showBoss((Player) getFollowTarget(),getNameTag(),getHealth(),getMaxHealth());
+//                if(!config.isImmobile()  && this.isImmobile() && !config.isCanMove() && !hasNoTarget()){
+//                    this.setImmobile(false);
+//                }
+            }
+        }else{
+            if(getFollowTarget() == null){
+                if(healTime >= healSettingTime && heal > 0){
+                    healTime = 0;
+                    this.heal(heal);
+                }
+            }else if(!config.isUnFightHeal()){
+                if(healTime >= healSettingTime && heal > 0){
+                    healTime = 0;
+                    this.heal(heal);
+                }
+            }
+
+            if(boss != null){
+                BossBarManager.BossBarApi.removeBossBar(boss);
+                boss = null;
+            }
+
+//            this.followTarget = null;
+
+//            if(!config.isCanMove() && hasNoTarget()){
+//                this.setImmobile(true);
+//            }
+        }
+
+    }
+
+    @Override
+    public void heal(float amount) {
+        if (getHealth() < getMaxHealth()) {
+            healthList.removeIf(i -> getHealth() + amount >= i);
+            if (getHealth() + amount >= getMaxHealth()) {
+                reset();
+            }
+        }
+        this.heal(new EntityRegainHealthEvent(this, amount, 0));
+    }
+
+    public void reset(){
+        handle = new DamageHandle();
+        healthList = new ArrayList<>();
+        if(config != null) {
+            config.npcSetting(this);
+        }
+    }
+
+    //受到攻击
+
+    @Override
+    public void onAttack(EntityDamageEvent sure) {
+        if(this.damageDelay > config.getInvincibleTime()){
+            if(isImmobile() && !config.isImmobile()){
+                sure.setCancelled();
+            }
+            if(!config.isKonck()){
+                if(sure instanceof EntityDamageByEntityEvent){
+                    ((EntityDamageByEntityEvent) sure).setKnockBack(0);
+                }
+            }
+            this.damageDelay = 0;
+            this.level.addParticle(new DestroyBlockParticle(this,new BlockRedstone()));
+            if(sure instanceof EntityDamageByEntityEvent){
+                if(!(getFollowTarget() instanceof Player)) {
+                    if(getFollowTarget() != null) {
+                        if(targetOption(getFollowTarget(),distance(getFollowTarget()))){
+                            setFollowTarget(null,false);
+                            return;
+                        }
+                        if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
+                            if (!targetOption(((EntityDamageByEntityEvent) sure).getDamager(), distance(((EntityDamageByEntityEvent) sure).getDamager()))) {
+                                setFollowTarget( ((EntityDamageByEntityEvent) sure).getDamager());
+                            }
+                        }
+                    }else{
+                        if(config.isPassiveAttackEntity()){
+                            if(!config.isAttackHostileEntity()){
+                                if(((EntityDamageByEntityEvent) sure).getDamager() instanceof EntityMob){
+                                    return;
+                                }
+                            }
+                            if (!targetOption((EntityCreature) ((EntityDamageByEntityEvent) sure).getDamager(), distance(((EntityDamageByEntityEvent) sure).getDamager()))) {
+                                setFollowTarget((EntityCreature) ((EntityDamageByEntityEvent) sure).getDamager());
+                            }
+                        }
+
+                    }
+                }
+            }
+
+        }else{
+            sure.setCancelled();
+        }
+
+    }
+
+    @Override
+    public int getKillExperience() {
+        return 0;
+    }
+
+    //攻击玩家~
+
+    @Override
+    public void attackEntity(EntityCreature player){
+        if (this.attackDelay > attackSleepTime && player.distance(this) <= distanceLine) {
+            this.attackDelay = 0;
+//            String s1 = "ce5c0300-7f03-455d-aaf1-352e4927b54d";
+            switch (attactMode){
+                case 1:
+                    //群体
+                    LinkedList<Entity> players = Utils.getAroundPlayers(this,config.getArea(),true,true,true);
+                    for(Entity p:players){
+                        if(p instanceof Player && ((Player) p).isCreative()){
+                            continue;
+                        }
+                        if(p instanceof LittleNpc){
+                            continue;
+                        }
+                        p.attack(new EntityDamageByEntityEvent(this, p, EntityDamageEvent.DamageCause.ENTITY_ATTACK, getDamage()));
+                    }
+                    player.level.addParticle(new HugeExplodeSeedParticle(player));
+                    player.level.addSound(player, Sound.RANDOM_EXPLODE);
+//                    displayEmote(s1);
+
+                    break;
+                case 2:
+                    double f = 1.3D;
+                    Entity k = Entity.createEntity("Arrow", this, this);
+                    if (!(k instanceof EntityArrow)) {
+                        return;
+                    }
+
+                    EntityArrow arrow = (EntityArrow)k;
+                    arrow.setMotion(new Vector3(-Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f, -Math.sin(Math.toRadians(pitch)) * f * f, Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f));
+                    EntityShootBowEvent ev = new EntityShootBowEvent(this, Item.get(262, 0, 1), arrow, f);
+                    this.server.getPluginManager().callEvent(ev);
+                    EntityProjectile projectile = ev.getProjectile();
+
+                    if (ev.isCancelled()) {
+                        projectile.kill();
+                    } else {
+                        ProjectileLaunchEvent launch = new ProjectileLaunchEvent(projectile);
+                        this.server.getPluginManager().callEvent(launch);
+                        if (launch.isCancelled()) {
+                            projectile.kill();
+                        } else {
+                            projectile.spawnToAll();
+                            projectile.namedTag.putBoolean("canNotPickup", true);
+                            this.level.addSound(this, Sound.RANDOM_BOW);
+                        }
+                    }
+                    EntityEventPacket pk = new EntityEventPacket();
+                    pk.eid = this.getId();
+                    pk.event = 4;
+                    this.level.getPlayers().values().forEach(player1 -> player1.dataPacket(pk));
+                    waitTime = 0;
+                    return;
+                case 3:
+                    EntityInteractEvent event = new EntityInteractEvent(this,player.getPosition().add(0,0.5,0).getLevelBlock());
+                    Server.getInstance().getPluginManager().callEvent(event);
+                    waitTime = 0;
+                    break;
+                case 0:
+                default:
+                    HashMap<EntityDamageEvent.DamageModifier, Float> damage = new LinkedHashMap<>();
+                    damage.put(EntityDamageEvent.DamageModifier.BASE, getDamage());
+                    if (player instanceof Player) {
+                        HashMap<Integer, Float> armorValues = new LinkedHashMap<Integer, Float>() {
+                            {
+                                this.put(298, 1.0F);
+                                this.put(299, 3.0F);
+                                this.put(300, 2.0F);
+                                this.put(301, 1.0F);
+                                this.put(302, 1.0F);
+                                this.put(303, 5.0F);
+                                this.put(304, 4.0F);
+                                this.put(305, 1.0F);
+                                this.put(314, 1.0F);
+                                this.put(315, 5.0F);
+                                this.put(316, 3.0F);
+                                this.put(317, 1.0F);
+                                this.put(306, 2.0F);
+                                this.put(307, 6.0F);
+                                this.put(308, 5.0F);
+                                this.put(309, 2.0F);
+                                this.put(310, 3.0F);
+                                this.put(311, 8.0F);
+                                this.put(312, 6.0F);
+                                this.put(313, 3.0F);
+                            }
+                        };
+                        float points = 0.0F;
+                        Item[] var5 = ((Player)player).getInventory().getArmorContents();
+                        for (Item i : var5) {
+                            points += armorValues.getOrDefault(i.getId(), 0.0F);
+                        }
+
+                        damage.put(EntityDamageEvent.DamageModifier.ARMOR, (float)((double)(Float)damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0.0F) - Math.floor((double)((Float)damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1.0F) * points) * 0.04D)));
+                    }
+
+                    player.attack(new EntityDamageByEntityEvent(this, player, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage,0.8f));
+                    break;
+            }
+            for(Effect effect: config.getEffects()){
+                player.addEffect(effect);
+            }
+            EntityEventPacket pk = new EntityEventPacket();
+            pk.eid = this.getId();
+            pk.event = 4;
+            this.level.getPlayers().values().forEach(player1 -> player1.dataPacket(pk));
+//            this.level.addChunkPacket(this.getChunkX() >> 4, this.getChunkZ() >> 4, pk);
+
+        }
+    }
+
+
+    @Override
+    public void close() {
+        inventory.getViewers().clear();
+        super.close();
+        onClose();
+    }
+
+    @Override
+    public void saveNBT() {}
+
+    @Override
+    public float getDamage() {
+        return (float) damage;
+    }
+
+
+
+}
