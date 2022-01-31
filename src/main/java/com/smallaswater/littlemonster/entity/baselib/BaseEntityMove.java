@@ -4,7 +4,7 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.*;
 import cn.nukkit.entity.Entity;
-import cn.nukkit.entity.EntityCreature;;
+import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.BubbleParticle;
 import cn.nukkit.math.NukkitMath;
@@ -36,12 +36,12 @@ public abstract class BaseEntityMove extends BaseEntity {
 
     private boolean checkJump(double dx, double dz) {
         if (this.motionY == (double)(this.getGravity() * 2.0F)) {
-            return this.level.getBlock(new Vector3((double) NukkitMath.floorDouble(this.x), (double)((int)this.y), (double)NukkitMath.floorDouble(this.z))) instanceof BlockLiquid;
-        } else if (this.level.getBlock(new Vector3((double)NukkitMath.floorDouble(this.x), (double)((int)(this.y + 0.8D)), (double)NukkitMath.floorDouble(this.z))) instanceof BlockLiquid) {
-            this.motionY = (double)(this.getGravity() * 2.0F);
+            return this.level.getBlock(new Vector3(NukkitMath.floorDouble(this.x), (int)this.y, NukkitMath.floorDouble(this.z))) instanceof BlockLiquid;
+        } else if (this.level.getBlock(new Vector3(NukkitMath.floorDouble(this.x), (int)(this.y + 0.8D), NukkitMath.floorDouble(this.z))) instanceof BlockLiquid) {
+            this.motionY = this.getGravity() * 2.0F;
             return true;
         } else if (this.onGround && this.stayTime <= 0) {
-            Block that = this.getLevel().getBlock(new Vector3((double)NukkitMath.floorDouble(this.x + dx), (double)((int)this.y), (double)NukkitMath.floorDouble(this.z + dz)));
+            Block that = this.getLevel().getBlock(new Vector3(NukkitMath.floorDouble(this.x + dx), (int)this.y, NukkitMath.floorDouble(this.z + dz)));
             if (this.getDirection() == null) {
                 return false;
             } else {
@@ -49,16 +49,16 @@ public abstract class BaseEntityMove extends BaseEntity {
                 if (!block.canPassThrough() && block.up().canPassThrough() && that.up(2).canPassThrough()) {
                     if (!(block instanceof BlockFence) && !(block instanceof BlockFenceGate)) {
                         if (this.motionY <= (double)(this.getGravity() * 4.0F)) {
-                            this.motionY = (double)(this.getGravity() * 4.0F);
+                            this.motionY = this.getGravity() * 4.0F;
                         } else if (block instanceof BlockStairs || block instanceof BlockSlab) {
-                            this.motionY = (double)(this.getGravity() * 4.0F);
+                            this.motionY = this.getGravity() * 4.0F;
                         } else if (this.motionY <= (double)(this.getGravity() * 8.0F)) {
-                            this.motionY = (double)(this.getGravity() * 8.0F);
+                            this.motionY = this.getGravity() * 8.0F;
                         } else {
                             this.motionY += (double)this.getGravity() * 0.25D;
                         }
                     } else {
-                        this.motionY = (double)this.getGravity();
+                        this.motionY = this.getGravity();
                     }
 
                     return true;
@@ -306,7 +306,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                 }
                 if (this.isKnockback()) {
                     this.move(this.motionX , this.motionY, this.motionZ);
-                    this.motionY -= (double)(this.getGravity());
+                    this.motionY -= this.getGravity();
                     this.updateMovement();
                     return null;
                 } else {
@@ -391,11 +391,11 @@ public abstract class BaseEntityMove extends BaseEntity {
                         if (this.onGround) {
                             this.motionY = 0.0D;
                         } else if (this.motionY > (double)(-this.getGravity() * 4.0F)) {
-                            if (!(this.level.getBlock(new Vector3((double)NukkitMath.floorDouble(this.x), (double)((int)(this.y + 0.8D)), (double)NukkitMath.floorDouble(this.z))) instanceof BlockLiquid)) {
-                                this.motionY -= (double)(this.getGravity() * 1.0F);
+                            if (!(this.level.getBlock(new Vector3(NukkitMath.floorDouble(this.x), (int)(this.y + 0.8D), NukkitMath.floorDouble(this.z))) instanceof BlockLiquid)) {
+                                this.motionY -= this.getGravity();
                             }
                         } else {
-                            this.motionY -= (double)(this.getGravity() * (float)tickDiff);
+                            this.motionY -= this.getGravity() * (float)tickDiff;
                         }
                     }
 
