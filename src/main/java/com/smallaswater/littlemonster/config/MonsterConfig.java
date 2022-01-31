@@ -134,7 +134,7 @@ public class MonsterConfig {
         entity.setCampName(config.getString("阵营","光明"));
         entity.setHealTime(config.getInt("恢复间隔",20));
         entity.setUnFightHeal(config.getBoolean("是否仅脱战恢复"));
-        entity.setSeeLine(config.getInt("视觉距离",30));
+        entity.setSeeLine(config.getInt("视觉距离",15));
         entity.setHeal(config.getInt("恢复血量",5));
         entity.setDisplayDamage(config.getBoolean("显示伤害榜",true));
         entity.setArea(config.getInt("群体攻击范围",5));
