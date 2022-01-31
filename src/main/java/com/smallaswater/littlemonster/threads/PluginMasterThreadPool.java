@@ -2,7 +2,6 @@ package com.smallaswater.littlemonster.threads;
 
 import com.smallaswater.littlemonster.threads.runnables.BasePluginThreadTask;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -14,19 +13,27 @@ import java.util.concurrent.TimeUnit;
  */
 public class PluginMasterThreadPool {
 
-    private static ThreadPoolExecutor executor;
+    private static final ThreadPoolExecutor executor;
 
     static {
-        executor = new ThreadPoolExecutor(3, 20, 1L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadPoolExecutor.AbortPolicy());
+        executor = new ThreadPoolExecutor(
+                3,
+                20,
+                1L,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(),
+                new ThreadPoolExecutor.AbortPolicy()
+        );
     }
 
-    public PluginMasterThreadPool() {}
+    private PluginMasterThreadPool() {
+        throw new RuntimeException();
+    }
 
     public static void executeThread(BasePluginThreadTask t) {
         if (!executor.isShutdown() && !executor.isTerminating()) {
             executor.execute(t);
         }
-
     }
 
     public static void shutDownNow() {
