@@ -219,6 +219,11 @@ public abstract class BaseEntity extends EntityHuman {
      * */
     abstract public float getDamage();
 
+    //判断中间是否有方块
+    public boolean hasBlockInLine(Entity target){
+        return this.getTargetBlock((int)this.distance(target)).getId() != 0;
+    }
+
     @Override
     public boolean move(double dx, double dy, double dz) {
         if (dy < -10 || dy > 10) {

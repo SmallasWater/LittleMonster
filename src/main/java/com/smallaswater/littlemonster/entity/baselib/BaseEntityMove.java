@@ -366,7 +366,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                             this.move(x, this.motionY, z);
                         }else{
                             //判断直线距离中是否有方块阻挡
-                            if(this.getSide(getHorizontalFacing(),(int)distance(followTarget)).getLevelBlock().getId() != 0){
+                            if(hasBlockInLine(followTarget)){
                                 this.move(x, this.motionY, z);
                             }else{
                                 this.move(0.05, this.motionY, 0.05);
