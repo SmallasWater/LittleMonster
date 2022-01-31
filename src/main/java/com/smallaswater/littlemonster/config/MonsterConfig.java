@@ -83,10 +83,16 @@ public class MonsterConfig {
 
     private int invincibleTime;
 
+    /**
+     * 主动锁定玩家
+     */
     private boolean targetPlayer;
 
     private boolean passiveAttackEntity;
 
+    /**
+     * 主动攻击生物
+     */
     private boolean activeAttackEntity;
 
     private int seeLine;
