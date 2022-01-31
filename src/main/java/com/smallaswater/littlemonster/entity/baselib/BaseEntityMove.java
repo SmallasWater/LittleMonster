@@ -244,7 +244,7 @@ public abstract class BaseEntityMove extends BaseEntity {
         if (this.closed) {
             return false;
         } else if (!this.isAlive()) {
-            onClose();
+//            onClose();
             if (++this.deadTicks >= 23) {
                 this.close();
                 return false;
