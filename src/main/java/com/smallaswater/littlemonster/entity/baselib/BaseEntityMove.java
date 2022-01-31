@@ -173,7 +173,6 @@ public abstract class BaseEntityMove extends BaseEntity {
                             }
                             if (x != 0 && z != 0) {
                                 this.route.setDestination(this.add(x, 0, z));
-                                this.route.research();
                             }
                         }
                     }

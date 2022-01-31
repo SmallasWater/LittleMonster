@@ -309,15 +309,15 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    }
 
    private Node getNodeInCloseByVector2(Vector3 vector2) {
-      Iterator var2 = this.closeList.iterator();
+      Iterator<Node> var2 = this.closeList.iterator();
 
-     Node node;
+      Node node;
       do {
          if (!var2.hasNext()) {
             return null;
          }
 
-         node = (Node)var2.next();
+         node = var2.next();
       } while(!vector2.equals(node.getVector3()));
 
       return node;
