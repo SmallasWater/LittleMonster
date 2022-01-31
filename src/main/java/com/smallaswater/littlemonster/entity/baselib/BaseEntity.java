@@ -221,7 +221,10 @@ public abstract class BaseEntity extends EntityHuman {
 
     //判断中间是否有方块
     public boolean hasBlockInLine(Entity target){
-        return this.getTargetBlock((int)this.distance(target)).getId() != 0;
+        if(target != null) {
+            return this.getTargetBlock((int) this.distance(target)).getId() != 0;
+        }
+        return false;
     }
 
     @Override

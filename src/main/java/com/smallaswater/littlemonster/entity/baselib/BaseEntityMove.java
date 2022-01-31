@@ -116,6 +116,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                     if (this.passengers.isEmpty()){
                         //获取范围内可以攻击的生物
                         for (Entity entity : Utils.getAroundPlayers(this,seeSize,true,true,true)) {
+                            //忽略凋零头 盔甲架
                             if(entity.getNetworkId() == 19 || entity.getNetworkId() == 30){
                                 continue;
                             }
@@ -139,11 +140,11 @@ public abstract class BaseEntityMove extends BaseEntity {
                                     }
                                 }
                             }
-
                         }
                     }
+
+                    //随便走..
                     if(config.isCanMove()) {
-                        //随便走..
                         if (this.followTarget == null || this.followTarget.closed || !this.followTarget.isAlive() || this.targetOption(this.followTarget,
                                 this.distance(this.followTarget)) || this.target == null) {
                             int x, z;
@@ -175,7 +176,6 @@ public abstract class BaseEntityMove extends BaseEntity {
                         return;
                     }
                     if(this.target == null) {
-//                    near = distance;
                         this.stayTime = 0;
                         this.moveTime = 0;
                         if (this.passengers.isEmpty()) {
@@ -333,19 +333,21 @@ public abstract class BaseEntityMove extends BaseEntity {
                             if ((this.passengers.isEmpty()) &&
                                     (this.stayTime <= 0 || Utils.rand())) {
                                 this.yaw = Math.toDegrees(-Math.atan2(x / diff, z / diff));
-                                if(followTarget != null) {
-                                    double dx = this.x - followTarget.x;
-                                    double dy = (this.y + this.getEyeHeight()) - (followTarget.y + followTarget.getEyeHeight());
-                                    double dz = this.z - followTarget.z;
-                                    double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
-                                    double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
-                                    if (dz > 0.0D) {
-                                        yaw = -yaw + 180.0D;
+                                if(!hasBlockInLine(followTarget)) {
+                                    if (followTarget != null) {
+                                        double dx = this.x - followTarget.x;
+                                        double dy = (this.y + this.getEyeHeight()) - (followTarget.y + followTarget.getEyeHeight());
+                                        double dz = this.z - followTarget.z;
+                                        double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
+                                        double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
+                                        if (dz > 0.0D) {
+                                            yaw = -yaw + 180.0D;
+                                        }
+                                        this.yaw = yaw;
+                                        this.pitch = pitch;
+                                    } else {
+                                        pitch = 0;
                                     }
-                                    this.yaw = yaw;
-                                    this.pitch = pitch;
-                                }else{
-                                    pitch = 0;
                                 }
                             }
                         }
@@ -373,6 +375,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                             }*/
                             waitTime++;
                             if(waitTime >= 20 * 5){
+                                waitTime = 0;
                                 setFollowTarget(null,false);
                             }
                         }
