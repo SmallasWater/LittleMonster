@@ -95,11 +95,11 @@ public abstract class BaseEntityMove extends BaseEntity {
     private boolean isCheck(){
         return (this.followTarget == null || this.followTarget.closed || !this.followTarget.isAlive()
                 || this.targetOption(this.followTarget, this.distance(this.followTarget)) || this.target == null
-                || (config.isTargetPlayer() &&  followTarget != null && !(followTarget instanceof Player)));
+                || (config.isTargetPlayer() && !(followTarget instanceof Player)));
     }
 
     private boolean checkFight(){
-        return followTarget == null || (config.isTargetPlayer() &&  followTarget != null && !(followTarget instanceof Player))
+        return followTarget == null || (config.isTargetPlayer() && !(followTarget instanceof Player))
                 || (followTarget instanceof LittleNpc && Utils.canAttackNpc((LittleNpc) this,(LittleNpc) followTarget));
     }
 
@@ -110,7 +110,7 @@ public abstract class BaseEntityMove extends BaseEntity {
     private void checkTarget() {
         if (!this.isKnockback()) {
             if(isCheck()) {
-                double near = 2.147483647E9D;
+                double near = Integer.MAX_VALUE;
                 double distance;
                 if(checkFight()){
                     if (this.passengers.isEmpty()){
@@ -290,7 +290,6 @@ public abstract class BaseEntityMove extends BaseEntity {
 
     private Vector3 updateMove(int tickDiff) {
         if (!this.isImmobile()) {
-
             if (!this.isMovement()) {
                 return null;
             } else {

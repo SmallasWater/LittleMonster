@@ -13,6 +13,7 @@ import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
 import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.entity.LittleNpc;
+import com.smallaswater.littlemonster.entity.baselib.Area;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,7 +72,7 @@ public class Utils {
         return content;
     }
 
-    public static ArrayList<Player> getAroundOfPlayers(Position player, int size) {
+    public static ArrayList<Player> getAroundOfPlayers(Entity player, int size) {
         ArrayList<Player> players = new ArrayList<>();
         for(Entity entity:getAroundPlayers(player,size,true,false,false)){
             players.add((Player) entity);
@@ -81,41 +82,52 @@ public class Utils {
 
     public static boolean canAttackNpc(LittleNpc l1,LittleNpc l2){
         if(l1.getConfig() == null){
-            l1.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(l1.name));
+            l1.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(l1.getName()));
         }
         if(l2.getConfig() == null){
-            l2.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(l2.name));
+            l2.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(l2.getName()));
         }
-        if(l1.getConfig()
-                .getCampName()
-                .equalsIgnoreCase(l2
-                        .getConfig()
-                        .getCampName())){
-            return l1.getConfig().isCanAttackSameCamp();
-        }else {
-            return l1.getConfig().getDamageCamp().contains(l2.getConfig().getCampName());
+
+        try{
+            if(l1.getConfig()
+                    .getCampName()
+                    .equalsIgnoreCase(l2
+                            .getConfig()
+                            .getCampName())){
+                return l1.getConfig().isCamp();
+            }else {
+                return l1.getConfig().getDamageCamp().contains(l2.getConfig().getCampName());
+            }
+
+        }catch (Exception e){
+            Server.getInstance().getLogger().info("NPC配置 空！l1 config: "+l1.getConfig()+" l2 config: "+l2.getConfig());
+            return false;
         }
 
     }
 
-    public static LinkedList<Entity> getAroundPlayers(Position player, int size,boolean isPlayer, boolean isEntity,boolean isNpc) {
+    public static LinkedList<Entity> getAroundPlayers(Entity player, int size,boolean isPlayer, boolean isEntity,boolean isNpc) {
         LinkedList<Entity> explodePlayer = new LinkedList<>();
-        for(Entity player1: player.level.getEntities()){
-            if(player1.x < player.x + size && player1.x > player.x - size && player1.z < player.z + size && player1.z > player.z - size && player1.y < player.y + size && player1.y > player.y - size){
-                if(isPlayer && player1 instanceof Player){
-                    explodePlayer.add(player1);
-                    continue;
-                }
-                if(isEntity){
-                    if(isNpc && player1 instanceof LittleNpc){
-                        if(player instanceof LittleNpc){
-                           if(canAttackNpc((LittleNpc) player,(LittleNpc)player1)){
-                               explodePlayer.add(player1);
-                           }
+        for(Entity player1: player.level.getNearbyEntities(new Area(
+                player.x - size / 2.0,
+                player.x + size / 2.0,
+                player.y - size / 2.0,
+                player.y + size / 2.0,
+                player.z - size / 2.0,
+                player.z + size / 2.0),player,true)){
+            if(isPlayer && player1 instanceof Player){
+                explodePlayer.add(player1);
+                continue;
+            }
+            if(isEntity){
+                if(isNpc && player1 instanceof LittleNpc){
+                    if(player instanceof LittleNpc){
+                        if(canAttackNpc((LittleNpc) player,(LittleNpc)player1)){
+                            explodePlayer.add(player1);
                         }
-                    }else if(player1 instanceof EntityLiving &&!(player1 instanceof EntityHuman) && !player1.isImmobile()){
-                        explodePlayer.add(player1);
                     }
+                }else if(player1 instanceof EntityLiving &&!(player1 instanceof EntityHuman) && !player1.isImmobile()){
+                    explodePlayer.add(player1);
                 }
             }
         }

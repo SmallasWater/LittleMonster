@@ -8,12 +8,16 @@ import cn.nukkit.entity.EntityHuman;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
+import cn.nukkit.network.protocol.MoveEntityAbsolutePacket;
+import cn.nukkit.network.protocol.SetEntityMotionPacket;
 import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
+
 
 import java.util.ArrayList;
 
@@ -148,10 +152,10 @@ public abstract class BaseEntity extends EntityHuman {
     public boolean targetOption(Entity creature, double distance) {
         if (creature instanceof Player) {
             Player player = (Player)creature;
-            return !player.isOnline() || player.closed || !player.spawned || !player.isAlive() || (!player.isSurvival() && !player.isAdventure()) || distance > seeSize ||
-                    player.getLevel() != this.getLevel();
+            return player.closed || !player.spawned || !player.isAlive() || (!player.isSurvival() && !player.isAdventure()) || distance > seeSize ||
+                    !player.getLevel().getFolderName().equalsIgnoreCase(getLevel().getFolderName());
         }else{
-            return creature.closed || !creature.isAlive() || creature.getLevel() != this.getLevel() || distance > seeSize;
+            return creature.closed || !creature.isAlive() || !creature.getLevel().getFolderName().equalsIgnoreCase(getLevel().getFolderName()) || distance > seeSize;
         }
 
     }
@@ -215,4 +219,116 @@ public abstract class BaseEntity extends EntityHuman {
      * */
     abstract public float getDamage();
 
+    @Override
+    public boolean move(double dx, double dy, double dz) {
+        if (dy < -10 || dy > 10) {
+            return false;
+        }
+
+        double movX = dx * moveMultiplier;
+        double movY = dy;
+        double movZ = dz * moveMultiplier;
+
+        AxisAlignedBB[] list = this.level.getCollisionCubes(this, this.boundingBox.addCoord(dx, dy, dz), false);
+        for (AxisAlignedBB bb : list) {
+            dx = bb.calculateXOffset(this.boundingBox, dx);
+        }
+        this.boundingBox.offset(dx, 0, 0);
+
+        for (AxisAlignedBB bb : list) {
+            dz = bb.calculateZOffset(this.boundingBox, dz);
+        }
+        this.boundingBox.offset(0, 0, dz);
+
+        for (AxisAlignedBB bb : list) {
+            dy = bb.calculateYOffset(this.boundingBox, dy);
+        }
+        this.boundingBox.offset(0, dy, 0);
+
+        this.setComponents(this.x + dx, this.y + dy, this.z + dz);
+        this.checkChunks();
+
+        this.checkGroundState(movX, movY, movZ, dx, dy, dz);
+        this.updateFallState(this.onGround);
+
+        return true;
+    }
+
+    protected float getMountedYOffset() {
+        return getHeight() * 0.75F;
+    }
+
+
+    public int nearbyDistanceMultiplier() {
+        return 1;
+    }
+
+    private int airTicks = 0;
+
+    @Override
+    public int getAirTicks() {
+        return this.airTicks;
+    }
+
+    @Override
+    public void setAirTicks(int ticks) {
+        this.airTicks = ticks;
+    }
+
+    @Override
+    public void addMovement(double x, double y, double z, double yaw, double pitch, double headYaw) {
+        MoveEntityAbsolutePacket pk = new MoveEntityAbsolutePacket();
+        pk.eid = this.id;
+        pk.x = (float) x;
+        pk.y = (float) y;
+        pk.z = (float) z;
+        pk.yaw = (float) yaw;
+        pk.headYaw = (float) headYaw;
+        pk.pitch = (float) pitch;
+        pk.onGround = this.onGround;
+        for (Player p : this.hasSpawned.values()) {
+            p.batchDataPacket(pk);
+        }
+    }
+
+    @Override
+    public void addMotion(double motionX, double motionY, double motionZ) {
+        SetEntityMotionPacket pk = new SetEntityMotionPacket();
+        pk.eid = this.id;
+        pk.motionX = (float) motionX;
+        pk.motionY = (float) motionY;
+        pk.motionZ = (float) motionZ;
+        for (Player p : this.hasSpawned.values()) {
+            p.batchDataPacket(pk);
+        }
+    }
+
+    @Override
+    protected void checkGroundState(double movX, double movY, double movZ, double dx, double dy, double dz) {
+        if (onGround && movX == 0 && movY == 0 && movZ == 0 && dx == 0 && dy == 0 && dz == 0) {
+            return;
+        }
+        this.isCollidedVertically = movY != dy;
+        this.isCollidedHorizontally = (movX != dx || movZ != dz);
+        this.isCollided = (this.isCollidedHorizontally || this.isCollidedVertically);
+        this.onGround = (movY != dy && movY < 0);
+    }
+
+
+
+    @Override
+    public void resetFallDistance() {
+        this.highestPosition = this.y;
+    }
+
+    @Override
+    public boolean setMotion(Vector3 motion) {
+        this.motionX = motion.x;
+        this.motionY = motion.y;
+        this.motionZ = motion.z;
+        if (!this.justCreated) {
+            this.updateMovement();
+        }
+        return true;
+    }
 }

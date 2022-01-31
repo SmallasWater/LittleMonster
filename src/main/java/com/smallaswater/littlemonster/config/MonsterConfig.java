@@ -400,4 +400,9 @@ public class MonsterConfig {
             npcSetting(entity);
         }
     }
+
+    @Override
+    public String toString(){
+        return "name: "+name+" ->"+"camp: "+getCampName();
+    }
 }
