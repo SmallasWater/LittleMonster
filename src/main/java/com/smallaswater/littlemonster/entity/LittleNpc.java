@@ -313,12 +313,7 @@ public class LittleNpc extends BaseEntityMove {
                         getMaxHealth());
             }
         }else{
-            if(getFollowTarget() == null){
-                if(healTime >= healSettingTime && heal > 0){
-                    healTime = 0;
-                    this.heal(heal);
-                }
-            }else if(!config.isUnFightHeal()){
+            if(getFollowTarget() == null || !config.isUnFightHeal()){
                 if(healTime >= healSettingTime && heal > 0){
                     healTime = 0;
                     this.heal(heal);
@@ -414,9 +409,9 @@ public class LittleNpc extends BaseEntityMove {
     //攻击玩家~
 
     @Override
-    public void attackEntity(EntityCreature player){
+    public void attackEntity(EntityCreature entity){
         if (this.attackDelay > attackSleepTime &&
-                player.distance(this) <= distanceLine) {
+                entity.distance(this) <= distanceLine) {
             this.attackDelay = 0;
             switch (attactMode){
                 case 1:
@@ -431,8 +426,8 @@ public class LittleNpc extends BaseEntityMove {
                         }
                         p.attack(new EntityDamageByEntityEvent(this, p, EntityDamageEvent.DamageCause.ENTITY_ATTACK, getDamage(), (float) config.getKnockBack()));
                     }
-                    player.level.addParticle(new HugeExplodeSeedParticle(player));
-                    player.level.addSound(player, Sound.RANDOM_EXPLODE);
+                    entity.level.addParticle(new HugeExplodeSeedParticle(entity));
+                    entity.level.addSound(entity, Sound.RANDOM_EXPLODE);
                     break;
                 case 2:
                     double f = 1.3D;
@@ -468,7 +463,7 @@ public class LittleNpc extends BaseEntityMove {
                     waitTime = 0;
                     return;
                 case 3:
-                    EntityInteractEvent event = new EntityInteractEvent(this,player.getPosition().add(0.5,player.getEyeHeight(),0.5).getLevelBlock());
+                    EntityInteractEvent event = new EntityInteractEvent(this,entity.getPosition().add(0.5,entity.getEyeHeight(),0.5).getLevelBlock());
                     Server.getInstance().getPluginManager().callEvent(event);
                     waitTime = 0;
                     break;
@@ -476,7 +471,7 @@ public class LittleNpc extends BaseEntityMove {
                 default:
                     HashMap<EntityDamageEvent.DamageModifier, Float> damage = new LinkedHashMap<>();
                     damage.put(EntityDamageEvent.DamageModifier.BASE, getDamage());
-                    if (player instanceof Player) {
+                    if (entity instanceof Player) {
                         HashMap<Integer, Float> armorValues = new LinkedHashMap<Integer, Float>() {
                             {
                                 this.put(298, 1.0F);
@@ -502,7 +497,7 @@ public class LittleNpc extends BaseEntityMove {
                             }
                         };
                         float points = 0.0F;
-                        Item[] var5 = ((Player)player).getInventory().getArmorContents();
+                        Item[] var5 = ((Player)entity).getInventory().getArmorContents();
                         for (Item i : var5) {
                             points += armorValues.getOrDefault(i.getId(), 0.0F);
                         }
@@ -510,11 +505,11 @@ public class LittleNpc extends BaseEntityMove {
                         damage.put(EntityDamageEvent.DamageModifier.ARMOR, (float)((double) damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0.0F) - Math.floor((double)(damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1.0F) * points) * 0.04D)));
                     }
 
-                    player.attack(new EntityDamageByEntityEvent(this, player, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage,(float) config.getKnockBack()));
+                    entity.attack(new EntityDamageByEntityEvent(this, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage,(float) config.getKnockBack()));
                     break;
             }
             for(Effect effect: config.getEffects()){
-                player.addEffect(effect);
+                entity.addEffect(effect);
             }
             EntityEventPacket pk = new EntityEventPacket();
             pk.eid = this.getId();
