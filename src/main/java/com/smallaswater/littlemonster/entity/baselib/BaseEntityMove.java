@@ -11,7 +11,6 @@ import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
-import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.route.RouteFinder;
 import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
 import com.smallaswater.littlemonster.threads.runnables.RouteFinderSearchTask;
@@ -338,7 +337,6 @@ public abstract class BaseEntityMove extends BaseEntity {
 
         Vector3 before = this.target;
         this.checkTarget();
-        LittleMasterMainClass.getMasterMainClass().getLogger().info("target:" + this.target);
         double x;
         double z;
         if (this.target != null || before != this.target) {
@@ -365,7 +363,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                 if ((this.passengers.isEmpty()) &&
                         (this.stayTime <= 0 || Utils.rand())) {
                     this.yaw = Math.toDegrees(-Math.atan2(x / diff, z / diff));
-                    if(!hasBlockInLine(followTarget)) {
+                    //if(!hasBlockInLine(followTarget)) {
                         if (followTarget != null) {
                             double dx = this.x - followTarget.x;
                             double dy = (this.y + this.getEyeHeight()) - (followTarget.y + followTarget.getEyeHeight());
@@ -380,7 +378,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                         } else {
                             pitch = 0;
                         }
-                    }
+                    //}
                 }
             }
         }else {

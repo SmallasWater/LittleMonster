@@ -2,6 +2,7 @@ package com.smallaswater.littlemonster.entity.baselib;
 
 
 import cn.nukkit.Player;
+import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.EntityHuman;
@@ -245,10 +246,10 @@ public abstract class BaseEntity extends EntityHuman {
     public boolean hasBlockInLine(Entity target){
         if(target != null) {
             //TODO 找到卡服原因
-            /*Block targetBlock = this.getTargetBlock((int) this.distance(target));
+            Block targetBlock = this.getTargetBlock((int) this.distance(target));
             if (targetBlock != null) {
                 return targetBlock.getId() != 0;
-            }*/
+            }
             return false;
         }
         return false;
