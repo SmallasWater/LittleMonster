@@ -83,6 +83,9 @@ public class Utils {
         if(l1.getConfig() == null){
             l1.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(l1.name));
         }
+        if(l2.getConfig() == null){
+            l2.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(l2.name));
+        }
         if(l1.getConfig()
                 .getCampName()
                 .equalsIgnoreCase(l2

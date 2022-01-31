@@ -25,6 +25,8 @@ import java.util.ArrayList;
  */
 public abstract class BaseEntity extends EntityHuman {
 
+    protected float moveMultiplier = 1.0f;
+
     protected int healTime = 0;
     //停留
     int stayTime = 0;

@@ -28,6 +28,9 @@ import nukkitcoders.mobplugin.entities.monster.Monster;
  */
 public abstract class BaseEntityMove extends BaseEntity {
 
+
+    private static final double FLOW_MULTIPLIER = .1;
+
     protected RouteFinder route = null;
 
     public BaseEntityMove(FullChunk chunk, CompoundTag nbt) {
@@ -35,40 +38,43 @@ public abstract class BaseEntityMove extends BaseEntity {
     }
 
     private boolean checkJump(double dx, double dz) {
-        if (this.motionY == (double)(this.getGravity() * 2.0F)) {
-            return this.level.getBlock(new Vector3(NukkitMath.floorDouble(this.x), (int)this.y, NukkitMath.floorDouble(this.z))) instanceof BlockLiquid;
-        } else if (this.level.getBlock(new Vector3(NukkitMath.floorDouble(this.x), (int)(this.y + 0.8D), NukkitMath.floorDouble(this.z))) instanceof BlockLiquid) {
-            this.motionY = this.getGravity() * 2.0F;
-            return true;
-        } else if (this.onGround && this.stayTime <= 0) {
-            Block that = this.getLevel().getBlock(new Vector3(NukkitMath.floorDouble(this.x + dx), (int)this.y, NukkitMath.floorDouble(this.z + dz)));
-            if (this.getDirection() == null) {
-                return false;
-            } else {
-                Block block = that.getSide(this.getHorizontalFacing());
-                if (!block.canPassThrough() && block.up().canPassThrough() && that.up(2).canPassThrough()) {
-                    if (!(block instanceof BlockFence) && !(block instanceof BlockFenceGate)) {
-                        if (this.motionY <= (double)(this.getGravity() * 4.0F)) {
-                            this.motionY = this.getGravity() * 4.0F;
-                        } else if (block instanceof BlockStairs || block instanceof BlockSlab) {
-                            this.motionY = this.getGravity() * 4.0F;
-                        } else if (this.motionY <= (double)(this.getGravity() * 8.0F)) {
-                            this.motionY = this.getGravity() * 8.0F;
-                        } else {
-                            this.motionY += (double)this.getGravity() * 0.25D;
-                        }
-                    } else {
-                        this.motionY = this.getGravity();
-                    }
-
-                    return true;
-                } else {
-                    return false;
+        if (this.motionY == this.getGravity() * 2) {
+            int b = level.getBlockIdAt(NukkitMath.floorDouble(this.x), (int) this.y, NukkitMath.floorDouble(this.z));
+            return b == BlockID.WATER || b == BlockID.STILL_WATER;
+        } else  {
+            int b = level.getBlockIdAt(NukkitMath.floorDouble(this.x), (int) (this.y + 0.8), NukkitMath.floorDouble(this.z));
+            if (b == BlockID.WATER || b == BlockID.STILL_WATER) {
+                if (this.target == null) {
+                    this.motionY = this.getGravity() * 2;
                 }
+                return true;
             }
-        } else {
+        }
+
+        if (!this.onGround || this.stayTime > 0) {
             return false;
         }
+
+        Block that = this.getLevel().getBlock(new Vector3(NukkitMath.floorDouble(this.x + dx), (int) this.y, NukkitMath.floorDouble(this.z + dz)));
+        Block block = that.getSide(this.getHorizontalFacing());
+        Block down = block.down();
+        if (!down.isSolid() && !block.isSolid() && !down.down().isSolid()) {
+            this.stayTime = 10;
+        } else if (!block.canPassThrough() && block.up().canPassThrough() && that.up(2).canPassThrough()) {
+            if (block instanceof BlockFence || block instanceof BlockFenceGate) {
+                this.motionY = this.getGravity();
+            } else if (this.motionY <= this.getGravity() * 4) {
+                this.motionY = this.getGravity() * 4;
+            } else if (block instanceof BlockStairs) {
+                this.motionY = this.getGravity() * 4;
+            } else if (this.motionY <= (this.getGravity() * 8)) {
+                this.motionY = this.getGravity() * 8;
+            } else {
+                this.motionY += this.getGravity() * 0.25;
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -142,23 +148,23 @@ public abstract class BaseEntityMove extends BaseEntity {
                                 this.distance(this.followTarget)) || this.target == null) {
                             int x, z;
                             if (this.stayTime > 0) {
-                                if (Utils.rand(1, 1000) > 50) {
+                                if (Utils.rand(1, 100) > 5) {
                                     return;
                                 }
                                 x = Utils.rand(10, 30);
                                 z = Utils.rand(10, 30);
-                                this.target = this.add(Utils.rand(1, 100) <= 40 ? (double) x : (double) (-x), Utils.rand(-20.0D, 20.0D) / 10.0D, Utils.rand(1, 100) <= 60 ? (double) z : (double) (-z));
+                                this.target = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);
                             } else if (Utils.rand(1, 100) == 1) {
                                 x = Utils.rand(10, 30);
                                 z = Utils.rand(10, 30);
                                 this.stayTime = Utils.rand(100, 200);
-                                this.target = this.add(Utils.rand(1, 100) <= 40 ? (double) x : (double) (-x), Utils.rand(-20.0D, 20.0D) / 10.0D, Utils.rand(1, 100) <= 60 ? (double) z : (double) (-z));
+                                this.target = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);
                             } else if (this.moveTime <= 0 || this.target == null) {
                                 x = Utils.rand(20, 100);
                                 z = Utils.rand(20, 100);
                                 this.stayTime = 0;
-                                this.moveTime = Utils.rand(30, 200);
-                                this.target = this.add(Utils.rand(1, 100) <= 40 ? (double) x : (double) (-x), 0, Utils.rand(1, 100) <= 60 ? (double) z : (double) (-z));
+                                this.moveTime = Utils.rand(100, 200);
+                                this.target = this.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
                             }
                         }
                     }
@@ -330,7 +336,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                                 this.yaw = Math.toDegrees(-Math.atan2(x / diff, z / diff));
                                 if(followTarget != null) {
                                     double dx = this.x - followTarget.x;
-                                    double dy = this.y + this.getEyeHeight() - followTarget.y + followTarget.getEyeHeight();
+                                    double dy = this.y - followTarget.y + followTarget.getEyeHeight();
                                     double dz = this.z - followTarget.z;
                                     double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
                                     double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
@@ -360,7 +366,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                             waitTime = 0;
                             this.move(x, this.motionY, z);
                         }else{
-                            this.move(0.5D, this.motionY, 0.5D);
+                            this.move(0.01, this.motionY, 0.01D);
                             waitTime++;
                             if(waitTime >= 20 * 5){
                                 setFollowTarget(null,false);
@@ -393,6 +399,7 @@ public abstract class BaseEntityMove extends BaseEntity {
             return null;
         }
     }
+
     public RouteFinder getRoute() {
         return this.route;
     }
