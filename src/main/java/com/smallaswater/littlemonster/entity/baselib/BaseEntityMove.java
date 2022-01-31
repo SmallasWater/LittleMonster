@@ -13,8 +13,6 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.route.RouteFinder;
-import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
-import com.smallaswater.littlemonster.threads.runnables.RouteFinderSearchTask;
 import com.smallaswater.littlemonster.utils.Utils;
 import nukkitcoders.mobplugin.entities.animal.Animal;
 import nukkitcoders.mobplugin.entities.monster.Monster;
@@ -301,7 +299,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                 return null;
             } else {
                 if (this.age % 10 == 0 && this.route != null && !this.route.isSearching()) {
-                    RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this.route));
+                    //RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this.route));
                     if (this.route.hasNext()) {
                         this.target = this.route.next();
                     }
