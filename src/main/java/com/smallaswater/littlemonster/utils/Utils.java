@@ -3,7 +3,6 @@ package com.smallaswater.littlemonster.utils;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
-import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.EntityHuman;
 import cn.nukkit.entity.EntityLiving;
 import cn.nukkit.level.Level;
@@ -14,10 +13,11 @@ import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
 import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.entity.LittleNpc;
-import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 /**
@@ -219,20 +219,19 @@ public class Utils {
         HashMap<String,Number> map1 = new LinkedHashMap<>();
         for(String n:map.keySet()){
             Number num = map.get(n);
-            if(num instanceof Integer) {
-                map1.put(n, num);
-            }else{
-                if(num instanceof Double){
-                    map1.put(n, Integer.parseInt(new java.text.DecimalFormat("0").format(num)));
-                }
+            if(num instanceof Double){
+                map1.put(n, new BigDecimal(num.toString()).setScale(2, RoundingMode.HALF_UP).doubleValue());
+                continue;
             }
+            map1.put(n, num);
         }
-        Comparator<Map.Entry<String, Number>> valCmp = (o1, o2) -> {
-            // TODO Auto-generated method stub
-            return Integer.parseInt(o2.getValue().toString()) - Integer.parseInt(o1.getValue().toString());
-        };
         List<Map.Entry<String, Number>> list = new ArrayList<>(map1.entrySet());
-        list.sort(valCmp);
+        list.sort((o1, o2) -> {
+            if (Objects.equals(o1.getValue().doubleValue(), o2.getValue().doubleValue())) {
+                return 0;
+            }
+            return o1.getValue().doubleValue() > o2.getValue().doubleValue() ? -1 : 1;
+        });
         for(Map.Entry<String,Number> ma:list){
             rank.put(ma.getKey(),ma.getValue());
         }
