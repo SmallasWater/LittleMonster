@@ -109,20 +109,15 @@ public abstract class RouteFinder {
    }
 
    public Node getCurrentNode() {
-     Node var1;
       try {
          this.lock.readLock().lock();
          if (this.hasCurrentNode()) {
-            var1 = this.nodes.get(this.current);
-            return var1;
+            return this.nodes.get(this.current);
          }
-
-         var1 = null;
       } finally {
          this.lock.readLock().unlock();
       }
-
-      return var1;
+      return null;
    }
 
    public boolean hasCurrentNode() {
@@ -182,20 +177,17 @@ public abstract class RouteFinder {
    }
 
    public Vector3 next() {
-      Vector3 var1;
+      Vector3 vector3;
       try {
          this.lock.readLock().lock();
          if (!this.hasNext()) {
-            var1 = null;
-            return var1;
+            return null;
          }
-
-         var1 = this.nodes.get(++this.current).getVector3();
+         vector3 = this.nodes.get(++this.current).getVector3();
       } finally {
          this.lock.readLock().unlock();
       }
-
-      return var1;
+      return vector3;
    }
 
    public boolean isInterrupted() {

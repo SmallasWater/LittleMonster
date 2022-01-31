@@ -100,7 +100,7 @@ public class Utils {
             }
 
         }catch (Exception e){
-            Server.getInstance().getLogger().info("NPC配置 空！l1 config: "+l1.getConfig()+" l2 config: "+l2.getConfig());
+            Server.getInstance().getLogger().error("NPC配置 空！l1 config: "+l1.getConfig()+" l2 config: "+l2.getConfig(), e);
             return false;
         }
 
