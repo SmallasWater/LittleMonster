@@ -212,7 +212,7 @@ public abstract class BaseEntityMove extends BaseEntity {
      * @return 是否可以攻击
      */
     private boolean canAttackEntity(Entity entity) {
-        if (this.targetOption(entity)) {
+        if (this.targetOption(entity, this.distance(entity))) {
             return false;
         }
         if (!this.config.isActiveAttackEntity()) {
