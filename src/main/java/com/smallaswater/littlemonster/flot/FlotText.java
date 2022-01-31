@@ -12,7 +12,6 @@ import com.smallaswater.littlemonster.utils.Utils;
 
 public class FlotText extends FloatingTextParticle {
 
-
     private Position position;
 
     private String name;

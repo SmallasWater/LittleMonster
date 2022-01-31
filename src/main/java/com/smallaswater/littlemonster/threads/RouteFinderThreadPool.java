@@ -8,6 +8,7 @@ import java.util.concurrent.ThreadPoolExecutor.AbortPolicy;
 import com.smallaswater.littlemonster.threads.runnables.RouteFinderSearchTask;
 
 public class RouteFinderThreadPool {
+
    public static ThreadPoolExecutor executor;
 
    public static void executeRouteFinderThread(RouteFinderSearchTask t) {
@@ -22,6 +23,6 @@ public class RouteFinderThreadPool {
    }
 
    static {
-      executor = new ThreadPoolExecutor(1, Runtime.getRuntime().availableProcessors() + 1, 1L, TimeUnit.SECONDS, new LinkedBlockingQueue(), new AbortPolicy());
+      executor = new ThreadPoolExecutor(1, Runtime.getRuntime().availableProcessors() + 1, 1L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),new ThreadPoolExecutor.AbortPolicy());
    }
 }

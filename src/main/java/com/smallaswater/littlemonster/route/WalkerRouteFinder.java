@@ -14,10 +14,15 @@ import java.util.PriorityQueue;
 
 
 public class WalkerRouteFinder extends SimpleRouteFinder {
+
    private static final int DIRECT_MOVE_COST = 10;
+
    private static final int OBLIQUE_MOVE_COST = 14;
+
    private PriorityQueue<Node> openList = new PriorityQueue<>();
+
    private ArrayList<Node> closeList = new ArrayList<>();
+
    private int searchLimit = 100;
 
    public WalkerRouteFinder(BaseEntity entity) {
@@ -270,7 +275,6 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
             }
          }
       }
-
    }
 
    private Node getNodeInOpenByVector2(Vector3 vector2) {

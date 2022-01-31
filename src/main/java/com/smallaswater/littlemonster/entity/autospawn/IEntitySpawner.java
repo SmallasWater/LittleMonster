@@ -11,7 +11,6 @@ import java.util.Collection;
  */
 public interface IEntitySpawner {
 
-
     String getEntityName();
 
     void spawn(Collection<Player> var1);

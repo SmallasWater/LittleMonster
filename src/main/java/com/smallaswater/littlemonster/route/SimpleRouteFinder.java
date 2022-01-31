@@ -4,6 +4,7 @@ import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
 
 
 public class SimpleRouteFinder extends RouteFinder {
+
    public SimpleRouteFinder(BaseEntity entity) {
       super(entity);
    }

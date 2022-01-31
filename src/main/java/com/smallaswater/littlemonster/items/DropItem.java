@@ -8,14 +8,12 @@ import cn.nukkit.item.Item;
  */
 public class DropItem extends BaseItem{
 
-
     private Item item;
 
     public DropItem(Item item, int round){
         super(round);
         this.item = item;
     }
-
 
     public Item getItem() {
         return item;
@@ -38,7 +36,6 @@ public class DropItem extends BaseItem{
             }else{
                 return new DropItem(toStringItem(s.split(SPLIT_1)[0]),round);
             }
-
         }
         return null;
     }

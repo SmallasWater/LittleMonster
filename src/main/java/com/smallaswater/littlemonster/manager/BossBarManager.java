@@ -25,7 +25,6 @@ public class BossBarManager {
              this.bossBarId = id;
          }
 
-
          public static void createBossBar(Player player,long bossBarId) {
              if (!apis.containsKey(player)) {
                  BossBarApi bossBar = new BossBarApi(player,bossBarId);
@@ -36,7 +35,6 @@ public class BossBarManager {
              }
 
          }
-
 
          public static void removeBossBar(Player player){
              if(apis.containsKey(player)){
@@ -66,5 +64,4 @@ public class BossBarManager {
              }
          }
      }
-
 }

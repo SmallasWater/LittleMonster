@@ -30,7 +30,6 @@ public class TimeHandle {
         return 0;
     }
 
-
     public TimeHandle(Player player){
         this.player = player;
     }
@@ -69,6 +68,5 @@ public class TimeHandle {
     public boolean hasCold(String name){
         return times.containsKey(name);
     }
-
 
 }

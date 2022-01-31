@@ -19,8 +19,11 @@ import java.util.*;
 public class AutoSpawnTask extends Thread{
 
     private Map<String, Integer> maxSpawns = new HashMap<>();
+
     private List<AbstractEntitySpawner> entitySpawners = new ArrayList<>();
+
     private Config pluginConfig;
+
     private LittleMasterMainClass plugin;
 
     public AutoSpawnTask(LittleMasterMainClass plugin) {
@@ -101,16 +104,13 @@ public class AutoSpawnTask extends Thread{
                     y = 256;
                     break;
                 }
-
                 if (y < 1) {
                     y = 0;
                     break;
                 }
-
                 if (level.getBlockIdAt(x, y, z) != 0) {
                     checkNeedDegree = needDegree;
                     checkY = y;
-
                     do {
                         ++checkY;
                         --checkNeedDegree;
@@ -118,7 +118,6 @@ public class AutoSpawnTask extends Thread{
                             continue label51;
                         }
                     } while(checkNeedDegree > 0);
-
                     return y;
                 }
             }
@@ -130,16 +129,13 @@ public class AutoSpawnTask extends Thread{
                     y = 256;
                     break;
                 }
-
                 if (y < 1) {
                     y = 0;
                     break;
                 }
-
                 if (level.getBlockIdAt(x, y, z) != 0) {
                     checkNeedDegree = needDegree;
                     checkY = y;
-
                     do {
                         --checkY;
                         --checkNeedDegree;
@@ -152,10 +148,6 @@ public class AutoSpawnTask extends Thread{
                 }
             }
         }
-
         return y;
     }
-
-
-
 }

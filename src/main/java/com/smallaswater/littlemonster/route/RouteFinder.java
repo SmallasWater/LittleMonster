@@ -9,16 +9,27 @@ import java.util.Objects;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class RouteFinder {
+
    protected ArrayList<Node> nodes = new ArrayList<>();
+
    protected boolean finished = false;
+
    protected boolean searching = false;
+
    protected int current = 0;
+
    public BaseEntity entity;
+
    protected Vector3 start;
+
    protected Vector3 destination;
+
    protected Level level;
+
    protected boolean interrupt = false;
+
    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+
    protected boolean reachable = true;
 
    RouteFinder(BaseEntity entity) {
@@ -147,7 +158,6 @@ public abstract class RouteFinder {
       } finally {
          this.lock.writeLock().unlock();
       }
-
    }
 
    public abstract boolean search();

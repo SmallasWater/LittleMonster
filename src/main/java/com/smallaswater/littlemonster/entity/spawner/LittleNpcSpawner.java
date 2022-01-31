@@ -26,7 +26,6 @@ public class LittleNpcSpawner extends AbstractEntitySpawner {
         this.entityName = config.getName();
     }
 
-
     @Override
     public SpawnResult spawn(Player player, Position pos, Level level) {
         SpawnResult result = SpawnResult.OK;
@@ -44,7 +43,6 @@ public class LittleNpcSpawner extends AbstractEntitySpawner {
 
         return result;
     }
-
 
     @Override
     public String getEntityName() {

@@ -17,7 +17,6 @@ import java.util.ArrayList;
  */
 public class SummonHealthSkill extends BaseSkillManager {
 
-
     private ArrayList<String> littleNpcs = new ArrayList<>();
 
     public SummonHealthSkill(String name) {
@@ -37,6 +36,5 @@ public class SummonHealthSkill extends BaseSkillManager {
             }
 
         }
-
     }
 }

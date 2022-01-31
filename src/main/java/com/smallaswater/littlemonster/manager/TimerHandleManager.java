@@ -14,7 +14,6 @@ public class TimerHandleManager {
 
     public static LinkedHashMap<Player, TimeHandle> PLAYER_TIMER = new LinkedHashMap<>();
 
-
     public static TimeHandle getTimeHandle(Player player){
         if(!PLAYER_TIMER.containsKey(player)){
             PLAYER_TIMER.put(player,new TimeHandle(player));

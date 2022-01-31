@@ -4,10 +4,15 @@ import cn.nukkit.math.Vector3;
 import java.util.Objects;
 
 public class Node implements Comparable<Node> {
+
    private Vector3 vector3;
+
    private Node parent;
+
    private int G;
+
    private int H;
+
    private int F;
 
    Node(Vector3 vector3, Node parent, int G, int H) {

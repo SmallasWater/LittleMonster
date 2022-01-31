@@ -25,11 +25,7 @@ import java.util.ArrayList;
  */
 public abstract class BaseEntity extends EntityHuman {
 
-
     protected int healTime = 0;
-
-
-
     //停留
     int stayTime = 0;
 
@@ -55,10 +51,6 @@ public abstract class BaseEntity extends EntityHuman {
 
     boolean canAttack = true;
 
-
-
-
-
     //开发接口
     //攻击方式
     public int attactMode = 0;
@@ -68,18 +60,15 @@ public abstract class BaseEntity extends EntityHuman {
     public int attackSleepTime = 23;
     //伤害
     public double damage = 2;
-
     //移动速度
     public float speed = 1.0f;
 
     public int seeSize = 20;
 
-
     BaseEntity(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
 
     }
-
 
     @Override
     protected void initEntity() {
@@ -91,11 +80,7 @@ public abstract class BaseEntity extends EntityHuman {
         if (this.namedTag.contains("Age")) {
             this.age = this.namedTag.getShort("Age");
         }
-
-
     }
-
-
 
     public boolean hasNoTarget(){
         return getFollowTarget() == null  || (getFollowTarget() != null && targetOption(getFollowTarget(),distance(getFollowTarget())));
@@ -154,12 +139,9 @@ public abstract class BaseEntity extends EntityHuman {
         this.target = null;
     }
 
-
-
     protected boolean isPlayerTarget(Player player){
         return !player.closed  && player.isAlive() && (player.isSurvival() || player.isAdventure()) ;
     }
-
 
     public boolean targetOption(Entity creature, double distance) {
         if (creature instanceof Player) {
@@ -171,7 +153,6 @@ public abstract class BaseEntity extends EntityHuman {
         }
 
     }
-
 
     @Override
     public boolean entityBaseTick(int tickDiff) {
@@ -189,13 +170,9 @@ public abstract class BaseEntity extends EntityHuman {
         if (this instanceof LittleNpc && this.healTime < 1000) {
             ++this.healTime;
         }
-
         onUpdata();
-
         return true;
     }
-
-
 
     public abstract void onUpdata();
 
@@ -216,29 +193,14 @@ public abstract class BaseEntity extends EntityHuman {
             }
             this.target = null;
             this.stayTime = 0;
-
             super.attack(source);
-
-
             return true;
         }
     }
-//    private int despawnTicks = 0;
-
-//    public boolean canDespawn() {
-//
-//        return
-////        return despawnTicks > 0 && this.age > despawnTicks && !this.hasCustomName();
-//    }
-
 
     public void setConfig(MonsterConfig config) {
         this.config = config;
     }
-
-
-
-
 
     /**攻击生物
      * @param player 生物

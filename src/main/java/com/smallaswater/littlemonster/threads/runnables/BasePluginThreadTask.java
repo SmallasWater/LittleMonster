@@ -19,7 +19,6 @@ public abstract class BasePluginThreadTask implements Runnable {
                 break;
             }
         }
-
     }
     /**
      * 循环执行

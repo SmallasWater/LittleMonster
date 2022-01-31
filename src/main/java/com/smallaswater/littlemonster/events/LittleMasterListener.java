@@ -75,14 +75,10 @@ public class LittleMasterListener implements Listener {
     @EventHandler
     public void onDie(EntityDeathEvent e){
         Entity entity = e.getEntity();
-
         if(entity instanceof LittleNpc){
             ((LittleNpc) entity).onDeath(e);
-
         }
     }
-
-
 
     @EventHandler
     public void onListenerWindow(PlayerFormRespondedEvent event) {
@@ -127,15 +123,8 @@ public class LittleMasterListener implements Listener {
                     config.saveAll();
                     config.resetEntity();
                     player.sendMessage("保存完成");
-
-
                 }
-
             }
         }
     }
-
-
-
-
 }

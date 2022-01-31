@@ -103,18 +103,12 @@ public abstract class BaseEntityMove extends BaseEntity {
             if(isCheck()) {
                 double near = 2.147483647E9D;
                 double distance;
-
                 if(checkFight()){
                     if (this.passengers.isEmpty()){
                         for (Entity entity : Utils.getAroundPlayers(this,seeSize,true,true,true)) {
-//                            if(entity instanceof BaseEntity){
-//                                continue;
-//                            }
-
                             if(entity.getNetworkId() == 19 || entity.getNetworkId() == 30){
                                 continue;
                             }
-
                             if(entity instanceof EntityCreature) {
                                 if (entity != this) {
                                     if (config.isTargetPlayer()) {
@@ -133,7 +127,6 @@ public abstract class BaseEntityMove extends BaseEntity {
                                         getAttackChunk(near, entity);
                                         break;
                                     }
-
                                 }
                             }
 
@@ -179,14 +172,14 @@ public abstract class BaseEntityMove extends BaseEntity {
                             this.target = followTarget;
                         }
                     }
-
                 }
             }
         }
     }
 
-
-
+    /**
+     * 检查要锁定的生物
+     * */
     private double getAttackChunk(double near, Entity entity) {
         if (!config.isActiveAttackEntity()) {
             if (!(entity instanceof Player)) {
@@ -199,7 +192,6 @@ public abstract class BaseEntityMove extends BaseEntity {
                     return near;
                 }
             }
-
             if(!config.isAttackHostileEntity()){
                 if(entity instanceof Monster){
                     return near;
@@ -210,6 +202,9 @@ public abstract class BaseEntityMove extends BaseEntity {
         return near;
     }
 
+    /**
+     * 锁定生物
+     * */
     private double getFightEntity(double near, EntityCreature entity) {
         EntityCreature creature;
         double distance;
@@ -218,7 +213,6 @@ public abstract class BaseEntityMove extends BaseEntity {
         if (distance > seeSize || this.targetOption(creature, distance)) {
             return near;
         }
-
         near = distance;
         this.stayTime = 0;
         this.moveTime = 0;
@@ -226,11 +220,9 @@ public abstract class BaseEntityMove extends BaseEntity {
         if (this.route == null && this.passengers.isEmpty()) {
             this.target = creature;
         }
-
         canAttack = true;
         return near;
     }
-
 
     /**
      * 生物移除
@@ -283,14 +275,9 @@ public abstract class BaseEntityMove extends BaseEntity {
             }else if (target != null && Math.pow(this.x - target.x, 2.0D) + Math.pow(this.z - target.z, 2.0D) <= 1.0D) {
                 this.moveTime = 0;
             }
-
             return true;
         }
     }
-
-
-
-
 
     private Vector3 updateMove(int tickDiff) {
         if (!this.isImmobile()) {
@@ -316,7 +303,6 @@ public abstract class BaseEntityMove extends BaseEntity {
                     double z;
                     if (this.target != null || before != this.target) {
                         if(this.target != null) {
-
                             x = this.target.x - this.x;
                             z = this.target.z - this.z;
                             double diff = Math.abs(x) + Math.abs(z);
@@ -349,15 +335,12 @@ public abstract class BaseEntityMove extends BaseEntity {
                                     }
                                     this.yaw = yaw;
                                     this.pitch = pitch;
-
-
                                 }else{
                                     pitch = 0;
                                 }
                             }
                         }
                     }
-
                     x = this.motionX * (double)tickDiff;
                     z = this.motionZ * (double)tickDiff;
                     boolean isJump = this.checkJump(x, z);
@@ -379,14 +362,11 @@ public abstract class BaseEntityMove extends BaseEntity {
                                 setFollowTarget(null,false);
                             }
                         }
-
-
                         Vector2 af = new Vector2(this.x, this.z);
                         if ((be.x != af.x || be.y != af.y) && !isJump) {
                             this.moveTime -= 90 * tickDiff;
                         }
                     }
-
                     if (!isJump) {
                         if (this.onGround) {
                             this.motionY = 0.0D;
@@ -398,20 +378,16 @@ public abstract class BaseEntityMove extends BaseEntity {
                             this.motionY -= this.getGravity() * (float)tickDiff;
                         }
                     }
-
                     this.updateMovement();
                     if (this.route != null && this.route.hasCurrentNode() && this.route.hasArrivedNode(this) && this.route.hasNext()) {
                         this.target = this.route.next();
                     }
-
                     return this.followTarget != null ? this.followTarget : this.target;
                 }
             }
         } else {
             return null;
         }
-
-
     }
     public RouteFinder getRoute() {
         return this.route;
@@ -420,6 +396,5 @@ public abstract class BaseEntityMove extends BaseEntity {
     public void setRoute(RouteFinder route) {
         this.route = route;
     }
-
 
 }

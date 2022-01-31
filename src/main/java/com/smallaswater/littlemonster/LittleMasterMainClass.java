@@ -103,6 +103,7 @@ public class LittleMasterMainClass extends PluginBase {
             }
         }
     }
+
     public static LittleMasterMainClass getMasterMainClass() {
         return masterMainClass;
     }
@@ -118,6 +119,7 @@ public class LittleMasterMainClass extends PluginBase {
             }
         }
     }
+
     private void initSkin(){
         for(String s:SKINS){
             if(!new File(this.getDataFolder()+"/Skins/"+s).exists()){
@@ -132,8 +134,8 @@ public class LittleMasterMainClass extends PluginBase {
             this.saveResource("skin/"+s+"/skin.png","/Skins/"+s+"/skin.png",false);
             this.getLogger().info("成功载入 "+s+"皮肤");
         }
-
     }
+
     private void loadSkin() {
         if(!new File(this.getDataFolder()+"/Skins").exists()){
             initSkin();

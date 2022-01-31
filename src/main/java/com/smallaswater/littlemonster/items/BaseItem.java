@@ -6,15 +6,23 @@ import com.smallaswater.littlemonster.utils.Utils;
 
 
 public abstract class BaseItem {
+
     private int round;
 
     protected static final String SPLIT_1 = "@";
+
     protected static final String SPLIT_3 = "&";
+
     protected static final String SPLIT_2 = ":";
+
     protected static final String NBT = "nbt";
+
     protected static final String NOT = "not";
+
     public static final String TARGET = "target";
+
     public static final String TARGETALL = "targetAll";
+
     public static final String DAMAGE = "damage";
 
     public BaseItem(int round){
@@ -38,7 +46,6 @@ public abstract class BaseItem {
                     CompoundTag tag = Item.parseCompoundTag(bytes);
                     item.setNamedTag(tag);
                 }
-
             }
             return item;
         }
@@ -59,6 +66,7 @@ public abstract class BaseItem {
         }
         return d;
     }
+
     private static byte charToByte(char c) {
         return (byte) "0123456789ABCDEF".indexOf(c);
     }
@@ -91,13 +99,13 @@ public abstract class BaseItem {
         }
         return new Item(0,0);
     }
+
     public static String toStringItem(Item item){
         String tag = "not";
         if(item.hasCompoundTag()){
             tag = bytesToHexString(item.getCompoundTag());
         }
         return item.getId()+":"+item.getDamage()+":"+item.getCount()+":"+tag;
-
     }
 
 }

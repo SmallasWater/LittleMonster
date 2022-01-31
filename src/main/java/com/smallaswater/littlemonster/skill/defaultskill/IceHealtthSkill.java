@@ -14,7 +14,6 @@ import com.smallaswater.littlemonster.skill.BaseSkillManager;
  */
 public class IceHealtthSkill extends BaseSkillManager implements BaseSkillAreaManager {
 
-
     public IceHealtthSkill(String name) {
         super(name);
     }

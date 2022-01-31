@@ -15,6 +15,7 @@ import java.util.Iterator;
  * Package com.smallaswater.littlemonster.manager
  */
 public class PlayerFlotTextManager {
+
     private Player player;
 
     private ArrayList<FlotText> flotTexts = new ArrayList<>();
@@ -43,6 +44,7 @@ public class PlayerFlotTextManager {
     public int size(){
         return flotTexts.size();
     }
+
     public void remove(FlotText text){
         flotTexts.remove(text);
 
@@ -58,8 +60,6 @@ public class PlayerFlotTextManager {
             }
         }
     }
-
-
 
     public boolean hasPosition(Position position){
         for(FlotText t:flotTexts){
@@ -78,7 +78,6 @@ public class PlayerFlotTextManager {
         }
         return LittleMasterMainClass.getMasterMainClass().texts.get(LittleMasterMainClass.getMasterMainClass().texts.indexOf(flotTextManager));
     }
-
 
     @Override
     public String toString() {

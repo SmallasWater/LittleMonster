@@ -18,9 +18,11 @@ import java.util.Map;
  * Package com.smallaswater.littlemonster.entity
  */
 public class EntityCommandSender implements CommandSender {
+
     private final PermissibleBase perm = new PermissibleBase(this);
 
     private String name;
+
     EntityCommandSender(String name) {
         this.name = name;
     }

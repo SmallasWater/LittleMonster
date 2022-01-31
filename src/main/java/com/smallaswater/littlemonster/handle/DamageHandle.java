@@ -56,6 +56,5 @@ public class DamageHandle {
             playerDamageList.put(playerName,0.0d);
         }
         return playerDamageList.get(playerName);
-
     }
 }

@@ -29,12 +29,9 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
                     }
                 }
             }
-
-
             if(!easyEntity.isOpen()){
                 continue;
             }
-
             boolean spawn = true;
             if(Utils.getEntityCount(easyEntity.getPos().level,
                     easyEntity.getLittleNpc().getName(),easyEntity.getName())
@@ -74,7 +71,6 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
                 }
             }
         }
-
         return true;
     }
 

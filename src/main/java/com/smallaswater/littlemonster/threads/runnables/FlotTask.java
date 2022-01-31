@@ -66,12 +66,7 @@ public class FlotTask extends BasePluginThreadTask{
                             manager.remove(easyEntity.getPos());
                         }
                     }
-
-
                 }
-
-
-
             } else {
                 if (manager.size() > 0) {
                     for (FlotText position : manager.getFlotTexts()) {
@@ -82,7 +77,6 @@ public class FlotTask extends BasePluginThreadTask{
                     }
                 }
                 LittleMasterMainClass.getMasterMainClass().texts.clear();
-
             }
             if (PlayerFlotTextManager.getInstance(player).getFlotTexts().size() > 0) {
                 try {
@@ -102,6 +96,5 @@ public class FlotTask extends BasePluginThreadTask{
             }
         }
         return true;
-
     }
 }

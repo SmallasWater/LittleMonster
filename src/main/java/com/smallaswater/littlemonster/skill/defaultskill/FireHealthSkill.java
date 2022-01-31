@@ -11,8 +11,6 @@ import com.smallaswater.littlemonster.skill.BaseSkillManager;
  */
 public class FireHealthSkill extends BaseSkillManager implements BaseSkillAreaManager {
 
-
-
     public FireHealthSkill(String name) {
         super(name);
     }

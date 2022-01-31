@@ -26,10 +26,12 @@ import java.util.*;
  * Package com.smallaswater.littlemonster.utils
  */
 public class Utils {
-    private static final SplittableRandom random = new SplittableRandom(System.currentTimeMillis());
-    public static final int ACCORDING_X_OBTAIN_Y = 0;
-    public static final int ACCORDING_Y_OBTAIN_X = 1;
 
+    private static final SplittableRandom random = new SplittableRandom(System.currentTimeMillis());
+
+    public static final int ACCORDING_X_OBTAIN_Y = 0;
+
+    public static final int ACCORDING_Y_OBTAIN_X = 1;
 
     public static int rand(int min, int max) {
         return min == max ? max : random.nextInt(max + 1 - min) + min;
@@ -58,6 +60,7 @@ public class Utils {
             return type == 0 ? (element - pos1.getX()) * (pos1.getZ() - pos2.getZ()) / (pos1.getX() - pos2.getX()) + pos1.getZ() : (element - pos1.getZ()) * (pos1.getX() - pos2.getX()) / (pos1.getZ() - pos2.getZ()) + pos1.getX();
         }
     }
+
     public static String readFile(File file){
         String content = "";
         try{
@@ -67,6 +70,7 @@ public class Utils {
         }
         return content;
     }
+
     public static ArrayList<Player> getAroundOfPlayers(Position player, int size) {
         ArrayList<Player> players = new ArrayList<>();
         for(Entity entity:getAroundPlayers(player,size,true,false,false)){
@@ -74,11 +78,11 @@ public class Utils {
         }
         return players;
     }
+
     public static boolean canAttackNpc(LittleNpc l1,LittleNpc l2){
         if(l1.getConfig() == null){
             l1.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(l1.name));
         }
-
         if(l1.getConfig()
                 .getCampName()
                 .equalsIgnoreCase(l2
@@ -135,7 +139,6 @@ public class Utils {
         return effects;
     }
 
-
     public static ArrayList<LittleNpc> getEntitys(String name){
         ArrayList<LittleNpc> littleNpcs = new ArrayList<>();
         for(Level level: Server.getInstance().getLevels().values()) {
@@ -146,7 +149,6 @@ public class Utils {
             }
         }
         return littleNpcs;
-
     }
 
     public static int getEntityCount(Level level, String entityName,String pos){
@@ -201,8 +203,6 @@ public class Utils {
         return names.toArray(new String[0]);
     }
 
-
-
     public static Config getNbtItemConfig(){
         if(LittleMasterMainClass.getMasterMainClass().nbtItem == null){
             LittleMasterMainClass.getMasterMainClass().nbtItem = new Config(LittleMasterMainClass.getMasterMainClass().getDataFolder()+"/nbtitem.yml",Config.YAML);
@@ -239,6 +239,5 @@ public class Utils {
 
         return rank;
     }
-
 
 }

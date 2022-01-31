@@ -17,7 +17,6 @@ public class AttributeHealthSkill extends BaseSkillManager {
 
     private Skin skin;
 
-
     private AttributeType attributeType;
 
     public AttributeHealthSkill(String name) {
@@ -31,7 +30,6 @@ public class AttributeHealthSkill extends BaseSkillManager {
     public void setSkin(Skin skin) {
         this.skin = skin;
     }
-
 
     public void setAttributeType(AttributeType attributeType) {
         this.attributeType = attributeType;

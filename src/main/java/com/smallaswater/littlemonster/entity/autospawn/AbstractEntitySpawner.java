@@ -63,7 +63,6 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
 
     }
 
-
     private SpawnResult spawn(Player player) {
         Position pos = player.getPosition();
         Level level = player.getLevel();

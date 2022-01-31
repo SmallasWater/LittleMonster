@@ -20,10 +20,7 @@ public class PluginMasterThreadPool {
         executor = new ThreadPoolExecutor(3, 20, 1L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadPoolExecutor.AbortPolicy());
     }
 
-
-
-    public PluginMasterThreadPool() {
-    }
+    public PluginMasterThreadPool() {}
 
     public static void executeThread(BasePluginThreadTask t) {
         if (!executor.isShutdown() && !executor.isTerminating()) {

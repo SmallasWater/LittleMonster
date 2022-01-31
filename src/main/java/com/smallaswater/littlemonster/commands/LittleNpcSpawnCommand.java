@@ -23,6 +23,7 @@ import java.util.LinkedHashMap;
  * @author 若水 &
  */
 public class LittleNpcSpawnCommand extends Command {
+
     public LittleNpcSpawnCommand() {
         super("刷怪","生成命令","/lt help",new String[]{"lt"});
     }
@@ -66,8 +67,6 @@ public class LittleNpcSpawnCommand extends Command {
                                     }
                                     LittleMasterMainClass.getMasterMainClass().monsters.get(strings[1]).spawn(((Player) sender).getPosition(),time);
                                 }
-
-
                                 sender.sendMessage("§a怪物 " + strings[1] + "生成"+((time > 0)?" 存活 §e"+time+"§a 秒":""));
                             } else {
                                 sender.sendMessage("§c怪物 " + strings[1] + "不存在");
@@ -165,12 +164,9 @@ public class LittleNpcSpawnCommand extends Command {
                                 } else {
                                     sender.sendMessage("§c不存在" + strings[2] + "怪物");
                                 }
-
-
                                 sender.sendMessage("§a创建成功");
                             } catch (Exception e) {
                                 sender.sendMessage("§c创建刷怪点出现错误");
-
                                 return false;
                             }
                         } else {
@@ -191,7 +187,6 @@ public class LittleNpcSpawnCommand extends Command {
                             }
                             LittleMasterMainClass.getMasterMainClass().saveResource("monster.yml", "/Monster/" + name + ".yml", false);
                             Config config = new Config(LittleMasterMainClass.getMasterMainClass().getDataFolder() + "/Monster/" + name + ".yml", Config.YAML);
-
                             config.save();
                             MonsterConfig easyEntity = MonsterConfig.loadEntity(name, config);
                             if (easyEntity != null) {
@@ -204,7 +199,6 @@ public class LittleNpcSpawnCommand extends Command {
                             sender.sendMessage("§a创建成功");
                         } catch (Exception e) {
                             sender.sendMessage("§c创建怪物出现错误");
-
                             return false;
                         }
                     }else{
@@ -277,7 +271,6 @@ public class LittleNpcSpawnCommand extends Command {
                 return false;
             }
         }
-
         return false;
     }
 
@@ -293,6 +286,5 @@ public class LittleNpcSpawnCommand extends Command {
             sender.sendMessage("§c刷怪点不存在");
         }
         return false;
-
     }
 }

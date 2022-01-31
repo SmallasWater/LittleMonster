@@ -12,12 +12,9 @@ import com.smallaswater.littlemonster.skill.BaseSkillManager;
  */
 public class KnockBackHealthSkill extends BaseSkillManager  implements BaseSkillAreaManager {
 
-
     public KnockBackHealthSkill(String name) {
         super(name);
     }
-
-
 
     private void knockBack(Entity entity, double x, double z, double base) {
         double f = Math.sqrt(x * x + z * z);

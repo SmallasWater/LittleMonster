@@ -22,6 +22,7 @@ import java.util.LinkedHashMap;
  * Package com.smallaswater.littlemonster.windows
  */
 public class LittleWindow {
+
     private static final int MENU = 0x55;
 
     public static LinkedHashMap<Integer,FormWindow> WINDOWS = new LinkedHashMap<>();
@@ -36,7 +37,6 @@ public class LittleWindow {
         }
         player.showFormWindow(simple,MENU + 1);
         WINDOWS.put(MENU + 1,simple);
-
     }
 
     public static void sendSetting(Player player){
@@ -54,8 +54,6 @@ public class LittleWindow {
                 player.showFormWindow(custom,MENU + 2);
                 WINDOWS.put(MENU + 2,custom);
             }
-
         }
     }
-
 }
