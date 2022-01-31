@@ -148,10 +148,10 @@ public abstract class BaseEntity extends EntityHuman {
     public boolean targetOption(Entity creature, double distance) {
         if (creature instanceof Player) {
             Player player = (Player)creature;
-            return player.closed || !player.spawned || !player.isAlive() || (!player.isSurvival() && !player.isAdventure()) || distance > seeSize ||
-                    !player.getLevel().getFolderName().equalsIgnoreCase(getLevel().getFolderName());
+            return !player.isOnline() || player.closed || !player.spawned || !player.isAlive() || (!player.isSurvival() && !player.isAdventure()) || distance > seeSize ||
+                    player.getLevel() != this.getLevel();
         }else{
-            return creature.closed || !creature.isAlive() || !creature.getLevel().getFolderName().equalsIgnoreCase(getLevel().getFolderName());
+            return creature.closed || !creature.isAlive() || creature.getLevel() != this.getLevel() || distance > seeSize;
         }
 
     }
