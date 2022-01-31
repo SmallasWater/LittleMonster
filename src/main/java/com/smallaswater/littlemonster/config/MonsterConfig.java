@@ -119,6 +119,8 @@ public class MonsterConfig {
 
     private ArrayList<String> damageCamp = new ArrayList<>();
 
+    private ArrayList<String> toDamageCamp = new ArrayList<>();
+
     private MonsterConfig(String name){
         this.name = name;
     }
@@ -139,6 +141,7 @@ public class MonsterConfig {
         entity.setCanAttackSameCamp(config.getBoolean("是否攻击相同阵营",false));
         entity.setDelDamage(config.getInt("防御"));
         entity.setDamageCamp(new ArrayList<>(config.getStringList("攻击阵营")));
+        entity.setToDamageCamp(new ArrayList<>(config.getStringList("回击阵营")));
         entity.setCampName(config.getString("阵营","光明"));
         entity.setHealTime(config.getInt("恢复间隔",20));
         entity.setUnFightHeal(config.getBoolean("是否仅脱战恢复"));

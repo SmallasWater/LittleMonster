@@ -389,7 +389,7 @@ public class LittleNpc extends BaseEntityMove {
                                         }
                                     }
                                     if (((EntityDamageByEntityEvent) sure).getDamager() instanceof LittleNpc) {
-                                        if (!Utils.canAttackNpc(this, (LittleNpc) ((EntityDamageByEntityEvent) sure).getDamager())) {
+                                        if (!Utils.canAttackNpc(this, (LittleNpc) ((EntityDamageByEntityEvent) sure).getDamager(),true)) {
                                             return;
                                         }
                                     }
