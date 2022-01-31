@@ -84,7 +84,7 @@ public class LittleNpc extends BaseEntityMove {
         this.route = new WalkerRouteFinder(this);
         if (this.config.getAttackDistance() > 5) {
             if (this.route.getDestinationDeviate() <= 0) {
-                this.route.setDestinationDeviate(this.config.getAttackDistance() / 2);
+                this.route.setDestinationDeviate(this.config.getAttackDistance() * 0.8);
             }
         }else {
             this.route.setDestinationDeviate(0);

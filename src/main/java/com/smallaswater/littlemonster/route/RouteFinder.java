@@ -37,7 +37,7 @@ public abstract class RouteFinder {
 
    protected boolean interrupt = false;
 
-   private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+   private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
    protected boolean reachable = true;
 
@@ -60,7 +60,6 @@ public abstract class RouteFinder {
       if (!this.isSearching()) {
          this.start = start;
       }
-
    }
 
    public Vector3 getDestination() {
@@ -73,7 +72,6 @@ public abstract class RouteFinder {
          this.interrupt = true;
          this.research();
       }
-
    }
 
    public boolean isFinished() {

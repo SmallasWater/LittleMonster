@@ -11,11 +11,13 @@ import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
+import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.route.RouteFinder;
+import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
+import com.smallaswater.littlemonster.threads.runnables.RouteFinderSearchTask;
 import com.smallaswater.littlemonster.utils.Utils;
 import nukkitcoders.mobplugin.entities.animal.Animal;
 import nukkitcoders.mobplugin.entities.monster.Monster;
-import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
 
@@ -85,8 +87,12 @@ public abstract class BaseEntityMove extends BaseEntity {
     public void setFollowTarget(Entity target, boolean attack) {
         super.setFollowTarget(target);
         this.canAttack = attack;
-        if (this.route != null && target != null) {
-            this.route.setDestination(target);
+        if (this.route != null) {
+            if (target != null) {
+                this.route.setDestination(target);
+            }else {
+                this.route.resetNodes();
+            }
         }
     }
 
@@ -139,21 +145,22 @@ public abstract class BaseEntityMove extends BaseEntity {
                 //TODO 更智能的选取高优先级目标
                 entities.sort((p1, p2) -> Double.compare(this.distance(p1) - this.distance(p2), 0.0D));
                 if (!entities.isEmpty()) {
-                    this.fightEntity(entities.get(0));
+                    EntityCreature entity = entities.get(0);
+                    if (entity != this.getFollowTarget()) {
+                        this.fightEntity(entity);
+                    }
                 }
-                //TODO 删除调试信息
-                Server.getInstance().getLogger().info("NPC:" + this.config.getName() + "目标" + entities);
             }
 
             //获取寻路目标点
-            if (this.route != null && this.route.hasCurrentNode() && this.route.hasArrivedNode(this) && this.route.hasNext()) {
+            if (this.route != null && this.route.isFinished() && this.route.hasCurrentNode() && this.route.hasArrivedNode(this) && this.route.hasNext()) {
                 this.target = this.route.next();
                 return;
             }
 
             //随机移动
             if(this.config.isCanMove()) {
-                /*if (this.followTarget == null || this.target == null) {
+                if (this.followTarget == null || this.target == null) {
                     if (this.route.hasNext()) {
                         this.target = this.route.next();
                     }
@@ -181,11 +188,11 @@ public abstract class BaseEntityMove extends BaseEntity {
                     if (x != 0 && z != 0) {
                         this.route.setDestination(this.add(x, 0, z));
                     }
-                }*/
+                }
             }
 
             //TODO 未知用途，需要进一步测试
-            double distance = this.followTarget != null ? this.distance(followTarget) : 0;
+            /*double distance = this.followTarget != null ? this.distance(followTarget) : 0;
             if (distance > seeSize || this.targetOption(followTarget, distance)) {
                 this.setFollowTarget(null,false);
                 return;
@@ -196,7 +203,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                 if (this.passengers.isEmpty()) {
                     this.target = followTarget;
                 }
-            }
+            }*/
         }else {
             //如果有寻路节点 更新目标
             if (this.route != null && this.route.hasCurrentNode() && this.route.hasArrivedNode(this) && this.route.hasNext()) {
@@ -254,6 +261,7 @@ public abstract class BaseEntityMove extends BaseEntity {
         this.stayTime = 0;
         this.moveTime = 0;
         this.setFollowTarget(entity, true);
+        this.target = entity;
         /*this.followTarget = creature;
         if (this.route == null && this.passengers.isEmpty()) {
             this.target = creature;
@@ -315,7 +323,7 @@ public abstract class BaseEntityMove extends BaseEntity {
         }
 
         if (this.age % 10 == 0 && this.route != null && this.route.isFinished()) {
-            //RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this.route));
+            RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this.route));
             if (this.route.hasNext()) {
                 this.target = this.route.next();
             }
@@ -328,120 +336,99 @@ public abstract class BaseEntityMove extends BaseEntity {
             return null;
         }
 
-        Block levelBlock = getLevelBlock();
-        boolean inWater = levelBlock.getId() == 8 || levelBlock.getId() == 9;
-        int downId = level.getBlockIdAt(getFloorX(), getFloorY() - 1, getFloorZ());
-        if (inWater && (downId == 0 || downId == 8 || downId == 9 || downId == BlockID.LAVA || downId == BlockID.STILL_LAVA || downId == BlockID.SIGN_POST || downId == BlockID.WALL_SIGN)) onGround = false;
-        if (downId == 0 || downId == BlockID.SIGN_POST || downId == BlockID.WALL_SIGN) onGround = false;
-        if (this.followTarget != null && !this.followTarget.closed && this.followTarget.isAlive() && this.target!=null) {
-            double x = this.target.x - this.x;
-            double z = this.target.z - this.z;
-
-            double diff = Math.abs(x) + Math.abs(z);
-            if (!inWater && (this.stayTime > 0 || this.distance(this.followTarget) <= (this.getWidth()) / 2 + 0.05)) {
-                this.motionX = 0;
-                this.motionZ = 0;
-            } else {
-                if (levelBlock.getId() == 8) {
-                    BlockWater blockWater = (BlockWater) levelBlock;
-                    Vector3 flowVector = blockWater.getFlowVector();
-                    motionX = flowVector.getX() * FLOW_MULTIPLIER;
-                    motionZ = flowVector.getZ() * FLOW_MULTIPLIER;
-                } else if (levelBlock.getId() == 9) {
-                    this.motionX = this.getSpeed() * moveMultiplier * 0.05 * (x / diff);
-                    this.motionZ = this.getSpeed() * moveMultiplier * 0.05 * (z / diff);
-                    this.level.addParticle(new BubbleParticle(this.add(Utils.rand(-2.0, 2.0), Utils.rand(-0.5, 0), Utils.rand(-2.0, 2.0))));
-                } else {
-                    this.motionX = this.getSpeed() * moveMultiplier * 0.1 * (x / diff);
-                    this.motionZ = this.getSpeed() * moveMultiplier * 0.1 * (z / diff);
-                }
-            }
-            if (this.passengers.isEmpty() && (this.stayTime <= 0 || Utils.rand())) this.yaw = Math.toDegrees(-FastMath.atan2(x / diff, z / diff));
-        }
-
         Vector3 before = this.target;
         this.checkTarget();
-        if (this.target != null && before != this.target) {
-            double x = this.target.x - this.x;
-            double z = this.target.z - this.z;
-
-            double diff = Math.abs(x) + Math.abs(z);
-            if (!inWater && (this.stayTime > 0 || this.distance(this.target) <= ((this.getWidth()) / 2 + 0.05) * nearbyDistanceMultiplier())) {
-                this.motionX = 0;
-                this.motionZ = 0;
-            } else {
-                if (levelBlock.getId() == 8) {
-                    BlockWater blockWater = (BlockWater) levelBlock;
-                    Vector3 flowVector = blockWater.getFlowVector();
-                    motionX = flowVector.getX() * FLOW_MULTIPLIER;
-                    motionZ = flowVector.getZ() * FLOW_MULTIPLIER;
-                } else if (levelBlock.getId() == 9) {
-                    this.motionX = this.getSpeed() * moveMultiplier * 0.05 * (x / diff);
-                    this.motionZ = this.getSpeed() * moveMultiplier * 0.05 * (z / diff);
-                    this.level.addParticle(new BubbleParticle(this.add(Utils.rand(-2.0, 2.0), Utils.rand(-0.5, 0), Utils.rand(-2.0, 2.0))));
+        LittleMasterMainClass.getMasterMainClass().getLogger().info("target:" + this.target);
+        double x;
+        double z;
+        if (this.target != null || before != this.target) {
+            if(this.target != null) {
+                x = this.target.x - this.x;
+                z = this.target.z - this.z;
+                double diff = Math.abs(x) + Math.abs(z);
+                if(diff <= 0){
+                    diff = 0.1;
+                }
+                if (this.stayTime <= 0 && this.distance(this.target) > ((double) this.getWidth() + 0.0D) / 2.0D + 0.05D) {
+                    if (this.isInsideOfWater()) {
+                        this.motionX = this.getSpeed() * 0.05D * (x / diff);
+                        this.motionZ = this.getSpeed() * 0.05D * (z / diff);
+                        this.level.addParticle(new BubbleParticle(this.add(Utils.rand(-2.0D, 2.0D), Utils.rand(-0.5D, 0.0D), Utils.rand(-2.0D, 2.0D))));
+                    } else {
+                        this.motionX = this.getSpeed() * 0.15D * (x / diff);
+                        this.motionZ = this.getSpeed() * 0.15D * (z / diff);
+                    }
                 } else {
-                    this.motionX = this.getSpeed() * moveMultiplier * 0.15 * (x / diff);
-                    this.motionZ = this.getSpeed() * moveMultiplier * 0.15 * (z / diff);
+                    this.motionX = 0.0D;
+                    this.motionZ = 0.0D;
+                }
+                if ((this.passengers.isEmpty()) &&
+                        (this.stayTime <= 0 || Utils.rand())) {
+                    this.yaw = Math.toDegrees(-Math.atan2(x / diff, z / diff));
+                    if(!hasBlockInLine(followTarget)) {
+                        if (followTarget != null) {
+                            double dx = this.x - followTarget.x;
+                            double dy = (this.y + this.getEyeHeight()) - (followTarget.y + followTarget.getEyeHeight());
+                            double dz = this.z - followTarget.z;
+                            double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
+                            double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
+                            if (dz > 0.0D) {
+                                yaw = -yaw + 180.0D;
+                            }
+                            this.yaw = yaw;
+                            this.pitch = pitch;
+                        } else {
+                            pitch = 0;
+                        }
+                    }
                 }
             }
-            if (this.passengers.isEmpty() && (this.stayTime <= 0 || Utils.rand())) this.yaw = Math.toDegrees(-FastMath.atan2(x / diff, z / diff));
-        }
-
-        if (this.followTarget != null || this.target != null) {
-            Vector3 nowTarget = this.followTarget != null ? this.followTarget.clone() : this.target.clone();
-            if (nowTarget instanceof Entity) {
-                nowTarget.setY(nowTarget.getY() + ((Entity) nowTarget).getEyeHeight());
-            }
-
-            double dx = this.x - nowTarget.x;
-            double dy = (this.y + this.getEyeHeight()) - nowTarget.y;
-            double dz = this.z - nowTarget.z;
-            double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
-            double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
-            if (dz > 0.0D) {
-                yaw = -yaw + 180.0D;
-            }
-
-            this.yaw = yaw;
-            this.pitch = pitch;
         }else {
-            this.pitch = 0;
+            this.motionX = 0;
+            this.motionZ = 0;
+            this.stayTime = 1;
         }
-
-        double dx = this.motionX;
-        double dz = this.motionZ;
-        boolean isJump = this.checkJump(dx, dz);
-        if (this.stayTime > 0 && !inWater) {
+        x = this.motionX * (double)tickDiff;
+        z = this.motionZ * (double)tickDiff;
+        boolean isJump = this.checkJump(x, z);
+        if (this.stayTime > 0) {
             this.stayTime -= tickDiff;
-            this.move(0, this.motionY, 0);
+            this.move(0.0D, this.motionY, 0.0D);
         } else {
-            Vector2 be = new Vector2(this.x + dx, this.z + dz);
-            this.move(dx, this.motionY, dz);
+            Vector2 be = new Vector2(this.x + x, this.z + z);
+            if(attactMode != 3 && attactMode != 2){
+                waitTime = 0;
+                this.move(x, this.motionY, z);
+            }else if(followTarget == null || (this.distance(followTarget) > seeSize)){
+                waitTime = 0;
+                this.move(x, this.motionY, z);
+            }else{
+                this.move(x, this.motionY, z);
+                waitTime++;
+                if(waitTime >= 20 * 5){
+                    waitTime = 0;
+                    this.setFollowTarget(null,false);
+                }
+            }
             Vector2 af = new Vector2(this.x, this.z);
-
             if ((be.x != af.x || be.y != af.y) && !isJump) {
-                this.moveTime -= 90;
+                this.moveTime -= 90 * tickDiff;
             }
         }
-
         if (!isJump) {
-            if (this.onGround && !inWater) {
-                this.motionY = 0;
-            } else if (this.motionY > -this.getGravity() * 4) {
-                if (!(this.level.getBlock(new Vector3(NukkitMath.floorDouble(this.x), (int) (this.y + 0.8), NukkitMath.floorDouble(this.z))) instanceof BlockLiquid)) {
+            if (this.onGround) {
+                this.motionY = 0.0D;
+            } else if (this.motionY > (double)(-this.getGravity() * 4.0F)) {
+                if (!(this.level.getBlock(new Vector3(NukkitMath.floorDouble(this.x), (int)(this.y + 0.8D), NukkitMath.floorDouble(this.z))) instanceof BlockLiquid)) {
                     this.motionY -= this.getGravity();
                 }
             } else {
-                this.motionY -= this.getGravity();
+                this.motionY -= this.getGravity() * (float)tickDiff;
             }
         }
         this.updateMovement();
-        if (this.route != null) {
-            if (this.route.hasCurrentNode() && this.route.hasArrivedNode(this)) {
-                if (this.route.hasNext()) {
-                    this.target = this.route.next();
-                }
-            }
+        if (this.route != null && this.route.hasCurrentNode() && this.route.hasArrivedNode(this) && this.route.hasNext()) {
+            this.target = this.route.next();
         }
         return this.followTarget != null ? this.followTarget : this.target;
     }
