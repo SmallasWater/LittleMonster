@@ -3,6 +3,8 @@ package com.smallaswater.littlemonster.route;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.Vector3;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -24,6 +26,13 @@ public abstract class RouteFinder {
 
    protected Vector3 destination;
 
+   /**
+    * 目的地偏离
+    */
+   @Getter
+   @Setter
+   protected double destinationDeviate;
+
    protected Level level;
 
    protected boolean interrupt = false;
@@ -35,7 +44,7 @@ public abstract class RouteFinder {
    RouteFinder(BaseEntity entity) {
       Objects.requireNonNull(entity, "RouteFinder: entity can not be null");
       this.entity = entity;
-      this.start = this.entity.clone();
+      this.start = this.entity;
       this.level = entity.getLevel();
    }
 
