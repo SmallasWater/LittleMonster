@@ -37,7 +37,10 @@ public class KnockBackHealthSkill extends BaseSkillManager  implements BaseSkill
     @Override
     public void display(Entity... player) {
         for(Entity player1: player){
-            knockBack(player1,(player1.x - getMaster().getLocation().x),(player1.z - getMaster().getLocation().z),getEffect().doubleValue());
+            knockBack(player1,
+                    (player1.x - getMaster().getLocation().x),
+                    (player1.z - getMaster().getLocation().z),
+                    getEffect().doubleValue());
         }
 
     }

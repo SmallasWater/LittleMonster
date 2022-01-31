@@ -60,23 +60,14 @@ public class LittleNpc extends BaseEntityMove {
 
     public int healSettingTime;
 
-
     private ArrayList<Integer> healthList = new ArrayList<>();
 
-
-
     public DamageHandle handle = new DamageHandle();
-
-
 
     public LittleNpc(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
         this.route = new WalkerRouteFinder(this);
-
-
     }
-
-
 
     private Player getDamageMax(){
         double max = 0;
@@ -137,8 +128,6 @@ public class LittleNpc extends BaseEntityMove {
                         }
                     }
                     disCommand(cmd);
-
-
                 }
             }
         }
@@ -167,8 +156,6 @@ public class LittleNpc extends BaseEntityMove {
                 }
             }
         }
-
-
     }
 
     @Override
@@ -211,11 +198,10 @@ public class LittleNpc extends BaseEntityMove {
         }
     }
 
-
-
-    public LittleNpc(FullChunk chunk,CompoundTag nbt,MonsterConfig config){
+    public LittleNpc(FullChunk chunk,
+                     CompoundTag nbt,
+                     MonsterConfig config){
         super(chunk, nbt);
-
         this.config = config;
         this.name = config.getName();
         this.setNameTagAlwaysVisible();
@@ -228,9 +214,6 @@ public class LittleNpc extends BaseEntityMove {
         this.route = new WalkerRouteFinder(this);
     }
 
-
-
-
     private ArrayList<BaseSkillManager> getHealthSkill(int health){
 
         ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
@@ -242,35 +225,14 @@ public class LittleNpc extends BaseEntityMove {
                 }
             }
         }
-
         return skillManagers;
     }
 
     private Player boss = null;
 
-//    private String s2 = "9a469a61-c83b-4ba9-b507-bdbe64430582";
-//    private void displayEmote(String skin){
-//        EmotePacket packet = new EmotePacket();
-//        packet.runtimeId = this.getId();
-//        packet.emoteID = skin;
-//        packet.flags = 0;
-//        Server.broadcastPacket(Server.getInstance().getOnlinePlayers().values(), packet);
-//    }
-
-
-
     private void onHealthListener(int health){
         ArrayList<BaseSkillManager> skillAreaManagers = getHealthSkill(health);
         if(skillAreaManagers.size() > 0) {
-//            this.setImmobile(true);
-//            this.disPlayAnim = true;
-//            Server.getInstance().getScheduler().scheduleDelayedTask(LittleMasterMainClass.getMasterMainClass(), new Runnable() {
-//                @Override
-//                public void run() {
-//                    displayEmote(s2);
-//                }
-//            },5);
-
             for (BaseSkillManager skillManager : skillAreaManagers) {
                 if (skillManager instanceof BaseSkillAreaManager) {
                     if (this.getFollowTarget() != null) {
@@ -295,21 +257,11 @@ public class LittleNpc extends BaseEntityMove {
                 }
             }
         }
-//        if(emoteTime >= 50){
-//            emoteTime = 0;
-//            if(this.isImmobile() && !config.isImmobile() && disPlayAnim) {
-//                this.setImmobile(false);
-//                disPlayAnim = false;
-//            }
-//
-//        }
-
     }
 
     private int age = 0;
 
     private int cacheAge = 0;
-
 
     @Override
     public void onUpdata() {
@@ -320,36 +272,33 @@ public class LittleNpc extends BaseEntityMove {
             cacheAge++;
         }
         if(liveTime != -1 && age >= liveTime){
-            this.getLevel().addParticleEffect(this, ParticleEffect.BASIC_SMOKE);
+            this.getLevel().addParticleEffect(this,
+                    ParticleEffect.BASIC_SMOKE);
             this.close();
             return;
         }
-//        if(isImmobile() && disPlayAnim && emoteTime < 1000) {
-//            ++emoteTime;
-//        }
         if(config == null){
             return;
         }
-        this.setNameTag(config.getTag().replace("{名称}",name).replace("{血量}",getHealth()+"").replace("{最大血量}",getMaxHealth()+""));
-
+        this.setNameTag(config.getTag()
+                .replace("{名称}",name)
+                .replace("{血量}",getHealth()+"")
+                .replace("{最大血量}",getMaxHealth()+""));
         onHealthListener((int) Math.floor(getHealth()));
-
         if(this.getFollowTarget() != null && this.getFollowTarget() instanceof Player){
-            if(healTime >= healSettingTime && heal > 0 && !config.isUnFightHeal()){
+            if(healTime >= healSettingTime &&
+                    heal > 0 &&
+                    !config.isUnFightHeal()){
                 healTime = 0;
                 this.heal(heal);
             }
-
-            if(targetOption(this.getFollowTarget(), distance(this.getFollowTarget()))){
+            if(targetOption(this.getFollowTarget(),
+                    distance(this.getFollowTarget()))){
                 if(boss != null){
                     BossBarManager.BossBarApi.removeBossBar(boss);
                     boss = null;
                 }
                 setFollowTarget(null,false);
-
-
-
-
                 return;
             }
             if(this.getFollowTarget() instanceof Player){
@@ -357,10 +306,10 @@ public class LittleNpc extends BaseEntityMove {
                 if(!BossBarManager.BossBarApi.hasCreate((Player) this.getFollowTarget(),getId())) {
                     BossBarManager.BossBarApi.createBossBar((Player) this.getFollowTarget(), getId());
                 }
-                BossBarManager.BossBarApi.showBoss((Player) getFollowTarget(),getNameTag(),getHealth(),getMaxHealth());
-//                if(!config.isImmobile()  && this.isImmobile() && !config.isCanMove() && !hasNoTarget()){
-//                    this.setImmobile(false);
-//                }
+                BossBarManager.BossBarApi.showBoss((Player) getFollowTarget(),
+                        getNameTag(),
+                        getHealth(),
+                        getMaxHealth());
             }
         }else{
             if(getFollowTarget() == null){
@@ -374,19 +323,11 @@ public class LittleNpc extends BaseEntityMove {
                     this.heal(heal);
                 }
             }
-
             if(boss != null){
                 BossBarManager.BossBarApi.removeBossBar(boss);
                 boss = null;
             }
-
-//            this.followTarget = null;
-
-//            if(!config.isCanMove() && hasNoTarget()){
-//                this.setImmobile(true);
-//            }
         }
-
     }
 
     @Override
@@ -424,14 +365,18 @@ public class LittleNpc extends BaseEntityMove {
             this.damageDelay = 0;
             this.level.addParticle(new DestroyBlockParticle(this,new BlockRedstone()));
             if(sure instanceof EntityDamageByEntityEvent){
+                //如果锁定的不是玩家
                 if(!(getFollowTarget() instanceof Player)) {
                     if(getFollowTarget() != null) {
-                        if(targetOption(getFollowTarget(),distance(getFollowTarget()))){
+                        if(targetOption(getFollowTarget(),
+                                distance(getFollowTarget()))){
                             setFollowTarget(null,false);
                             return;
                         }
                         if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
-                            if (!targetOption(((EntityDamageByEntityEvent) sure).getDamager(), distance(((EntityDamageByEntityEvent) sure).getDamager()))) {
+                            if (!targetOption(((EntityDamageByEntityEvent) sure)
+                                    .getDamager(),
+                                    distance(((EntityDamageByEntityEvent) sure).getDamager()))) {
                                 setFollowTarget( ((EntityDamageByEntityEvent) sure).getDamager());
                             }
                         }
@@ -451,7 +396,6 @@ public class LittleNpc extends BaseEntityMove {
                                 setFollowTarget(((EntityDamageByEntityEvent) sure).getDamager());
                             }
                         }
-
                     }
                 }
             }
@@ -459,7 +403,6 @@ public class LittleNpc extends BaseEntityMove {
         }else{
             sure.setCancelled();
         }
-
     }
 
     @Override
@@ -471,9 +414,9 @@ public class LittleNpc extends BaseEntityMove {
 
     @Override
     public void attackEntity(EntityCreature player){
-        if (this.attackDelay > attackSleepTime && player.distance(this) <= distanceLine) {
+        if (this.attackDelay > attackSleepTime &&
+                player.distance(this) <= distanceLine) {
             this.attackDelay = 0;
-//            String s1 = "ce5c0300-7f03-455d-aaf1-352e4927b54d";
             switch (attactMode){
                 case 1:
                     //群体
@@ -489,8 +432,6 @@ public class LittleNpc extends BaseEntityMove {
                     }
                     player.level.addParticle(new HugeExplodeSeedParticle(player));
                     player.level.addSound(player, Sound.RANDOM_EXPLODE);
-//                    displayEmote(s1);
-
                     break;
                 case 2:
                     double f = 1.3D;
@@ -498,13 +439,14 @@ public class LittleNpc extends BaseEntityMove {
                     if (!(k instanceof EntityArrow)) {
                         return;
                     }
-
                     EntityArrow arrow = (EntityArrow)k;
-                    arrow.setMotion(new Vector3(-Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f, -Math.sin(Math.toRadians(pitch)) * f * f, Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f));
+                    arrow.setMotion(
+                            new Vector3(-Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f,
+                                    -Math.sin(Math.toRadians(pitch)) * f * f,
+                                    Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f));
                     EntityShootBowEvent ev = new EntityShootBowEvent(this, Item.get(262, 0, 1), arrow, f);
                     this.server.getPluginManager().callEvent(ev);
                     EntityProjectile projectile = ev.getProjectile();
-
                     if (ev.isCancelled()) {
                         projectile.kill();
                     } else {
@@ -577,18 +519,14 @@ public class LittleNpc extends BaseEntityMove {
             pk.eid = this.getId();
             pk.event = 4;
             this.level.getPlayers().values().forEach(player1 -> player1.dataPacket(pk));
-//            this.level.addChunkPacket(this.getChunkX() >> 4, this.getChunkZ() >> 4, pk);
-
         }
     }
-
 
     @Override
     public void close() {
         if(inventory != null && inventory.getViewers() != null){
             inventory.getViewers().clear();
         }
-
         super.close();
         onClose();
     }
@@ -600,7 +538,5 @@ public class LittleNpc extends BaseEntityMove {
     public float getDamage() {
         return (float) damage;
     }
-
-
 
 }

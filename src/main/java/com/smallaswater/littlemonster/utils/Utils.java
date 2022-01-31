@@ -98,7 +98,6 @@ public class Utils {
     public static LinkedList<Entity> getAroundPlayers(Position player, int size,boolean isPlayer, boolean isEntity,boolean isNpc) {
         LinkedList<Entity> explodePlayer = new LinkedList<>();
         for(Entity player1: player.level.getEntities()){
-
             if(player1.x < player.x + size && player1.x > player.x - size && player1.z < player.z + size && player1.z > player.z - size && player1.y < player.y + size && player1.y > player.y - size){
                 if(isPlayer && player1 instanceof Player){
                     explodePlayer.add(player1);
@@ -110,16 +109,13 @@ public class Utils {
                            if(canAttackNpc((LittleNpc) player,(LittleNpc)player1)){
                                explodePlayer.add(player1);
                            }
-
                         }
                     }else if(player1 instanceof EntityLiving &&!(player1 instanceof EntityHuman) && !player1.isImmobile()){
                         explodePlayer.add(player1);
                     }
                 }
-
             }
         }
-
         return explodePlayer;
     }
 

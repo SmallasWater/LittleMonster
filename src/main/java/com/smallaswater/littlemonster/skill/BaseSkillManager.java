@@ -41,7 +41,8 @@ public abstract class BaseSkillManager implements Cloneable{
     private static ConcurrentHashMap<String,BaseSkillManager> MANAGER_CONCURRENT_HASH_MAP
             = new ConcurrentHashMap<>();
 
-    private static void register(String name, BaseSkillManager manager){
+    private static void register(String name,
+                                 BaseSkillManager manager){
         MANAGER_CONCURRENT_HASH_MAP.put(name, manager);
     }
 
