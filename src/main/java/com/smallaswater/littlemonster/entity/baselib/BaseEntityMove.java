@@ -333,19 +333,21 @@ public abstract class BaseEntityMove extends BaseEntity {
                             if ((this.passengers.isEmpty()) &&
                                     (this.stayTime <= 0 || Utils.rand())) {
                                 this.yaw = Math.toDegrees(-Math.atan2(x / diff, z / diff));
-                                if(followTarget != null) {
-                                    double dx = this.x - followTarget.x;
-                                    double dy = (this.y + this.getEyeHeight()) - (followTarget.y + followTarget.getEyeHeight());
-                                    double dz = this.z - followTarget.z;
-                                    double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
-                                    double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
-                                    if (dz > 0.0D) {
-                                        yaw = -yaw + 180.0D;
+                                if(!hasBlockInLine(followTarget)) {
+                                    if (followTarget != null) {
+                                        double dx = this.x - followTarget.x;
+                                        double dy = (this.y + this.getEyeHeight()) - (followTarget.y + followTarget.getEyeHeight());
+                                        double dz = this.z - followTarget.z;
+                                        double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
+                                        double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
+                                        if (dz > 0.0D) {
+                                            yaw = -yaw + 180.0D;
+                                        }
+                                        this.yaw = yaw;
+                                        this.pitch = pitch;
+                                    } else {
+                                        pitch = 0;
                                     }
-                                    this.yaw = yaw;
-                                    this.pitch = pitch;
-                                }else{
-                                    pitch = 0;
                                 }
                             }
                         }
@@ -370,9 +372,10 @@ public abstract class BaseEntityMove extends BaseEntity {
                                 this.move(x, this.motionY, z);
                             }else{
                                 this.move(0.05, this.motionY, 0.05);
+                                waitTime++;
                             }
-                            waitTime++;
                             if(waitTime >= 20 * 5){
+                                waitTime = 0;
                                 setFollowTarget(null,false);
                             }
                         }
