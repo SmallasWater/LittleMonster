@@ -13,10 +13,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class PluginMasterThreadPool {
 
-    private static final ThreadPoolExecutor executor;
+    private static final ThreadPoolExecutor EXECUTOR;
 
     static {
-        executor = new ThreadPoolExecutor(
+        EXECUTOR = new ThreadPoolExecutor(
                 3,
                 20,
                 1L,
@@ -31,13 +31,13 @@ public class PluginMasterThreadPool {
     }
 
     public static void executeThread(BasePluginThreadTask t) {
-        if (!executor.isShutdown() && !executor.isTerminating()) {
-            executor.execute(t);
+        if (!EXECUTOR.isShutdown() && !EXECUTOR.isTerminating()) {
+            EXECUTOR.execute(t);
         }
     }
 
     public static void shutDownNow() {
-        executor.shutdownNow();
+        EXECUTOR.shutdownNow();
     }
 
 }
