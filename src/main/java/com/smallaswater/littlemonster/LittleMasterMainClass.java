@@ -22,6 +22,8 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -157,13 +159,29 @@ public class LittleMasterMainClass extends PluginBase {
                     if(new File(this.getDataFolder()+"/Skins/"+skinName+"/skin.json").exists()){
                         Map<String, Object> skinJson = (new Config(this.getDataFolder()+"/Skins/"+skinName+"/skin.json", Config.JSON)).getAll();
                         String geometryName = null;
-                        for (Map.Entry<String, Object> entry1: skinJson.entrySet()){
-                            if(geometryName == null){
-                                geometryName = entry1.getKey();
+
+                        if(skinJson.containsKey("format_version")){
+                            skin.generateSkinId("littlemaster");
+                            for(Map.Entry<String, Object> entry1: skinJson.entrySet()){
+                                if(geometryName == null){
+                                    if(entry1.getKey().startsWith("geometry")) {
+                                        geometryName = entry1.getKey();
+                                    }
+                                }
                             }
+                            skin.setSkinResourcePatch("{\"geometry\":{\"default\":\""+geometryName+"\"}}");
+                            skin.setGeometryData(Utils.readFile(new File(this.getDataFolder()+"/Skins/"+skinName+"/skin.json")));
+                            skin.setTrusted(true);
+                        }else{
+                            for (Map.Entry<String, Object> entry1: skinJson.entrySet()){
+                                if(geometryName == null){
+                                    geometryName = entry1.getKey();
+                                }
+                            }
+                            skin.setGeometryName(geometryName);
+                            skin.setGeometryData(Utils.readFile(new File(this.getDataFolder()+"/Skins/"+skinName+"/skin.json")));
                         }
-                        skin.setGeometryName(geometryName);
-                        skin.setGeometryData(Utils.readFile(new File(this.getDataFolder()+"/Skins/"+skinName+"/skin.json")));
+
                     }
                     this.getLogger().info(skinName+"皮肤读取完成");
                     loadSkins.put(skinName,skin);

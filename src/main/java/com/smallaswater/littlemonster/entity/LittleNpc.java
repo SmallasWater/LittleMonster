@@ -54,6 +54,7 @@ public class LittleNpc extends BaseEntityMove {
     @Getter
     private int liveTime = -1;
 
+    public String spawnPos = null;
 
     public int heal;
 
@@ -441,6 +442,11 @@ public class LittleNpc extends BaseEntityMove {
                                     return;
                                 }
                             }
+                            if(((EntityDamageByEntityEvent) sure).getDamager() instanceof LittleNpc){
+                                if(!Utils.canAttackNpc(this, (LittleNpc) ((EntityDamageByEntityEvent) sure).getDamager())){
+                                    return;
+                                }
+                            }
                             if (!targetOption((EntityCreature) ((EntityDamageByEntityEvent) sure).getDamager(), distance(((EntityDamageByEntityEvent) sure).getDamager()))) {
                                 setFollowTarget((EntityCreature) ((EntityDamageByEntityEvent) sure).getDamager());
                             }
@@ -479,7 +485,7 @@ public class LittleNpc extends BaseEntityMove {
                         if(p instanceof LittleNpc){
                             continue;
                         }
-                        p.attack(new EntityDamageByEntityEvent(this, p, EntityDamageEvent.DamageCause.ENTITY_ATTACK, getDamage()));
+                        p.attack(new EntityDamageByEntityEvent(this, p, EntityDamageEvent.DamageCause.ENTITY_ATTACK, getDamage(), (float) config.getKnockBack()));
                     }
                     player.level.addParticle(new HugeExplodeSeedParticle(player));
                     player.level.addSound(player, Sound.RANDOM_EXPLODE);
@@ -561,7 +567,7 @@ public class LittleNpc extends BaseEntityMove {
                         damage.put(EntityDamageEvent.DamageModifier.ARMOR, (float)((double)(Float)damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0.0F) - Math.floor((double)((Float)damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1.0F) * points) * 0.04D)));
                     }
 
-                    player.attack(new EntityDamageByEntityEvent(this, player, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage,0.8f));
+                    player.attack(new EntityDamageByEntityEvent(this, player, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage,(float) config.getKnockBack()));
                     break;
             }
             for(Effect effect: config.getEffects()){

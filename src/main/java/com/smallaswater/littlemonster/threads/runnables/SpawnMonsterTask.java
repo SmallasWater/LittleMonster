@@ -37,13 +37,13 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
 
             boolean spawn = true;
             if(Utils.getEntityCount(easyEntity.getPos().level,
-                    easyEntity.getLittleNpc().getName())
+                    easyEntity.getLittleNpc().getName(),easyEntity.getName())
                     >= easyEntity.getMaxCount()){
                 spawn =  false;
             }
             if (spawn) {
-                if (LittleMasterMainClass.getMasterMainClass().time.containsKey(easyEntity.getLittleNpc().getName())) {
-                    int t = LittleMasterMainClass.getMasterMainClass().time.get(easyEntity.getLittleNpc().getName());
+                if (LittleMasterMainClass.getMasterMainClass().time.containsKey(easyEntity.getName())) {
+                    int t = LittleMasterMainClass.getMasterMainClass().time.get(easyEntity.getName());
                     t--;
                     if (t <= 0) {
                         if(LittleMasterMainClass.getMasterMainClass().monsters.containsKey(easyEntity.getLittleNpc().getName())){
@@ -53,7 +53,8 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
                                         .replace("{name}", easyEntity.getLittleNpc().getName())));
                             }
                             for(int i = 0;i < easyEntity.getCount();i++) {
-                                easyEntity.getLittleNpc().spawn(easyEntity.getPos(),easyEntity.getLiveTime());
+                                LittleNpc npc = easyEntity.getLittleNpc().spawn(easyEntity.getPos(),easyEntity.getLiveTime());
+                                npc.spawnPos = easyEntity.getName();
 //                               LittleMasterMainClass.getMasterMainClass().monsters
 //                                       .get(easyEntity.getLittleNpc().getName()).spawn(easyEntity.getPos(),easyEntity.getLiveTime());
                             }
@@ -69,9 +70,9 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
                             }
                         }
                     }
-                    LittleMasterMainClass.getMasterMainClass().time.put(easyEntity.getLittleNpc().getName(), t);
+                    LittleMasterMainClass.getMasterMainClass().time.put(easyEntity.getName(), t);
                 } else {
-                    LittleMasterMainClass.getMasterMainClass().time.put(easyEntity.getLittleNpc().getName(),easyEntity.getRound());
+                    LittleMasterMainClass.getMasterMainClass().time.put(easyEntity.getName(),easyEntity.getRound());
                 }
             }
         }

@@ -37,7 +37,7 @@ public class LittleNpcSpawner extends AbstractEntitySpawner {
         } else if (biomeId == 8) {
             result = SpawnResult.WRONG_BIOME;
         } else if (pos.y <= 255.0D && (!"nether".equals(level.getName()) || pos.y <= 127.0D) && pos.y >= 1.0D && blockId != 0) {
-            config.spawn(pos,LittleMasterMainClass.getMasterMainClass().getConfig().getInt("autospawn."+getEntityName()+".maxCount",30));
+            config.spawn(pos,LittleMasterMainClass.getMasterMainClass().getConfig().getInt("autospawn."+getEntityName()+".liveTime",30));
         } else {
             result = SpawnResult.POSITION_MISMATCH;
         }

@@ -80,13 +80,13 @@ public class Utils {
         }
 
         if(l1.getConfig()
-                .getCamp()
+                .getCampName()
                 .equalsIgnoreCase(l2
                         .getConfig()
-                        .getCamp())){
+                        .getCampName())){
             return l1.getConfig().isCamp();
         }else {
-            return l1.getConfig().getDamageCamp().contains(l2.getConfig().getCamp());
+            return l1.getConfig().getDamageCamp().contains(l2.getConfig().getCampName());
         }
 
     }
@@ -149,12 +149,18 @@ public class Utils {
 
     }
 
-    public static int getEntityCount(Level level, String entityName){
+    public static int getEntityCount(Level level, String entityName,String pos){
         int count = 0;
         for(Entity entitys: level.getEntities()){
             String name = getMonster(entitys);
             if(name != null && name.equals(entityName)){
-                count++;
+                if(entitys instanceof LittleNpc){
+                    if(((LittleNpc) entitys).spawnPos != null){
+                        if(((LittleNpc) entitys).spawnPos.equalsIgnoreCase(pos)){
+                            count++;
+                        }
+                    }
+                }
             }
         }
         return count;

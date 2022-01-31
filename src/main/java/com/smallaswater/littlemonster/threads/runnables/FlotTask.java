@@ -49,7 +49,7 @@ public class FlotTask extends BasePluginThreadTask{
                             String text = easyEntity.getText();
                             text = text.replace("{名称}", easyEntity.getLittleNpc().getName())
                                     .replace("{数量}", Utils
-                                            .getEntityCount(easyEntity.getPos().level, easyEntity.getLittleNpc().getName()) + "")
+                                            .getEntityCount(easyEntity.getPos().level, easyEntity.getLittleNpc().getName(),easyEntity.getName()) + "")
                                     .replace("{上限}", easyEntity.getMaxCount() + "")
                                     .replace("{time}", LittleMasterMainClass.getMasterMainClass().time.containsKey(easyEntity.getLittleNpc().getName()) ?
                                             LittleMasterMainClass.getMasterMainClass().time.get(easyEntity.getLittleNpc().getName()) + "" : "0")

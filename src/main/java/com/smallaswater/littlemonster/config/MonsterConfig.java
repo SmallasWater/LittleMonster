@@ -97,6 +97,8 @@ public class MonsterConfig {
 
     private int seeLine;
 
+    private double knockBack = 0.8;
+
     private Item offhand;
 
     private ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
@@ -134,6 +136,7 @@ public class MonsterConfig {
         entity.setTag(config.getString("头部显示"));
         entity.setDamage(config.getInt("攻击力"));
         entity.setHealth(config.getInt("血量"));
+        entity.setKnockBack(config.getDouble("击退距离",0.8));
         entity.setTargetPlayer(config.getBoolean("主动锁定玩家"));
         entity.setAttackHostileEntity(config.getBoolean("是否攻击敌对生物",true));
         entity.setAttackFriendEntity(config.getBoolean("是否攻击友好生物",false));
@@ -143,7 +146,7 @@ public class MonsterConfig {
         entity.setIsCamp(config.getBoolean("是否攻击相同阵营",false));
         entity.setDelDamage(config.getInt("防御"));
         entity.setDamageCamp(new ArrayList<>(config.getStringList("攻击阵营")));
-        entity.setCamp(config.getString("阵营","光明"));
+        entity.setCampName(config.getString("阵营","光明"));
         entity.setHealTime(config.getInt("恢复间隔",20));
         entity.setUnFightHeal(config.getBoolean("是否仅脱战恢复"));
         entity.setSeeLine(config.getInt("视觉距离",30));
@@ -206,6 +209,14 @@ public class MonsterConfig {
 
     }
 
+    public void setKnockBack(double knockBack) {
+        this.knockBack = knockBack;
+    }
+
+    public double getKnockBack() {
+        return knockBack;
+    }
+
     public void setSeeLine(int seeLine) {
         this.seeLine = seeLine;
     }
@@ -243,7 +254,7 @@ public class MonsterConfig {
         return entityId;
     }
 
-    public void spawn(Position spawn, int time){
+    public LittleNpc spawn(Position spawn, int time){
         Skin skin = new Skin();
         if(LittleMasterMainClass.loadSkins.containsKey(getSkin())){
             skin = LittleMasterMainClass.loadSkins.get(getSkin());
@@ -257,6 +268,7 @@ public class MonsterConfig {
             littleNpc.setLiveTime(time);
         }
         littleNpc.spawnToAll();
+        return littleNpc;
     }
 
     public void spawn(Position spawn){
@@ -484,7 +496,7 @@ public class MonsterConfig {
         this.healTime = healTime;
     }
 
-    public void setCamp(String camp) {
+    public void setCampName(String camp) {
         this.camp = camp;
     }
 
@@ -666,7 +678,7 @@ public class MonsterConfig {
         return area;
     }
 
-    public String getCamp() {
+    public String getCampName() {
         return camp;
     }
 
