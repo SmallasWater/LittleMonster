@@ -463,9 +463,11 @@ public class LittleNpc extends BaseEntityMove {
                     waitTime = 0;
                     return;
                 case 3:
-                    EntityInteractEvent event = new EntityInteractEvent(this,entity.getPosition().add(0.5,entity.getEyeHeight(),0.5).getLevelBlock());
-                    Server.getInstance().getPluginManager().callEvent(event);
-                    waitTime = 0;
+                    if(this.getSide(getHorizontalFacing(),(int)distance(entity)).getLevelBlock().getId() != 0) {
+                        EntityInteractEvent event = new EntityInteractEvent(this, entity.getPosition().add(0.5, entity.getEyeHeight(), 0.5).getLevelBlock());
+                        Server.getInstance().getPluginManager().callEvent(event);
+                        waitTime = 0;
+                    }
                     break;
                 case 0:
                 default:
