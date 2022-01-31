@@ -83,6 +83,9 @@ public abstract class BaseEntityMove extends BaseEntity {
     public void setFollowTarget(Entity target, boolean attack) {
         super.setFollowTarget(target);
         this.canAttack = attack;
+        if (this.route != null) {
+            this.route.setDestination(target);
+        }
     }
 
     /**
@@ -298,7 +301,7 @@ public abstract class BaseEntityMove extends BaseEntity {
             if (!this.isMovement()) {
                 return null;
             } else {
-                if (this.age % 10 == 0 && this.route != null && !this.route.isSearching()) {
+                if (this.age % 10 == 0 && this.route != null && this.route.isFinished()) {
                     //RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this.route));
                     if (this.route.hasNext()) {
                         this.target = this.route.next();
