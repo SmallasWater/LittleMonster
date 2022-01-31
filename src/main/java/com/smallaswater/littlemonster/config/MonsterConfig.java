@@ -18,8 +18,10 @@ import com.smallaswater.littlemonster.skill.defaultskill.*;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Data;
 
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author SmallasWater
@@ -53,7 +55,7 @@ public class MonsterConfig {
 
     private String campName = "光明";
 
-    private boolean isCamp = false;
+    private boolean canAttackSameCamp = false;
 
     private LinkedList<Effect> effects = new LinkedList<>();
 
@@ -128,7 +130,7 @@ public class MonsterConfig {
         entity.setActiveAttackEntity(config.getBoolean("是否主动攻击生物",true));
         entity.setPassiveAttackEntity(config.getBoolean("是否被动回击生物",true));
         entity.setMove(config.getBoolean("是否可移动",true));
-        entity.setCamp(config.getBoolean("是否攻击相同阵营",false));
+        entity.setCanAttackSameCamp(config.getBoolean("是否攻击相同阵营",false));
         entity.setDelDamage(config.getInt("防御"));
         entity.setDamageCamp(new ArrayList<>(config.getStringList("攻击阵营")));
         entity.setCampName(config.getString("阵营","光明"));

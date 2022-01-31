@@ -278,6 +278,7 @@ public class LittleNpc extends BaseEntityMove {
             return;
         }
         if(config == null){
+            this.close();
             return;
         }
         this.setNameTag(config.getTag()
