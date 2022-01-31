@@ -16,6 +16,7 @@ import com.smallaswater.littlemonster.items.DropItem;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import com.smallaswater.littlemonster.skill.defaultskill.*;
 import com.smallaswater.littlemonster.utils.Utils;
+import lombok.Data;
 
 
 import java.util.*;
@@ -25,9 +26,8 @@ import java.util.*;
  * Create on 2021/6/28 7:49
  * Package com.smallaswater.littlemaster.config
  */
+@Data
 public class MonsterConfig {
-
-
 
     private Config config;
 
@@ -39,9 +39,7 @@ public class MonsterConfig {
 
     private boolean unFightHeal = true;
 
-
     private int health = 20;
-
 
     private int delDamage = 0;
 
@@ -49,16 +47,13 @@ public class MonsterConfig {
 
     private Item item;
 
-
     private boolean konck;
 
     private int healTime;
 
-    private String camp = "光明";
+    private String campName = "光明";
 
     private boolean isCamp = false;
-
-
 
     private LinkedList<Effect> effects = new LinkedList<>();
 
@@ -66,12 +61,9 @@ public class MonsterConfig {
 
     private LinkedList<DropItem> deathItem = new LinkedList<>();
 
-
     private boolean move;
 
     private int heal;
-
-
 
     /**攻击距离: 0.1
      攻击速度: 23
@@ -107,8 +99,6 @@ public class MonsterConfig {
 
     private String skin;
 
-    private int entityId;
-
     private boolean displayDamage;
 
     private boolean attackFriendEntity;
@@ -121,14 +111,9 @@ public class MonsterConfig {
 
     private ArrayList<String> damageCamp = new ArrayList<>();
 
-
-
-
     private MonsterConfig(String name){
         this.name = name;
     }
-
-
 
     public static MonsterConfig loadEntity(String name, Config config){
         MonsterConfig entity = new MonsterConfig(name);
@@ -143,7 +128,7 @@ public class MonsterConfig {
         entity.setActiveAttackEntity(config.getBoolean("是否主动攻击生物",true));
         entity.setPassiveAttackEntity(config.getBoolean("是否被动回击生物",true));
         entity.setMove(config.getBoolean("是否可移动",true));
-        entity.setIsCamp(config.getBoolean("是否攻击相同阵营",false));
+        entity.setCamp(config.getBoolean("是否攻击相同阵营",false));
         entity.setDelDamage(config.getInt("防御"));
         entity.setDamageCamp(new ArrayList<>(config.getStringList("攻击阵营")));
         entity.setCampName(config.getString("阵营","光明"));
@@ -177,7 +162,6 @@ public class MonsterConfig {
         }
 
         entity.setSize(config.getDouble("大小"));
-
         ArrayList<Item> armor = new ArrayList<>();
         entity.setItem(Item.fromString(config.getString("装饰.手持","267:0")));
         armor.add(Item.fromString(config.getString("装饰.头盔","0:0")));
@@ -204,33 +188,7 @@ public class MonsterConfig {
             }
         }
         entity.setDeathItem(items);
-
         return entity;
-
-    }
-
-    public void setKnockBack(double knockBack) {
-        this.knockBack = knockBack;
-    }
-
-    public double getKnockBack() {
-        return knockBack;
-    }
-
-    public void setSeeLine(int seeLine) {
-        this.seeLine = seeLine;
-    }
-
-    public int getSeeLine() {
-        return seeLine;
-    }
-
-    public boolean isCamp(){
-        return isCamp;
-    }
-
-    public void setIsCamp(boolean isCamp){
-        this.isCamp = isCamp;
     }
 
     public boolean isImmobile(){
@@ -243,15 +201,6 @@ public class MonsterConfig {
 
     public void set(String name,Object o){
         config.set(name, o);
-
-    }
-
-    public void setEntityId(int entityId) {
-        this.entityId = entityId;
-    }
-
-    public int getEntityId() {
-        return entityId;
     }
 
     public LittleNpc spawn(Position spawn, int time){
@@ -260,7 +209,9 @@ public class MonsterConfig {
             skin = LittleMasterMainClass.loadSkins.get(getSkin());
         }
 
-        LittleNpc littleNpc = new LittleNpc(spawn.getChunk(),Entity.getDefaultNBT(spawn).putCompound("Skin", new CompoundTag()
+        LittleNpc littleNpc = new LittleNpc(spawn.getChunk(),
+                Entity.getDefaultNBT(spawn).
+                        putCompound("Skin", new CompoundTag()
                 .putByteArray("Data", skin.getSkinData().data)
                 .putString("ModelId", skin.getSkinId())),this);
         npcSetting(littleNpc);
@@ -275,10 +226,11 @@ public class MonsterConfig {
         this.spawn(spawn,-1);
     }
 
-
-
     public void npcSetting(LittleNpc littleNpc) {
-        littleNpc.setNameTag(getTag().replace("{名称}",littleNpc.name).replace("{血量}",littleNpc.getHealth()+"").replace("{最大血量}",littleNpc.getMaxHealth()+""));
+        littleNpc.setNameTag(getTag()
+                .replace("{名称}",littleNpc.name)
+                .replace("{血量}",littleNpc.getHealth()+"")
+                .replace("{最大血量}",littleNpc.getMaxHealth()+""));
         littleNpc.setConfig(this);
         littleNpc.speed = (float) getMoveSpeed();
         littleNpc.damage = getDamage();
@@ -369,8 +321,6 @@ public class MonsterConfig {
         return strings;
     }
 
-
-
     private static BaseSkillManager fromSkillByName(String name){
         BaseSkillManager skill = null;
         int mode = 0;
@@ -446,291 +396,6 @@ public class MonsterConfig {
         for(LittleNpc entity: Utils.getEntitys(getName())){
             entity.setConfig(this);
             npcSetting(entity);
-
-
-//            Server.getInstance().getOnlinePlayers().values().forEach(player -> player.dataPacket(data));
         }
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setConfig(Config config) {
-        this.config = config;
-    }
-
-    public void setItem(Item item) {
-        this.item = item;
-    }
-
-    public void setDamage(int damage) {
-        this.damage = damage;
-    }
-
-    public void setDelDamage(int delDamage) {
-        this.delDamage = delDamage;
-    }
-
-    public void setHealth(int health) {
-        this.health = health;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
-    public void setKonck(boolean konck) {
-        this.konck = konck;
-    }
-
-    public void setSize(double size) {
-        this.size = size;
-    }
-
-    public void setUnFightHeal(boolean unFightHeal) {
-        this.unFightHeal = unFightHeal;
-    }
-
-    public void setHealTime(int healTime) {
-        this.healTime = healTime;
-    }
-
-    public void setCampName(String camp) {
-        this.camp = camp;
-    }
-
-    public void setArmor(ArrayList<Item> armor) {
-        this.armor = armor;
-    }
-
-    public void setOffhand(Item offhand) {
-        this.offhand = offhand;
-    }
-
-    public void setEffects(LinkedList<Effect> effects) {
-        this.effects = effects;
-    }
-
-    public void setCanMove(boolean canMove) {
-        this.canMove = canMove;
-    }
-
-    public void setDisplayDamage(boolean displayDamage) {
-        this.displayDamage = displayDamage;
-    }
-
-    public void setTargetPlayer(boolean targetPlayer) {
-        this.targetPlayer = targetPlayer;
-    }
-
-    public void setArea(int area) {
-        this.area = area;
-    }
-
-    public void setAttaceMode(int attaceMode) {
-        this.attaceMode = attaceMode;
-    }
-
-    public void setMoveSpeed(double moveSpeed) {
-        this.moveSpeed = moveSpeed;
-    }
-
-    public void setInvincibleTime(int invincibleTime) {
-        this.invincibleTime = invincibleTime;
-    }
-
-    public void setAttackDistance(double attackDistance) {
-        this.attackDistance = attackDistance;
-    }
-
-    public void setAttaceSpeed(int attaceSpeed) {
-        this.attaceSpeed = attaceSpeed;
-    }
-
-    public void setActiveAttackEntity(boolean activeAttackEntity) {
-        this.activeAttackEntity = activeAttackEntity;
-    }
-
-    public void setAttackFriendEntity(boolean attackFriendEntity) {
-        this.attackFriendEntity = attackFriendEntity;
-    }
-
-    public void setAttackHostileEntity(boolean attackHostileEntity) {
-        this.attackHostileEntity = attackHostileEntity;
-    }
-
-    public void setDamageCamp(ArrayList<String> damageCamp) {
-        this.damageCamp = damageCamp;
-    }
-
-    public void setDeathCommand(LinkedList<DeathCommand> deathCommand) {
-        this.deathCommand = deathCommand;
-    }
-
-    public void setDeathItem(LinkedList<DropItem> deathItem) {
-        this.deathItem = deathItem;
-    }
-
-    public void setHeal(int heal) {
-        this.heal = heal;
-    }
-
-    public void setMove(boolean move) {
-        this.move = move;
-    }
-
-    public void setPassiveAttackEntity(boolean passiveAttackEntity) {
-        this.passiveAttackEntity = passiveAttackEntity;
-    }
-
-    public void setSkillManagers(ArrayList<BaseSkillManager> skillManagers) {
-        this.skillManagers = skillManagers;
-    }
-
-    public ArrayList<BaseSkillManager> getSkillManagers() {
-        return skillManagers;
-    }
-
-    public Item getItem() {
-        return item;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Config getConfig() {
-        return config;
-    }
-
-    public double getSize() {
-        return size;
-    }
-
-    public int getDamage() {
-        return damage;
-    }
-
-    public int getDelDamage() {
-        return delDamage;
-    }
-
-    public int getHealth() {
-        return health;
-    }
-
-    public int getHealTime() {
-        return healTime;
-    }
-
-    public String getTag() {
-        return tag;
-    }
-
-    public Item getOffhand() {
-        return offhand;
-    }
-
-    public ArrayList<Item> getArmor() {
-        return armor;
-    }
-
-    public boolean isUnFightHeal() {
-        return unFightHeal;
-    }
-
-    public boolean isKonck() {
-        return konck;
-    }
-
-    public boolean isMove() {
-        return move;
-    }
-
-    public boolean isCanMove() {
-        return canMove;
-    }
-
-    public boolean isDisplayDamage() {
-        return displayDamage;
-    }
-
-    public boolean isActiveAttackEntity() {
-        return activeAttackEntity;
-    }
-
-    public boolean isAttackFriendEntity() {
-        return attackFriendEntity;
-    }
-
-    public boolean isAttackHostileEntity() {
-        return attackHostileEntity;
-    }
-
-    public boolean isPassiveAttackEntity() {
-        return passiveAttackEntity;
-    }
-
-
-
-    public int getArea() {
-        return area;
-    }
-
-    public String getCampName() {
-        return camp;
-    }
-
-    public String getSkin() {
-        return skin;
-    }
-
-    public int getAttaceMode() {
-        return attaceMode;
-    }
-
-    public double getMoveSpeed() {
-        return moveSpeed;
-    }
-
-    public int getInvincibleTime() {
-        return invincibleTime;
-    }
-
-    public int getAttaceSpeed() {
-        return attaceSpeed;
-    }
-
-    public double getAttackDistance() {
-        return attackDistance;
-    }
-
-    public ArrayList<String> getDamageCamp() {
-        return damageCamp;
-    }
-
-    public int getHeal() {
-        return heal;
-    }
-
-    public LinkedList<DeathCommand> getDeathCommand() {
-        return deathCommand;
-    }
-
-    public LinkedList<DropItem> getDeathItem() {
-        return deathItem;
-    }
-
-    public LinkedList<Effect> getEffects() {
-        return effects;
-    }
-
-    public boolean isTargetPlayer() {
-        return targetPlayer;
-    }
-
-    public void setSkin(String skin) {
-        this.skin = skin;
     }
 }

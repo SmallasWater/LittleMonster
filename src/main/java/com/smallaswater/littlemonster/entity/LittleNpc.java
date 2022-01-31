@@ -212,10 +212,10 @@ public class LittleNpc extends BaseEntityMove {
     }
 
 
-
-    public LittleNpc(FullChunk chunk,CompoundTag nbt,MonsterConfig config){
+    public LittleNpc(FullChunk chunk,
+                     CompoundTag nbt,
+                     MonsterConfig config){
         super(chunk, nbt);
-
         this.config = config;
         this.name = config.getName();
         this.setNameTagAlwaysVisible();
@@ -229,8 +229,6 @@ public class LittleNpc extends BaseEntityMove {
     }
 
 
-
-
     private ArrayList<BaseSkillManager> getHealthSkill(int health){
 
         ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
@@ -242,35 +240,14 @@ public class LittleNpc extends BaseEntityMove {
                 }
             }
         }
-
         return skillManagers;
     }
 
     private Player boss = null;
 
-//    private String s2 = "9a469a61-c83b-4ba9-b507-bdbe64430582";
-//    private void displayEmote(String skin){
-//        EmotePacket packet = new EmotePacket();
-//        packet.runtimeId = this.getId();
-//        packet.emoteID = skin;
-//        packet.flags = 0;
-//        Server.broadcastPacket(Server.getInstance().getOnlinePlayers().values(), packet);
-//    }
-
-
-
     private void onHealthListener(int health){
         ArrayList<BaseSkillManager> skillAreaManagers = getHealthSkill(health);
         if(skillAreaManagers.size() > 0) {
-//            this.setImmobile(true);
-//            this.disPlayAnim = true;
-//            Server.getInstance().getScheduler().scheduleDelayedTask(LittleMasterMainClass.getMasterMainClass(), new Runnable() {
-//                @Override
-//                public void run() {
-//                    displayEmote(s2);
-//                }
-//            },5);
-
             for (BaseSkillManager skillManager : skillAreaManagers) {
                 if (skillManager instanceof BaseSkillAreaManager) {
                     if (this.getFollowTarget() != null) {
@@ -295,21 +272,11 @@ public class LittleNpc extends BaseEntityMove {
                 }
             }
         }
-//        if(emoteTime >= 50){
-//            emoteTime = 0;
-//            if(this.isImmobile() && !config.isImmobile() && disPlayAnim) {
-//                this.setImmobile(false);
-//                disPlayAnim = false;
-//            }
-//
-//        }
-
     }
 
     private int age = 0;
 
     private int cacheAge = 0;
-
 
     @Override
     public void onUpdata() {
@@ -324,9 +291,6 @@ public class LittleNpc extends BaseEntityMove {
             this.close();
             return;
         }
-//        if(isImmobile() && disPlayAnim && emoteTime < 1000) {
-//            ++emoteTime;
-//        }
         if(config == null){
             return;
         }
@@ -346,10 +310,6 @@ public class LittleNpc extends BaseEntityMove {
                     boss = null;
                 }
                 setFollowTarget(null,false);
-
-
-
-
                 return;
             }
             if(this.getFollowTarget() instanceof Player){
