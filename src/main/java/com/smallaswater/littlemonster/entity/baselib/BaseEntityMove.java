@@ -116,6 +116,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                     if (this.passengers.isEmpty()){
                         //获取范围内可以攻击的生物
                         for (Entity entity : Utils.getAroundPlayers(this,seeSize,true,true,true)) {
+                            //忽略凋零头 盔甲架
                             if(entity.getNetworkId() == 19 || entity.getNetworkId() == 30){
                                 continue;
                             }
@@ -139,11 +140,11 @@ public abstract class BaseEntityMove extends BaseEntity {
                                     }
                                 }
                             }
-
                         }
                     }
+
+                    //随便走..
                     if(config.isCanMove()) {
-                        //随便走..
                         if (this.followTarget == null || this.followTarget.closed || !this.followTarget.isAlive() || this.targetOption(this.followTarget,
                                 this.distance(this.followTarget)) || this.target == null) {
                             int x, z;
@@ -175,7 +176,6 @@ public abstract class BaseEntityMove extends BaseEntity {
                         return;
                     }
                     if(this.target == null) {
-//                    near = distance;
                         this.stayTime = 0;
                         this.moveTime = 0;
                         if (this.passengers.isEmpty()) {
