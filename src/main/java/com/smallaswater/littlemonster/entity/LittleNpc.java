@@ -373,33 +373,35 @@ public class LittleNpc extends BaseEntityMove {
                             setFollowTarget(null,false);
                             return;
                         }
-                        if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
-                            if (!targetOption(((EntityDamageByEntityEvent) sure)
-                                    .getDamager(),
-                                    distance(((EntityDamageByEntityEvent) sure).getDamager()))) {
-                                setFollowTarget( ((EntityDamageByEntityEvent) sure).getDamager());
-                            }
-                        }
-                    }else{
                         if(config.isPassiveAttackEntity()){
-                            if(!config.isAttackHostileEntity()){
-                                if(((EntityDamageByEntityEvent) sure).getDamager() instanceof EntityMob){
-                                    return;
+                            if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
+                                if (!targetOption(((EntityDamageByEntityEvent) sure)
+                                        .getDamager(),
+                                        distance(((EntityDamageByEntityEvent) sure).getDamager()))) {
+                                    setFollowTarget( ((EntityDamageByEntityEvent) sure).getDamager());
                                 }
-                            }
-                            if(((EntityDamageByEntityEvent) sure).getDamager() instanceof LittleNpc){
-                                if(!Utils.canAttackNpc(this, (LittleNpc) ((EntityDamageByEntityEvent) sure).getDamager())){
-                                    return;
+
+                            }else {
+                                if (config.isPassiveAttackEntity()) {
+                                    if (!config.isAttackHostileEntity()) {
+                                        if (((EntityDamageByEntityEvent) sure).getDamager() instanceof EntityMob) {
+                                            return;
+                                        }
+                                    }
+                                    if (((EntityDamageByEntityEvent) sure).getDamager() instanceof LittleNpc) {
+                                        if (!Utils.canAttackNpc(this, (LittleNpc) ((EntityDamageByEntityEvent) sure).getDamager())) {
+                                            return;
+                                        }
+                                    }
+                                    if (!targetOption(((EntityDamageByEntityEvent) sure).getDamager(), distance(((EntityDamageByEntityEvent) sure).getDamager()))) {
+                                        setFollowTarget(((EntityDamageByEntityEvent) sure).getDamager());
+                                    }
                                 }
-                            }
-                            if (!targetOption(((EntityDamageByEntityEvent) sure).getDamager(), distance(((EntityDamageByEntityEvent) sure).getDamager()))) {
-                                setFollowTarget(((EntityDamageByEntityEvent) sure).getDamager());
                             }
                         }
                     }
                 }
             }
-
         }else{
             sure.setCancelled();
         }
