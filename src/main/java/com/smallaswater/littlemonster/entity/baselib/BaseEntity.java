@@ -146,7 +146,7 @@ public abstract class BaseEntity extends EntityHuman {
     }
 
     protected boolean isPlayerTarget(Player player){
-        return !player.closed  && player.isAlive() && (player.isSurvival() || player.isAdventure()) ;
+        return !player.closed && player.isAlive() && (player.isSurvival() || player.isAdventure()) ;
     }
 
     public boolean targetOption(Entity creature, double distance) {
