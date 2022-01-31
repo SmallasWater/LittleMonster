@@ -67,6 +67,29 @@ public class LittleNpc extends BaseEntityMove {
     public LittleNpc(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
         this.route = new WalkerRouteFinder(this);
+        this.close();
+    }
+
+    public LittleNpc(FullChunk chunk, CompoundTag nbt, MonsterConfig config){
+        super(chunk, nbt);
+        this.config = config;
+        this.name = config.getName();
+        this.setNameTagAlwaysVisible();
+        this.setNameTagVisible();
+        loadSkill();
+        this.setDataFlag(Entity.DATA_LEAD_HOLDER_EID,-1);
+        this.setHealth(config.getHealth());
+        this.setMaxHealth(config.getHealth());
+        this.namedTag.putString(TAG,name);
+        this.route = new WalkerRouteFinder(this);
+        if (this.config.getAttackDistance() > 5) {
+            if (this.route.getDestinationDeviate() <= 0) {
+                this.route.setDestinationDeviate(this.config.getAttackDistance() / 2);
+                this.route.research();
+            }
+        }else {
+            this.route.setDestinationDeviate(0);
+        }
     }
 
     private Player getDamageMax(){
@@ -196,22 +219,6 @@ public class LittleNpc extends BaseEntityMove {
             baseSkillManager.setMaster(this);
             skillManagers.add(baseSkillManager);
         }
-    }
-
-    public LittleNpc(FullChunk chunk,
-                     CompoundTag nbt,
-                     MonsterConfig config){
-        super(chunk, nbt);
-        this.config = config;
-        this.name = config.getName();
-        this.setNameTagAlwaysVisible();
-        this.setNameTagVisible();
-        loadSkill();
-        this.setDataFlag(Entity.DATA_LEAD_HOLDER_EID,-1);
-        this.setHealth(config.getHealth());
-        this.setMaxHealth(config.getHealth());
-        this.namedTag.putString(TAG,name);
-        this.route = new WalkerRouteFinder(this);
     }
 
     private ArrayList<BaseSkillManager> getHealthSkill(int health){

@@ -368,12 +368,12 @@ public abstract class BaseEntityMove extends BaseEntity {
                             this.move(x, this.motionY, z);
                         }else{
                             //判断直线距离中是否有方块阻挡
-                            if(hasBlockInLine(followTarget)){
+                            //if(hasBlockInLine(followTarget)){
                                 this.move(x, this.motionY, z);
-                            }else{
+                            /*}else{
                                 this.move(0.05, this.motionY, 0.05);
-                                waitTime++;
-                            }
+                            }*/
+                            waitTime++;
                             if(waitTime >= 20 * 5){
                                 waitTime = 0;
                                 setFollowTarget(null,false);
