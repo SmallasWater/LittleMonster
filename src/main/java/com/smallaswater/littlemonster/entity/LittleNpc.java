@@ -84,8 +84,7 @@ public class LittleNpc extends BaseEntityMove {
         this.route = new WalkerRouteFinder(this);
         if (this.config.getAttackDistance() > 5) {
             if (this.route.getDestinationDeviate() <= 0) {
-                this.route.setDestinationDeviate(this.config.getAttackDistance() / 2);
-                this.route.research();
+                this.route.setDestinationDeviate(this.config.getAttackDistance() * 0.8);
             }
         }else {
             this.route.setDestinationDeviate(0);
@@ -300,13 +299,11 @@ public class LittleNpc extends BaseEntityMove {
                 healTime = 0;
                 this.heal(heal);
             }
-            if(targetOption(this.getFollowTarget(),
-                    distance(this.getFollowTarget()))){
+            if(targetOption(this.getFollowTarget(), this.distance(this.getFollowTarget()))) {
                 if(boss != null){
                     BossBarManager.BossBarApi.removeBossBar(boss);
                     boss = null;
                 }
-                setFollowTarget(null,false);
                 return;
             }
             if(this.getFollowTarget() instanceof Player){
@@ -469,7 +466,7 @@ public class LittleNpc extends BaseEntityMove {
                     this.level.getPlayers().values().forEach(player1 -> player1.dataPacket(pk));
                     waitTime = 0;
                     return;
-                case 3:
+                case 3: //触发EntityInteractEvent
                     if(!hasBlockInLine(entity)) {
                         EntityInteractEvent event = new EntityInteractEvent(this, entity.getPosition().add(0.5, entity.getEyeHeight(), 0.5).getLevelBlock());
                         Server.getInstance().getPluginManager().callEvent(event);
@@ -533,7 +530,10 @@ public class LittleNpc extends BaseEntityMove {
             inventory.getViewers().clear();
         }
         super.close();
-        onClose();
+        if (this.route != null) {
+            this.route.interrupt();
+        }
+        this.onClose();
     }
 
     @Override

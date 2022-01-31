@@ -11,11 +11,14 @@ import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
-import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.route.RouteFinder;
+import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
+import com.smallaswater.littlemonster.threads.runnables.RouteFinderSearchTask;
 import com.smallaswater.littlemonster.utils.Utils;
 import nukkitcoders.mobplugin.entities.animal.Animal;
 import nukkitcoders.mobplugin.entities.monster.Monster;
+
+import java.util.ArrayList;
 
 
 /**
@@ -84,7 +87,11 @@ public abstract class BaseEntityMove extends BaseEntity {
         super.setFollowTarget(target);
         this.canAttack = attack;
         if (this.route != null) {
-            this.route.setDestination(target);
+            if (target != null) {
+                this.route.setDestination(target);
+            }else {
+                this.route.resetNodes();
+            }
         }
     }
 
@@ -93,153 +100,173 @@ public abstract class BaseEntityMove extends BaseEntity {
      * */
     public int waitTime = 0;
 
-    private boolean isCheck(){
-        return (this.followTarget == null || this.followTarget.closed || !this.followTarget.isAlive()
-                || this.targetOption(this.followTarget, this.distance(this.followTarget)) || this.target == null
-                || (config.isTargetPlayer() && !(followTarget instanceof Player)));
+    /**
+     * @return 是否寻找新目标
+     */
+    private boolean isNeedCheck(){
+        return this.targetOption(this.followTarget) || //followTarget 不满足继续被锁定的要求
+                this.target == null ||
+                (config.isTargetPlayer() && !(followTarget instanceof Player)) || //主动锁定玩家，但现有目标不是玩家
+                this.distance(this.target) < 1; //已移动到指定位置
     }
 
-    private boolean checkFight(){
-        return followTarget == null || (config.isTargetPlayer() && !(followTarget instanceof Player))
-                || (followTarget instanceof LittleNpc && Utils.canAttackNpc((LittleNpc) this,(LittleNpc) followTarget));
-    }
-
+    /*private boolean checkFight(){
+        return followTarget == null ||
+                (config.isTargetPlayer() && !(followTarget instanceof Player))
+                || (this instanceof LittleNpc && followTarget instanceof LittleNpc && Utils.canAttackNpc((LittleNpc) this,(LittleNpc) followTarget));
+    }*/
 
     /**
-     * 寻找可以攻击的生物
-     * */
+     * 寻找目标并锁定
+     */
     private void checkTarget() {
-        if (!this.isKnockback()) {
-            if(isCheck()) {
-                double near = Integer.MAX_VALUE;
-                double distance;
-                if(checkFight()){
-                    if (this.passengers.isEmpty()){
-                        //获取范围内可以攻击的生物
-                        for (Entity entity : Utils.getAroundPlayers(this,seeSize,true,true,true)) {
-                            //忽略凋零头 盔甲架
-                            if(entity.getNetworkId() == 19 || entity.getNetworkId() == 30){
-                                continue;
-                            }
-                            if(entity instanceof EntityCreature) {
-                                if (entity != this) {
-                                    if (config.isTargetPlayer()) {
-                                        if(entity instanceof Player) {
-                                            getAttackChunk(near, entity);
-                                            break;
-                                        }else{
-                                            if(followTarget == null) {
-                                                getAttackChunk(near, entity);
-                                            }
-                                        }
-                                    } else {
-                                        if(entity instanceof Player){
-                                            continue;
-                                        }
-                                        getAttackChunk(near, entity);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
+        if (this.isKnockback()) {
+            return;
+        }
+        if(this.isNeedCheck()) {
+            //扫描附近实体
+            if (this.passengers.isEmpty()) {
+                //获取范围内可以攻击的生物
+                ArrayList<EntityCreature> entities = new ArrayList<>();
+                for (Entity entity : Utils.getAroundPlayers(this,seeSize,true,true,true)) {
+                    //忽略凋零头 盔甲架
+                    if(entity.getNetworkId() == 19 || entity.getNetworkId() == 30){
+                        continue;
                     }
 
-                    //随便走..
-                    if(config.isCanMove()) {
-                        if (this.followTarget == null || this.followTarget.closed || !this.followTarget.isAlive() || this.targetOption(this.followTarget,
-                                this.distance(this.followTarget)) || this.target == null) {
-                            if (this.route.hasNext()) {
-                                this.target = this.route.next();
-                            }
-                            int x = 0;
-                            int z = 0;
-                            if (this.stayTime > 0) {
-                                if (Utils.rand(1, 100) > 5) {
-                                    return;
-                                }
-                                x = Utils.rand(10, 30);
-                                z = Utils.rand(10, 30);
-                                this.target = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);
-                            } else if (Utils.rand(1, 100) == 1) {
-                                x = Utils.rand(10, 30);
-                                z = Utils.rand(10, 30);
-                                this.stayTime = Utils.rand(100, 200);
-                                this.target = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);
-                            } else if (this.moveTime <= 0 || this.target == null) {
-                                x = Utils.rand(20, 100);
-                                z = Utils.rand(20, 100);
-                                this.stayTime = 0;
-                                this.moveTime = Utils.rand(100, 200);
-                                this.target = this.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
-                            }
-                            if (x != 0 && z != 0) {
-                                this.route.setDestination(this.add(x, 0, z));
-                            }
-                        }
-                    }
-                }else{
-                    distance = this.distance(followTarget);
-                    if (distance > seeSize || this.targetOption(followTarget, distance)) {
-                        setFollowTarget(null,false);
-                        return;
-                    }
-                    if(this.target == null) {
-                        this.stayTime = 0;
-                        this.moveTime = 0;
-                        if (this.passengers.isEmpty()) {
-                            this.target = followTarget;
+                    if(entity instanceof EntityCreature && entity != this) {
+                        if (this.canAttackEntity(entity)) {
+                            entities.add((EntityCreature) entity);
                         }
                     }
                 }
+
+                //TODO 更智能的选取高优先级目标
+                entities.sort((p1, p2) -> Double.compare(this.distance(p1) - this.distance(p2), 0.0D));
+                if (!entities.isEmpty()) {
+                    EntityCreature entity = entities.get(0);
+                    if (entity != this.getFollowTarget()) {
+                        this.fightEntity(entity);
+                    }
+                }
+            }
+
+            //获取寻路目标点
+            if (this.route != null && this.route.isFinished() && this.route.hasCurrentNode() && this.route.hasArrivedNode(this) && this.route.hasNext()) {
+                this.target = this.route.next();
+                return;
+            }
+
+            //随机移动
+            if(this.config.isCanMove()) {
+                if (this.followTarget == null || this.target == null) {
+                    if (this.route.hasNext()) {
+                        this.target = this.route.next();
+                    }
+                    int x = 0;
+                    int z = 0;
+                    if (this.stayTime > 0) {
+                        if (Utils.rand(1, 100) > 5) {
+                            return;
+                        }
+                        x = Utils.rand(10, 30);
+                        z = Utils.rand(10, 30);
+                        this.target = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);
+                    } else if (Utils.rand(1, 100) == 1) {
+                        x = Utils.rand(10, 30);
+                        z = Utils.rand(10, 30);
+                        this.stayTime = Utils.rand(100, 200);
+                        this.target = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);
+                    } else if (this.moveTime <= 0 || this.target == null) {
+                        x = Utils.rand(20, 100);
+                        z = Utils.rand(20, 100);
+                        this.stayTime = 0;
+                        this.moveTime = Utils.rand(100, 200);
+                        this.target = this.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
+                    }
+                    if (x != 0 && z != 0) {
+                        this.route.setDestination(this.add(x, 0, z));
+                    }
+                }
+            }
+
+            //TODO 未知用途，需要进一步测试
+            /*double distance = this.followTarget != null ? this.distance(followTarget) : 0;
+            if (distance > seeSize || this.targetOption(followTarget, distance)) {
+                this.setFollowTarget(null,false);
+                return;
+            }
+            if(this.target == null) {
+                this.stayTime = 0;
+                this.moveTime = 0;
+                if (this.passengers.isEmpty()) {
+                    this.target = followTarget;
+                }
+            }*/
+        }else {
+            //如果有寻路节点 更新目标
+            if (this.route != null && this.route.hasCurrentNode() && this.route.hasArrivedNode(this) && this.route.hasNext()) {
+                this.target = this.route.next();
             }
         }
     }
 
     /**
-     * 检查要锁定的生物
-     * */
-    private double getAttackChunk(double near, Entity entity) {
-        if (!config.isActiveAttackEntity()) {
+     * 是否可以攻击目标实体 （主要为NPC配置文件规则限制）
+     *
+     * @param entity 目标实体
+     * @return 是否可以攻击
+     */
+    private boolean canAttackEntity(Entity entity) {
+        if (this.targetOption(entity, this.distance(entity))) {
+            return false;
+        }
+        if (!this.config.isActiveAttackEntity()) {
             if (!(entity instanceof Player)) {
-                return near;
+                return false;
             }
         }
+        if (!this.config.isTargetPlayer() && entity instanceof Player) {
+            return false;
+        }
+
         if(Server.getInstance().getPluginManager().getPlugin("MobPlugin") != null){
-            if(!config.isAttackFriendEntity()){
+            if(!config.isAttackFriendEntity()) {
                 if(entity instanceof Animal){
-                    return near;
+                    return false;
                 }
             }
-            if(!config.isAttackHostileEntity()){
+            if(!config.isAttackHostileEntity()) {
                 if(entity instanceof Monster){
-                    return near;
+                    return false;
                 }
             }
         }
-        near = getFightEntity(near, (EntityCreature) entity);
-        return near;
+
+        return true;
     }
 
     /**
      * 锁定生物
      * */
-    private double getFightEntity(double near, EntityCreature entity) {
-        EntityCreature creature;
+    private boolean fightEntity(EntityCreature entity) {
+        /*EntityCreature creature;
         double distance;
-        creature = entity;
-        distance = this.distance(creature);
+        creature = entity;*/
+        /*distance = this.distance(creature);
         if (distance > seeSize || this.targetOption(creature, distance)) {
-            return near;
-        }
-        near = distance;
+            return false;
+        }*/
         this.stayTime = 0;
         this.moveTime = 0;
-        this.followTarget = creature;
+        this.setFollowTarget(entity, true);
+        this.target = entity;
+        /*this.followTarget = creature;
         if (this.route == null && this.passengers.isEmpty()) {
             this.target = creature;
         }
-        canAttack = true;
-        return near;
+        canAttack = true;*/
+        return true;
     }
 
     /**
@@ -252,7 +279,6 @@ public abstract class BaseEntityMove extends BaseEntity {
         if (this.closed) {
             return false;
         } else if (!this.isAlive()) {
-//            onClose();
             if (++this.deadTicks >= 23) {
                 this.close();
                 return false;
@@ -263,156 +289,146 @@ public abstract class BaseEntityMove extends BaseEntity {
             int tickDiff = currentTick - this.lastUpdate;
             this.lastUpdate = currentTick;
             this.entityBaseTick(tickDiff);
+
             Vector3 target = this.updateMove(tickDiff);
-            if(target instanceof EntityCreature){
-                if(targetOption((EntityCreature) target,distance(target))){
-                    setFollowTarget(null,false);
+            //攻击目标实体
+            if(target instanceof EntityCreature) {
+                if(this.targetOption((EntityCreature) target, this.distance(target))){
+                    this.setFollowTarget(null,false);
                     return true;
                 }
-                if(target instanceof Player){
-                    if(isPlayerTarget((Player) target)) {
-                        if (target != this.followTarget || this.canAttack) {
-                            if(!targetOption((EntityCreature) target,distance(target))) {
-                                this.attackEntity((Player) target);
-                            }else{
-                                setFollowTarget(null,false);
-                            }
-                        }
+                if(target instanceof Player) {
+                    Player player = (Player) target;
+                    if (target != this.followTarget || this.canAttack) {
+                        this.attackEntity(player);
                     }
-                }else{
-//                    if (target != this.followTarget || this.canAttack) {
-                        if (!targetOption((EntityCreature) target, distance(target))) {
-                            this.attackEntity((EntityCreature) target);
-                        }else{
-                            setFollowTarget(null,false);
-                        }
-//                    }
+                }else {
+                    if (this.canAttack) {
+                        this.attackEntity((EntityCreature) target);
+                    }
                 }
-//
             }else if (target != null && Math.pow(this.x - target.x, 2.0D) + Math.pow(this.z - target.z, 2.0D) <= 1.0D) {
+                //已到达目标地点 可以在这里获取下一目标
                 this.moveTime = 0;
             }
+
             return true;
         }
     }
 
     private Vector3 updateMove(int tickDiff) {
-        if (!this.isImmobile()) {
-            if (!this.isMovement()) {
-                return null;
-            } else {
-                if (this.age % 10 == 0 && this.route != null && this.route.isFinished()) {
-                    //RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this.route));
-                    if (this.route.hasNext()) {
-                        this.target = this.route.next();
-                    }
-                }
-                if (this.isKnockback()) {
-                    this.move(this.motionX , this.motionY, this.motionZ);
-                    this.motionY -= this.getGravity();
-                    this.updateMovement();
-                    return null;
-                } else {
-                    Vector3 before = this.target;
-                    this.checkTarget();
-                    double x;
-                    double z;
-                    if (this.target != null || before != this.target) {
-                        if(this.target != null) {
-                            x = this.target.x - this.x;
-                            z = this.target.z - this.z;
-                            double diff = Math.abs(x) + Math.abs(z);
-                            if(diff <= 0){
-                                diff = 0.1;
-                            }
-                            if (this.stayTime <= 0 && this.distance(this.target) > ((double) this.getWidth() + 0.0D) / 2.0D + 0.05D) {
-                                if (this.isInsideOfWater()) {
-                                    this.motionX = this.getSpeed() * 0.05D * (x / diff);
-                                    this.motionZ = this.getSpeed() * 0.05D * (z / diff);
-                                    this.level.addParticle(new BubbleParticle(this.add(Utils.rand(-2.0D, 2.0D), Utils.rand(-0.5D, 0.0D), Utils.rand(-2.0D, 2.0D))));
-                                } else {
-                                    this.motionX = this.getSpeed() * 0.15D * (x / diff);
-                                    this.motionZ = this.getSpeed() * 0.15D * (z / diff);
-                                }
-                            } else {
-                                this.motionX = 0.0D;
-                                this.motionZ = 0.0D;
-                            }
-                            if ((this.passengers.isEmpty()) &&
-                                    (this.stayTime <= 0 || Utils.rand())) {
-                                this.yaw = Math.toDegrees(-Math.atan2(x / diff, z / diff));
-                                if(!hasBlockInLine(followTarget)) {
-                                    if (followTarget != null) {
-                                        double dx = this.x - followTarget.x;
-                                        double dy = (this.y + this.getEyeHeight()) - (followTarget.y + followTarget.getEyeHeight());
-                                        double dz = this.z - followTarget.z;
-                                        double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
-                                        double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
-                                        if (dz > 0.0D) {
-                                            yaw = -yaw + 180.0D;
-                                        }
-                                        this.yaw = yaw;
-                                        this.pitch = pitch;
-                                    } else {
-                                        pitch = 0;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    x = this.motionX * (double)tickDiff;
-                    z = this.motionZ * (double)tickDiff;
-                    boolean isJump = this.checkJump(x, z);
-                    if (this.stayTime > 0) {
-                        this.stayTime -= tickDiff;
-                        this.move(0.0D, this.motionY, 0.0D);
-                    } else {
-                        Vector2 be = new Vector2(this.x + x, this.z + z);
-                        if(attactMode != 3 && attactMode != 2){
-                            waitTime = 0;
-                            this.move(x, this.motionY, z);
-                        }else if(followTarget == null || (this.distance(followTarget) > seeSize)){
-                            waitTime = 0;
-                            this.move(x, this.motionY, z);
-                        }else{
-                            //判断直线距离中是否有方块阻挡
-                            //if(hasBlockInLine(followTarget)){
-                                this.move(x, this.motionY, z);
-                            /*}else{
-                                this.move(0.05, this.motionY, 0.05);
-                            }*/
-                            waitTime++;
-                            if(waitTime >= 20 * 5){
-                                waitTime = 0;
-                                setFollowTarget(null,false);
-                            }
-                        }
-                        Vector2 af = new Vector2(this.x, this.z);
-                        if ((be.x != af.x || be.y != af.y) && !isJump) {
-                            this.moveTime -= 90 * tickDiff;
-                        }
-                    }
-                    if (!isJump) {
-                        if (this.onGround) {
-                            this.motionY = 0.0D;
-                        } else if (this.motionY > (double)(-this.getGravity() * 4.0F)) {
-                            if (!(this.level.getBlock(new Vector3(NukkitMath.floorDouble(this.x), (int)(this.y + 0.8D), NukkitMath.floorDouble(this.z))) instanceof BlockLiquid)) {
-                                this.motionY -= this.getGravity();
-                            }
-                        } else {
-                            this.motionY -= this.getGravity() * (float)tickDiff;
-                        }
-                    }
-                    this.updateMovement();
-                    if (this.route != null && this.route.hasCurrentNode() && this.route.hasArrivedNode(this) && this.route.hasNext()) {
-                        this.target = this.route.next();
-                    }
-                    return this.followTarget != null ? this.followTarget : this.target;
-                }
-            }
-        } else {
+        if (this.isImmobile() || !this.isMovement()) {
             return null;
         }
+
+        if (this.age % 10 == 0 && this.route != null && this.route.isFinished()) {
+            RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this.route));
+            if (this.route.hasNext()) {
+                this.target = this.route.next();
+            }
+        }
+
+        if (this.isKnockback()) {
+            this.move(this.motionX, this.motionY, this.motionZ);
+            this.motionY -= this.getGravity();
+            this.updateMovement();
+            return null;
+        }
+
+        Vector3 before = this.target;
+        this.checkTarget();
+        double x;
+        double z;
+        if (this.target != null || before != this.target) {
+            if(this.target != null) {
+                x = this.target.x - this.x;
+                z = this.target.z - this.z;
+                double diff = Math.abs(x) + Math.abs(z);
+                if(diff <= 0){
+                    diff = 0.1;
+                }
+                if (this.stayTime <= 0 && this.distance(this.target) > ((double) this.getWidth() + 0.0D) / 2.0D + 0.05D) {
+                    if (this.isInsideOfWater()) {
+                        this.motionX = this.getSpeed() * 0.05D * (x / diff);
+                        this.motionZ = this.getSpeed() * 0.05D * (z / diff);
+                        this.level.addParticle(new BubbleParticle(this.add(Utils.rand(-2.0D, 2.0D), Utils.rand(-0.5D, 0.0D), Utils.rand(-2.0D, 2.0D))));
+                    } else {
+                        this.motionX = this.getSpeed() * 0.15D * (x / diff);
+                        this.motionZ = this.getSpeed() * 0.15D * (z / diff);
+                    }
+                } else {
+                    this.motionX = 0.0D;
+                    this.motionZ = 0.0D;
+                }
+                if ((this.passengers.isEmpty()) &&
+                        (this.stayTime <= 0 || Utils.rand())) {
+                    this.yaw = Math.toDegrees(-Math.atan2(x / diff, z / diff));
+                    //if(!hasBlockInLine(followTarget)) {
+                        if (followTarget != null) {
+                            double dx = this.x - followTarget.x;
+                            double dy = (this.y + this.getEyeHeight()) - (followTarget.y + followTarget.getEyeHeight());
+                            double dz = this.z - followTarget.z;
+                            double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
+                            double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
+                            if (dz > 0.0D) {
+                                yaw = -yaw + 180.0D;
+                            }
+                            this.yaw = yaw;
+                            this.pitch = pitch;
+                        } else {
+                            pitch = 0;
+                        }
+                    //}
+                }
+            }
+        }else {
+            this.motionX = 0;
+            this.motionZ = 0;
+            this.stayTime = 1;
+        }
+        x = this.motionX * (double)tickDiff;
+        z = this.motionZ * (double)tickDiff;
+        boolean isJump = this.checkJump(x, z);
+        if (this.stayTime > 0) {
+            this.stayTime -= tickDiff;
+            this.move(0.0D, this.motionY, 0.0D);
+        } else {
+            Vector2 be = new Vector2(this.x + x, this.z + z);
+            if(attactMode != 3 && attactMode != 2){
+                waitTime = 0;
+                this.move(x, this.motionY, z);
+            }else if(followTarget == null || (this.distance(followTarget) > seeSize)){
+                waitTime = 0;
+                this.move(x, this.motionY, z);
+            }else{
+                this.move(x, this.motionY, z);
+                waitTime++;
+                if(waitTime >= 20 * 5){
+                    waitTime = 0;
+                    this.setFollowTarget(null,false);
+                }
+            }
+            Vector2 af = new Vector2(this.x, this.z);
+            if ((be.x != af.x || be.y != af.y) && !isJump) {
+                this.moveTime -= 90 * tickDiff;
+            }
+        }
+        if (!isJump) {
+            if (this.onGround) {
+                this.motionY = 0.0D;
+            } else if (this.motionY > (double)(-this.getGravity() * 4.0F)) {
+                if (!(this.level.getBlock(new Vector3(NukkitMath.floorDouble(this.x), (int)(this.y + 0.8D), NukkitMath.floorDouble(this.z))) instanceof BlockLiquid)) {
+                    this.motionY -= this.getGravity();
+                }
+            } else {
+                this.motionY -= this.getGravity() * (float)tickDiff;
+            }
+        }
+        this.updateMovement();
+        if (this.route != null && this.route.hasCurrentNode() && this.route.hasArrivedNode(this) && this.route.hasNext()) {
+            this.target = this.route.next();
+        }
+        return this.followTarget != null ? this.followTarget : this.target;
     }
 
     public RouteFinder getRoute() {

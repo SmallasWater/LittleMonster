@@ -145,19 +145,42 @@ public abstract class BaseEntity extends EntityHuman {
         this.target = null;
     }
 
+    /**
+     * 检查玩家目标是否满足条件
+     *
+     * @param player 玩家
+     * @return 是否满足继续跟踪的条件
+     */
     protected boolean isPlayerTarget(Player player){
-        return !player.closed && player.isAlive() && (player.isSurvival() || player.isAdventure()) ;
+        return player.isOnline() && !player.closed && player.isAlive() &&
+                (player.isSurvival() || player.isAdventure()) &&
+                player.getLevel() == this.getLevel() &&
+                this.distance(player) <= this.seeSize;
     }
 
+    public boolean targetOption(Entity creature) {
+        return this.targetOption(creature, (this.followTarget != null ? this.distance(this.followTarget) : this.seeSize + 1));
+    }
+
+    /**
+     * 检查是否需要更换目标
+     *
+     * @param creature 目标
+     * @param distance 距离
+     * @return 是否需要更换目标
+     */
     public boolean targetOption(Entity creature, double distance) {
+        if (creature == null) {
+            return true;
+        }
+        if (creature == this) {
+            return true; //不能攻击自己
+        }
         if (creature instanceof Player) {
-            Player player = (Player)creature;
-            return player.closed || !player.spawned || !player.isAlive() || (!player.isSurvival() && !player.isAdventure()) || distance > seeSize ||
-                    !player.getLevel().getFolderName().equalsIgnoreCase(getLevel().getFolderName());
+            return !this.isPlayerTarget((Player) creature);
         }else{
             return creature.closed || !creature.isAlive() || !creature.getLevel().getFolderName().equalsIgnoreCase(getLevel().getFolderName()) || distance > seeSize;
         }
-
     }
 
     @Override
@@ -222,10 +245,12 @@ public abstract class BaseEntity extends EntityHuman {
     //判断中间是否有方块
     public boolean hasBlockInLine(Entity target){
         if(target != null) {
+            //TODO 找到卡服原因
             Block targetBlock = this.getTargetBlock((int) this.distance(target));
             if (targetBlock != null) {
                 return targetBlock.getId() != 0;
             }
+            return false;
         }
         return false;
     }
