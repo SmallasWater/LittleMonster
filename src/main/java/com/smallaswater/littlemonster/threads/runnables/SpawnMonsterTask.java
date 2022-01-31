@@ -55,8 +55,6 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
                             for(int i = 0;i < easyEntity.getCount();i++) {
                                 LittleNpc npc = easyEntity.getLittleNpc().spawn(easyEntity.getPos(),easyEntity.getLiveTime());
                                 npc.spawnPos = easyEntity.getName();
-//                               LittleMasterMainClass.getMasterMainClass().monsters
-//                                       .get(easyEntity.getLittleNpc().getName()).spawn(easyEntity.getPos(),easyEntity.getLiveTime());
                             }
                         }
                         t = easyEntity.getRound();

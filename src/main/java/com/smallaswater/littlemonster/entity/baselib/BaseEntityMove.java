@@ -218,6 +218,7 @@ public abstract class BaseEntityMove extends BaseEntity {
         if (distance > seeSize || this.targetOption(creature, distance)) {
             return near;
         }
+
         near = distance;
         this.stayTime = 0;
         this.moveTime = 0;
@@ -339,7 +340,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                                 this.yaw = Math.toDegrees(-Math.atan2(x / diff, z / diff));
                                 if(followTarget != null) {
                                     double dx = this.x - followTarget.x;
-                                    double dy = this.y - followTarget.y;
+                                    double dy = this.y + this.getEyeHeight() - followTarget.y + followTarget.getEyeHeight();
                                     double dz = this.z - followTarget.z;
                                     double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
                                     double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
@@ -372,7 +373,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                             waitTime = 0;
                             this.move(x, this.motionY, z);
                         }else{
-                            this.move(0.0D, this.motionY, 0.0D);
+                            this.move(0.5D, this.motionY, 0.5D);
                             waitTime++;
                             if(waitTime >= 20 * 5){
                                 setFollowTarget(null,false);

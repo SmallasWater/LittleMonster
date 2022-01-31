@@ -525,7 +525,7 @@ public class LittleNpc extends BaseEntityMove {
                     waitTime = 0;
                     return;
                 case 3:
-                    EntityInteractEvent event = new EntityInteractEvent(this,player.getPosition().add(0,0.5,0).getLevelBlock());
+                    EntityInteractEvent event = new EntityInteractEvent(this,player.getPosition().add(0.5,player.getEyeHeight(),0.5).getLevelBlock());
                     Server.getInstance().getPluginManager().callEvent(event);
                     waitTime = 0;
                     break;
