@@ -98,6 +98,9 @@ public abstract class BaseEntityMove extends BaseEntity {
     }
 
 
+    /**
+     * 寻找可以攻击的生物
+     * */
     private void checkTarget() {
         if (!this.isKnockback()) {
             if(isCheck()) {
@@ -105,6 +108,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                 double distance;
                 if(checkFight()){
                     if (this.passengers.isEmpty()){
+                        //获取范围内可以攻击的生物
                         for (Entity entity : Utils.getAroundPlayers(this,seeSize,true,true,true)) {
                             if(entity.getNetworkId() == 19 || entity.getNetworkId() == 30){
                                 continue;
@@ -245,7 +249,6 @@ public abstract class BaseEntityMove extends BaseEntity {
             int tickDiff = currentTick - this.lastUpdate;
             this.lastUpdate = currentTick;
             this.entityBaseTick(tickDiff);
-
             Vector3 target = this.updateMove(tickDiff);
             if(target instanceof EntityCreature){
                 if(targetOption((EntityCreature) target,distance(target))){
@@ -322,7 +325,8 @@ public abstract class BaseEntityMove extends BaseEntity {
                                 this.motionX = 0.0D;
                                 this.motionZ = 0.0D;
                             }
-                            if ((this.passengers.isEmpty()) && (this.stayTime <= 0 || Utils.rand())) {
+                            if ((this.passengers.isEmpty()) &&
+                                    (this.stayTime <= 0 || Utils.rand())) {
                                 this.yaw = Math.toDegrees(-Math.atan2(x / diff, z / diff));
                                 if(followTarget != null) {
                                     double dx = this.x - followTarget.x;

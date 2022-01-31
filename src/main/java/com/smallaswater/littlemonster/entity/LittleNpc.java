@@ -60,23 +60,14 @@ public class LittleNpc extends BaseEntityMove {
 
     public int healSettingTime;
 
-
     private ArrayList<Integer> healthList = new ArrayList<>();
 
-
-
     public DamageHandle handle = new DamageHandle();
-
-
 
     public LittleNpc(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
         this.route = new WalkerRouteFinder(this);
-
-
     }
-
-
 
     private Player getDamageMax(){
         double max = 0;
@@ -137,8 +128,6 @@ public class LittleNpc extends BaseEntityMove {
                         }
                     }
                     disCommand(cmd);
-
-
                 }
             }
         }
@@ -167,8 +156,6 @@ public class LittleNpc extends BaseEntityMove {
                 }
             }
         }
-
-
     }
 
     @Override
@@ -378,6 +365,7 @@ public class LittleNpc extends BaseEntityMove {
             this.damageDelay = 0;
             this.level.addParticle(new DestroyBlockParticle(this,new BlockRedstone()));
             if(sure instanceof EntityDamageByEntityEvent){
+                //如果锁定的不是玩家
                 if(!(getFollowTarget() instanceof Player)) {
                     if(getFollowTarget() != null) {
                         if(targetOption(getFollowTarget(),
@@ -550,5 +538,5 @@ public class LittleNpc extends BaseEntityMove {
     public float getDamage() {
         return (float) damage;
     }
-    
+
 }
