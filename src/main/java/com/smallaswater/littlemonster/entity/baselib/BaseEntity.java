@@ -2,6 +2,7 @@ package com.smallaswater.littlemonster.entity.baselib;
 
 
 import cn.nukkit.Player;
+import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.EntityHuman;
@@ -17,7 +18,6 @@ import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
-
 
 import java.util.ArrayList;
 
@@ -222,7 +222,10 @@ public abstract class BaseEntity extends EntityHuman {
     //判断中间是否有方块
     public boolean hasBlockInLine(Entity target){
         if(target != null) {
-            return this.getTargetBlock((int) this.distance(target)).getId() != 0;
+            Block targetBlock = this.getTargetBlock((int) this.distance(target));
+            if (targetBlock != null) {
+                return targetBlock.getId() != 0;
+            }
         }
         return false;
     }

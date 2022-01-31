@@ -147,7 +147,11 @@ public abstract class BaseEntityMove extends BaseEntity {
                     if(config.isCanMove()) {
                         if (this.followTarget == null || this.followTarget.closed || !this.followTarget.isAlive() || this.targetOption(this.followTarget,
                                 this.distance(this.followTarget)) || this.target == null) {
-                            int x, z;
+                            if (this.route.hasNext()) {
+                                this.target = this.route.next();
+                            }
+                            int x = 0;
+                            int z = 0;
                             if (this.stayTime > 0) {
                                 if (Utils.rand(1, 100) > 5) {
                                     return;
@@ -166,6 +170,10 @@ public abstract class BaseEntityMove extends BaseEntity {
                                 this.stayTime = 0;
                                 this.moveTime = Utils.rand(100, 200);
                                 this.target = this.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
+                            }
+                            if (x != 0 && z != 0) {
+                                this.route.setDestination(this.add(x, 0, z));
+                                this.route.research();
                             }
                         }
                     }
