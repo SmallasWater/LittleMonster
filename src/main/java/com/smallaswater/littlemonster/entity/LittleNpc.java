@@ -585,7 +585,10 @@ public class LittleNpc extends BaseEntityMove {
 
     @Override
     public void close() {
-        inventory.getViewers().clear();
+        if(inventory != null && inventory.getViewers() != null){
+            inventory.getViewers().clear();
+        }
+
         super.close();
         onClose();
     }
