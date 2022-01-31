@@ -86,7 +86,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
             return false;
          }
 
-         this.closeList.add(presentNode = (Node)this.openList.poll());
+         this.closeList.add(presentNode = this.openList.poll());
       }
 
       if (!presentNode.getVector3().equals(this.destination)) {
@@ -136,7 +136,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    }
 
    private boolean isPassable(Vector3 vector3) {
-      double radius = (double)(this.entity.getWidth() * this.entity.getScale() / 2.0F);
+      double radius = this.entity.getWidth() * this.entity.getScale() / 2.0F;
       float height = this.entity.getHeight() * this.entity.getScale();
       AxisAlignedBB bb = new SimpleAxisAlignedBB(vector3.getX() - radius, vector3.getY(), vector3.getZ() - radius, vector3.getX() + radius, vector3.getY() + (double)height, vector3.getZ() + radius);
       return this.level.getCollisionBlocks(bb, true).length == 0 && !this.level.getBlock(vector3.add(0.0D, -1.0D, 0.0D), false).canPassThrough();
@@ -401,16 +401,16 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       } else {
          while(true) {
             while(total < array.size()) {
-               if (!this.hasBarrier((Node)array.get(current), (Node)array.get(total)) && total != array.size() - 1) {
+               if (!this.hasBarrier(array.get(current), array.get(total)) && total != array.size() - 1) {
                   ++total;
                } else {
-                  ((Node)array.get(total - 1)).setParent((Node)array.get(current));
+                  array.get(total - 1).setParent(array.get(current));
                   current = total - 1;
                   ++total;
                }
             }
 
-            Node temp = (Node)array.get(array.size() - 1);
+            Node temp = array.get(array.size() - 1);
             ArrayList<Node> tempL = new ArrayList<>();
             tempL.add(temp);
 
@@ -426,7 +426,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
    private ArrayList<Node> getPathRoute() {
       ArrayList<Node> nodes = new ArrayList<>();
-      Node temp = (Node)this.closeList.get(this.closeList.size() - 1);
+      Node temp = this.closeList.get(this.closeList.size() - 1);
       nodes.add(temp);
 
       while(!temp.getParent().getVector3().equals(this.start)) {

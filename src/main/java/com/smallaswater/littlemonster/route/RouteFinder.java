@@ -35,6 +35,7 @@ public abstract class RouteFinder {
    RouteFinder(BaseEntity entity) {
       Objects.requireNonNull(entity, "RouteFinder: entity can not be null");
       this.entity = entity;
+      this.start = this.entity.clone();
       this.level = entity.getLevel();
    }
 
@@ -103,7 +104,7 @@ public abstract class RouteFinder {
       try {
          this.lock.readLock().lock();
          if (this.hasCurrentNode()) {
-            var1 = (Node)this.nodes.get(this.current);
+            var1 = this.nodes.get(this.current);
             return var1;
          }
 
@@ -180,7 +181,7 @@ public abstract class RouteFinder {
             return var1;
          }
 
-         var1 = ((Node)this.nodes.get(++this.current)).getVector3();
+         var1 = this.nodes.get(++this.current).getVector3();
       } finally {
          this.lock.readLock().unlock();
       }
