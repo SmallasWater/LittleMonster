@@ -366,7 +366,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                             waitTime = 0;
                             this.move(x, this.motionY, z);
                         }else{
-                            this.move(0.01, this.motionY, 0.01D);
+                            this.move(0.03, this.motionY, 0.03D);
                             waitTime++;
                             if(waitTime >= 20 * 5){
                                 setFollowTarget(null,false);
