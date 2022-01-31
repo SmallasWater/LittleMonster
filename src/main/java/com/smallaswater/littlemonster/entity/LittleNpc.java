@@ -280,7 +280,7 @@ public class LittleNpc extends BaseEntityMove {
                                 skillManager.display(Utils.getAroundPlayers(this, config.getArea(),true,true,true).toArray(new Entity[0]));
                             } else {
                                 if (this.getFollowTarget() instanceof Player) {
-                                    skillManager.display((Player) this.getFollowTarget());
+                                    skillManager.display(this.getFollowTarget());
                                 }
                             }
                         }
@@ -447,8 +447,8 @@ public class LittleNpc extends BaseEntityMove {
                                     return;
                                 }
                             }
-                            if (!targetOption((EntityCreature) ((EntityDamageByEntityEvent) sure).getDamager(), distance(((EntityDamageByEntityEvent) sure).getDamager()))) {
-                                setFollowTarget((EntityCreature) ((EntityDamageByEntityEvent) sure).getDamager());
+                            if (!targetOption(((EntityDamageByEntityEvent) sure).getDamager(), distance(((EntityDamageByEntityEvent) sure).getDamager()))) {
+                                setFollowTarget(((EntityDamageByEntityEvent) sure).getDamager());
                             }
                         }
 
@@ -564,7 +564,7 @@ public class LittleNpc extends BaseEntityMove {
                             points += armorValues.getOrDefault(i.getId(), 0.0F);
                         }
 
-                        damage.put(EntityDamageEvent.DamageModifier.ARMOR, (float)((double)(Float)damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0.0F) - Math.floor((double)((Float)damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1.0F) * points) * 0.04D)));
+                        damage.put(EntityDamageEvent.DamageModifier.ARMOR, (float)((double) damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0.0F) - Math.floor((double)(damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1.0F) * points) * 0.04D)));
                     }
 
                     player.attack(new EntityDamageByEntityEvent(this, player, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage,(float) config.getKnockBack()));
