@@ -365,7 +365,12 @@ public abstract class BaseEntityMove extends BaseEntity {
                             waitTime = 0;
                             this.move(x, this.motionY, z);
                         }else{
-                            this.move(0.03, this.motionY, 0.03D);
+                            //判断直线距离中是否有方块阻挡
+                            if(this.getSide(getHorizontalFacing(),(int)distance(followTarget)).getLevelBlock().getId() != 0){
+                                this.move(x, this.motionY, z);
+                            }else{
+                                this.move(0.05, this.motionY, 0.05);
+                            }
                             waitTime++;
                             if(waitTime >= 20 * 5){
                                 setFollowTarget(null,false);
