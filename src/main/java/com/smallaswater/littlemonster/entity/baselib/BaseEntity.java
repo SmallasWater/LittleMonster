@@ -18,8 +18,11 @@ import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
+import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
 
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 
 
 /**
@@ -139,6 +142,7 @@ public abstract class BaseEntity extends EntityHuman {
     }
 
     public void setFollowTarget(Entity target) {
+
         this.followTarget = target;
         this.moveTime = 0;
         this.stayTime = 0;
@@ -245,15 +249,27 @@ public abstract class BaseEntity extends EntityHuman {
     //判断中间是否有方块
     public boolean hasBlockInLine(Entity target){
         if(target != null) {
-            //TODO 找到卡服原因
-            Block targetBlock = this.getTargetBlock((int) this.distance(target));
-            if (targetBlock != null) {
-                return targetBlock.getId() != 0;
-            }
-            return false;
+            //TODO 尝试异步调度获取
+            CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+                Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
+                if (targetBlock != null) {
+                    return targetBlock.getId() != 0;
+                }
+                return false;
+            }, PluginMasterThreadPool.EXECUTOR);
+            future.thenAccept(e -> isHasBlock = e);
+//            this.getTargetBlock()
+//            //TODO 找到卡服原因
+//            Block targetBlock = this.getLineOfSight((int) this.distance(target),1)[0];
+//            if (targetBlock != null) {
+//                return targetBlock.getId() != 0;
+//            }
+//            return false;
         }
-        return false;
+        return isHasBlock;
     }
+
+    private boolean isHasBlock = false;
 
     @Override
     public boolean move(double dx, double dy, double dz) {

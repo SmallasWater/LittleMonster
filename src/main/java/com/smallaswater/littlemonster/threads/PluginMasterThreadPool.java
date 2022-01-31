@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class PluginMasterThreadPool {
 
-    private static final ThreadPoolExecutor EXECUTOR;
+    public static final ThreadPoolExecutor EXECUTOR;
 
     static {
         EXECUTOR = new ThreadPoolExecutor(
