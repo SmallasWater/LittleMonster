@@ -366,44 +366,50 @@ public class LittleNpc extends BaseEntityMove {
             this.level.addParticle(new DestroyBlockParticle(this,new BlockRedstone()));
             if(sure instanceof EntityDamageByEntityEvent){
                 //如果锁定的不是玩家
-                if(!(getFollowTarget() instanceof Player)) {
-                    if(getFollowTarget() != null) {
-                        if(targetOption(getFollowTarget(),
-                                distance(getFollowTarget()))){
-                            setFollowTarget(null,false);
+                if(getFollowTarget() != null) {
+                    if(!(getFollowTarget() instanceof Player)) {
+                        if (targetOption(getFollowTarget(),
+                                distance(getFollowTarget()))) {
+                            setFollowTarget(null, false);
                             return;
                         }
-                        if(config.isPassiveAttackEntity()){
+                        if (config.isPassiveAttackEntity()) {
                             if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
                                 if (!targetOption(((EntityDamageByEntityEvent) sure)
-                                        .getDamager(),
+                                                .getDamager(),
                                         distance(((EntityDamageByEntityEvent) sure).getDamager()))) {
-                                    setFollowTarget( ((EntityDamageByEntityEvent) sure).getDamager());
+                                    setFollowTarget(((EntityDamageByEntityEvent) sure).getDamager());
                                 }
 
-                            }else {
-                                if (config.isPassiveAttackEntity()) {
-                                    if (!config.isAttackHostileEntity()) {
-                                        if (((EntityDamageByEntityEvent) sure).getDamager() instanceof EntityMob) {
-                                            return;
-                                        }
-                                    }
-                                    if (((EntityDamageByEntityEvent) sure).getDamager() instanceof LittleNpc) {
-                                        if (!Utils.canAttackNpc(this, (LittleNpc) ((EntityDamageByEntityEvent) sure).getDamager(),true)) {
-                                            return;
-                                        }
-                                    }
-                                    if (!targetOption(((EntityDamageByEntityEvent) sure).getDamager(), distance(((EntityDamageByEntityEvent) sure).getDamager()))) {
-                                        setFollowTarget(((EntityDamageByEntityEvent) sure).getDamager());
-                                    }
-                                }
+                            } else {
+                                toDamageEntity((EntityDamageByEntityEvent) sure);
                             }
                         }
                     }
+                }else{
+                    toDamageEntity((EntityDamageByEntityEvent) sure);
                 }
             }
         }else{
             sure.setCancelled();
+        }
+    }
+
+    private void toDamageEntity(EntityDamageByEntityEvent sure) {
+        if (config.isPassiveAttackEntity()) {
+            if (!config.isAttackHostileEntity()) {
+                if (sure.getDamager() instanceof EntityMob) {
+                    return;
+                }
+            }
+            if (sure.getDamager() instanceof LittleNpc) {
+                if (!Utils.canAttackNpc(this, (LittleNpc) sure.getDamager(),true)) {
+                    return;
+                }
+            }
+            if (!targetOption(sure.getDamager(), distance(sure.getDamager()))) {
+                setFollowTarget(sure.getDamager());
+            }
         }
     }
 

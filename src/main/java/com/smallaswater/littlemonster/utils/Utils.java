@@ -105,7 +105,11 @@ public class Utils {
                             .getCampName())){
                 return l1.getConfig().isCanAttackSameCamp();
             }else {
-                return isBack?l2.getConfig().getToDamageCamp().contains(l1.getConfig().getCampName()):l1.getConfig().getDamageCamp().contains(l2.getConfig().getCampName());
+                if(isBack){
+                    return l1.getConfig().getToDamageCamp().contains(l2.getConfig().getCampName());
+                }else{
+                    return l1.getConfig().getDamageCamp().contains(l2.getConfig().getCampName());
+                }
             }
 
         }catch (Exception e){
