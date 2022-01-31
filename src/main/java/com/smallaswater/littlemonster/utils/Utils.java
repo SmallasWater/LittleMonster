@@ -94,7 +94,7 @@ public class Utils {
                     .equalsIgnoreCase(l2
                             .getConfig()
                             .getCampName())){
-                return l1.getConfig().isCamp();
+                return l1.getConfig().isCanAttackSameCamp();
             }else {
                 return l1.getConfig().getDamageCamp().contains(l2.getConfig().getCampName());
             }
