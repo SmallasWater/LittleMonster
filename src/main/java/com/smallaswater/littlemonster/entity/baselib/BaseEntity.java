@@ -34,6 +34,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class BaseEntity extends EntityHuman {
 
+    protected EntityHuman masterHuman = null;
+
     protected float moveMultiplier = 1.0f;
 
     protected int healTime = 0;
@@ -155,6 +157,16 @@ public abstract class BaseEntity extends EntityHuman {
         }
     }
 
+    public void setMasterHuman(EntityHuman masterHuman) {
+        this.masterHuman = masterHuman;
+    }
+
+    //准则 不会伤害主人
+
+    public EntityHuman getMasterHuman() {
+        return masterHuman;
+    }
+
     public void setFollowTarget(Entity target) {
         this.followTarget = target;
         this.moveTime = 0;
@@ -191,7 +203,12 @@ public abstract class BaseEntity extends EntityHuman {
             return true;
         }
         if (creature == this) {
-            return true; //不能攻击自己
+            //不能攻击自己
+            return true;
+        }
+        if(masterHuman != null && creature == masterHuman){
+            //不能攻击主人
+            return true;
         }
         if (creature instanceof Player) {
             return !this.isPlayerTarget((Player) creature);
