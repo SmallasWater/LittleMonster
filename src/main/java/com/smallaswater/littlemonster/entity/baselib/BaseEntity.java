@@ -2,6 +2,7 @@ package com.smallaswater.littlemonster.entity.baselib;
 
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
@@ -14,14 +15,14 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.MoveEntityAbsolutePacket;
 import cn.nukkit.network.protocol.SetEntityMotionPacket;
+import cn.nukkit.scheduler.AsyncTask;
 import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
-import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
 
 import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -256,30 +257,33 @@ public abstract class BaseEntity extends EntityHuman {
      * */
     abstract public float getDamage();
 
+    private AtomicBoolean isHasBlock = new AtomicBoolean();
+
     //判断中间是否有方块
-    public boolean hasBlockInLine(Entity target){
+    public boolean hasBlockInLine(Vector3 target){
         if(target != null) {
-            //TODO 尝试异步调度获取
-            CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+            Server.getInstance().getScheduler().scheduleAsyncTask(LittleMasterMainClass.getMasterMainClass(), new AsyncTask() {
+                @Override
+                public void onRun() {
+                    Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
+                    if (targetBlock != null) {
+                        isHasBlock.set(targetBlock.getId() != 0);
+                    }else {
+                        isHasBlock.set(false);
+                    }
+                }
+            });
+            /*CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
                 Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
                 if (targetBlock != null) {
                     return targetBlock.getId() != 0;
                 }
                 return false;
             }, PluginMasterThreadPool.EXECUTOR);
-            future.thenAccept(e -> isHasBlock = e);
-//            this.getTargetBlock()
-//            //TODO 找到卡服原因
-//            Block targetBlock = this.getLineOfSight((int) this.distance(target),1)[0];
-//            if (targetBlock != null) {
-//                return targetBlock.getId() != 0;
-//            }
-//            return false;
+            future.thenAccept(e -> isHasBlock = e);*/
         }
-        return isHasBlock;
+        return this.isHasBlock.get();
     }
-
-    private boolean isHasBlock = false;
 
     @Override
     public boolean move(double dx, double dy, double dz) {
