@@ -5,6 +5,8 @@ import cn.nukkit.Server;
 import cn.nukkit.block.*;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
+import cn.nukkit.entity.mob.EntityMob;
+import cn.nukkit.entity.passive.EntityAnimal;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.BubbleParticle;
 import cn.nukkit.math.NukkitMath;
@@ -16,6 +18,7 @@ import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
 import com.smallaswater.littlemonster.threads.runnables.RouteFinderSearchTask;
 import com.smallaswater.littlemonster.utils.Utils;
 import nukkitcoders.mobplugin.entities.animal.Animal;
+import nukkitcoders.mobplugin.entities.animal.WalkingAnimal;
 import nukkitcoders.mobplugin.entities.monster.Monster;
 
 import java.util.ArrayList;
@@ -245,7 +248,7 @@ public abstract class BaseEntityMove extends BaseEntity {
 
         if(Server.getInstance().getPluginManager().getPlugin("MobPlugin") != null){
             if(!config.isAttackFriendEntity()) {
-                if(entity instanceof Animal){
+                if(entity instanceof WalkingAnimal){
                     return false;
                 }
             }
@@ -254,6 +257,12 @@ public abstract class BaseEntityMove extends BaseEntity {
                     return false;
                 }
             }
+        }
+        if(!config.isAttackFriendEntity()){
+            return !(entity instanceof EntityAnimal);
+        }
+        if(!config.isAttackHostileEntity()) {
+            return !(entity instanceof EntityMob);
         }
 
         return true;

@@ -1,5 +1,7 @@
 name: LittleMonester
 main: com.smallaswater.littlemonster.LittleMasterMainClass
-version: 1.5.8
-author: 若水
+version: 1.5.9
+authors:
+  - 若水
+  - Lt_name
 api: 1.0.13
