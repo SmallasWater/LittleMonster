@@ -146,7 +146,10 @@ public abstract class BaseEntityMove extends BaseEntity {
 
                 for (EntityCreature entity : this.targetWeightedMap.keySet()) {
                     if (!entities.contains(entity)) {
-                        this.targetWeightedMap.remove(entity);
+                        if (entity.isClosed() || !entity.isAlive() ||
+                                entity.getLevel() != this.getLevel() || this.distance(entity) > this.seeSize) {
+                            this.targetWeightedMap.remove(entity);
+                        }
                     }
                 }
                 for (EntityCreature entity : entities) {
@@ -180,8 +183,8 @@ public abstract class BaseEntityMove extends BaseEntity {
             //随机移动
             if(this.config.isCanMove()) {
                 if (this.followTarget == null && this.target == null) {
-                    int x = 0;
-                    int z = 0;
+                    int x;
+                    int z;
                     Vector3 nextTarget = null;
                     if (this.stayTime > 0) {
                         /*if (Utils.rand(1, 100) > 5) {
