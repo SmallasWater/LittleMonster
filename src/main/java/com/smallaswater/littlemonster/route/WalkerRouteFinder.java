@@ -49,6 +49,12 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
    @Override
    public boolean search() {
+      if (this.entity.isClosed() || this.entity.getFollowTarget() == null ) {
+         this.searching = false;
+         this.finished = true;
+         return false;
+      }
+
       this.finished = false;
       this.searching = true;
       if (this.start == null) {
@@ -56,25 +62,27 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       }
 
       if (this.destination == null) {
-         if (this.entity.getFollowTarget() == null) {
+         if (this.entity.getFollowTarget() == null || this.entity.getFollowTarget().isClosed()) {
             this.searching = false;
             this.finished = true;
             return false;
          }
 
-         this.destination = this.entity.getFollowTarget();
+         this.destination = this.entity.getTargetVector().clone();
       }
 
       if (this.destinationDeviate > 0) {
-         Vector3 vector3 = this.destination.add(Utils.rand(-this.destinationDeviate, this.destinationDeviate), 0, Utils.rand(-this.destinationDeviate, this.destinationDeviate));
-         this.destination = vector3.clone();
-         /*for (int y=this.destination.getFloorY() + 10;y>destination.getFloorY()-10; y--) {
-            vector3.setY(y);
-            if (!this.level.getBlock(vector3).canPassThrough()) {
+         double x = Utils.rand(this.destinationDeviate - 3, this.destinationDeviate);
+         double z = Utils.rand(this.destinationDeviate - 3, this.destinationDeviate);
+         Vector3 vector3 = this.destination.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
+         vector3.y += 5;
+         for (int i=0; i<10; i++) {
+            if (this.level.getBlock(vector3).canPassThrough() && !this.level.getBlock(vector3.down()).canPassThrough()) {
                this.destination = vector3;
                break;
             }
-         }*/
+            vector3.y--;
+         }
       }
 
       this.resetTemporary();
@@ -290,18 +298,13 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    }
 
    private Node getNodeInOpenByVector2(Vector3 vector2) {
-      Iterator var2 = this.openList.iterator();
-
-      Node node;
-      do {
-         if (!var2.hasNext()) {
-            return null;
+      for (Node node : this.openList) {
+         if (vector2.equals(node.getVector3())) {
+            return node;
          }
+      }
 
-         node = (Node)var2.next();
-      } while(!vector2.equals(node.getVector3()));
-
-      return node;
+      return null;
    }
 
    private boolean isContainsInOpen(Vector3 vector2) {
@@ -309,18 +312,12 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    }
 
    private Node getNodeInCloseByVector2(Vector3 vector2) {
-      Iterator<Node> var2 = this.closeList.iterator();
-
-      Node node;
-      do {
-         if (!var2.hasNext()) {
-            return null;
+      for (Node node : this.closeList) {
+         if (vector2.equals(node.getVector3())) {
+            return node;
          }
-
-         node = var2.next();
-      } while(!vector2.equals(node.getVector3()));
-
-      return node;
+      }
+      return null;
    }
 
    private boolean isContainsInClose(Vector3 vector2) {
@@ -451,6 +448,9 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    }
 
    private boolean isPositionOverlap(Vector3 vector2, Vector3 vector2_) {
+      if (vector2 == null || vector2_ == null) {
+         return false;
+      }
       return vector2.getFloorX() == vector2_.getFloorX() && vector2.getFloorZ() == vector2_.getFloorZ() && vector2.getFloorY() == vector2_.getFloorY();
    }
 

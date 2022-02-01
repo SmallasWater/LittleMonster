@@ -3,6 +3,8 @@ package com.smallaswater.littlemonster.route;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.Vector3;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
+import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
+import com.smallaswater.littlemonster.threads.runnables.RouteFinderSearchTask;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -67,10 +69,11 @@ public abstract class RouteFinder {
    }
 
    public void setDestination(Vector3 destination) {
-      this.destination = destination;
+      this.destination = destination.clone();
       if (this.isSearching()) {
          this.interrupt = true;
-         this.research();
+         RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this));
+         //this.research();
       }
    }
 
@@ -135,20 +138,29 @@ public abstract class RouteFinder {
    }
 
    public boolean hasArrivedNode(Vector3 vec) {
-      boolean var3;
       try {
-         this.lock.readLock().lock();
-         if (!this.hasNext() || this.getCurrentNode().getVector3() == null) {
-            return false;
+         lock.readLock().lock();
+         if (this.hasNext() &&  this.getCurrentNode().getVector3()!=null) {
+            Vector3 cur = this.getCurrentNode().getVector3();
+            return vec.getX() == cur.getX() && vec.getZ() == cur.getZ();
          }
-
-         Vector3 cur = this.getCurrentNode().getVector3();
-         var3 = vec.getX() == cur.getX() && vec.getZ() == cur.getZ();
+         return false;
       } finally {
-         this.lock.readLock().unlock();
+         lock.readLock().unlock();
       }
+   }
 
-      return var3;
+   public boolean hasArrivedNodeInaccurate(Vector3 vec) {
+      try {
+         lock.readLock().lock();
+         if (this.hasNext() &&  this.getCurrentNode().getVector3()!=null) {
+            Vector3 cur = this.getCurrentNode().getVector3();
+            return cur.distance(vec) < 0.8;
+         }
+         return false;
+      } finally {
+         lock.readLock().unlock();
+      }
    }
 
    public void resetNodes() {

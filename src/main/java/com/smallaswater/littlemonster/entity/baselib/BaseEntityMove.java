@@ -152,40 +152,48 @@ public abstract class BaseEntityMove extends BaseEntity {
             }
 
             //获取寻路目标点
-            if (this.route != null && this.route.isFinished() && this.route.hasCurrentNode() && this.route.hasArrivedNode(this) && this.route.hasNext()) {
-                this.target = this.route.next();
-                return;
+            if (this.route != null){
+                if (!this.route.isSearching() && this.route.hasArrivedNodeInaccurate(this) && this.route.hasNext()) {
+                    this.target = this.route.next();
+                    return;
+                }else if (this.followTarget != null && !this.route.isSearching()){
+                    this.route.setDestination(this.followTarget);
+                }
             }
 
             //随机移动
             if(this.config.isCanMove()) {
-                if (this.followTarget == null || this.target == null) {
+                //TODO 寻找冲突原因
+                if (this.followTarget == null && this.target == null) {
                     if (this.route.hasNext()) {
                         this.target = this.route.next();
+                        return;
                     }
                     int x = 0;
                     int z = 0;
+                    Vector3 nextTarget = null;
                     if (this.stayTime > 0) {
                         if (Utils.rand(1, 100) > 5) {
                             return;
                         }
                         x = Utils.rand(10, 30);
                         z = Utils.rand(10, 30);
-                        this.target = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);
-                    } else if (Utils.rand(1, 100) == 1) {
-                        x = Utils.rand(10, 30);
-                        z = Utils.rand(10, 30);
-                        this.stayTime = Utils.rand(100, 200);
-                        this.target = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);
+                        nextTarget = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);
+                    } else if (Utils.rand(1, 10) == 1) {
+                        x = Utils.rand(5, 20);
+                        z = Utils.rand(5, 20);
+                        this.stayTime = 0/*Utils.rand(60, 200)*/;
+                        nextTarget = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);
                     } else if (this.moveTime <= 0 || this.target == null) {
-                        x = Utils.rand(20, 100);
-                        z = Utils.rand(20, 100);
+                        x = Utils.rand(1, 5);
+                        z = Utils.rand(1, 5);
                         this.stayTime = 0;
-                        this.moveTime = Utils.rand(100, 200);
-                        this.target = this.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
+                        this.moveTime = Utils.rand(20, 60);
+                        nextTarget = this.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
                     }
-                    if (x != 0 && z != 0) {
-                        this.route.setDestination(this.add(x, 0, z));
+                    if (nextTarget != null) {
+                        this.target = nextTarget;
+                        this.route.setDestination(nextTarget);
                     }
                 }
             }
@@ -260,7 +268,7 @@ public abstract class BaseEntityMove extends BaseEntity {
         this.stayTime = 0;
         this.moveTime = 0;
         this.setFollowTarget(entity, true);
-        this.target = entity;
+        //this.target = entity;
         /*this.followTarget = creature;
         if (this.route == null && this.passengers.isEmpty()) {
             this.target = creature;
@@ -276,6 +284,9 @@ public abstract class BaseEntityMove extends BaseEntity {
 
     @Override
     public boolean onUpdate(int currentTick) {
+        if (this.config == null) {
+            this.close();
+        }
         if (this.closed) {
             return false;
         } else if (!this.isAlive()) {
@@ -308,7 +319,6 @@ public abstract class BaseEntityMove extends BaseEntity {
                     }
                 }
             }else if (target != null && Math.pow(this.x - target.x, 2.0D) + Math.pow(this.z - target.z, 2.0D) <= 1.0D) {
-                //已到达目标地点 可以在这里获取下一目标
                 this.moveTime = 0;
             }
 
@@ -321,11 +331,8 @@ public abstract class BaseEntityMove extends BaseEntity {
             return null;
         }
 
-        if (this.age % 10 == 0 && this.route != null && this.route.isFinished()) {
+        if (this.age % 10 == 0 && this.route != null && !this.route.isSearching()) {
             RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this.route));
-            if (this.route.hasNext()) {
-                this.target = this.route.next();
-            }
         }
 
         if (this.isKnockback()) {
@@ -364,32 +371,22 @@ public abstract class BaseEntityMove extends BaseEntity {
                     this.motionZ = 0.0D;
                 }
                 if ((this.passengers.isEmpty()) && (this.stayTime <= 0 /*|| Utils.rand()*/)) {
-                    //if(!hasBlockInLine(followTarget)) {
-                        //优先看向跟随目标
-                        if (this.followTarget != null) {
-                            double dx = this.x - this.followTarget.x;
-                            double dy = (this.y + this.getEyeHeight()) - (this.followTarget.y + this.followTarget.getEyeHeight());
-                            double dz = this.z - this.followTarget.z;
-                            double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
-                            double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
-                            if (dz > 0.0D) {
-                                yaw = -yaw + 180.0D;
-                            }
-                            this.yaw = yaw;
-                            this.pitch = pitch;
-                        } else {
-                            //看向移动方向
-                            this.yaw = Math.toDegrees(-Math.atan2(x / diff, z / diff));
-                            this.pitch = 0;
-                        }
-                    //}
+                    //看向移动方向
+                    if (this.followTarget == null) {
+                        this.yaw = Math.toDegrees(-Math.atan2(x / diff, z / diff));
+                        this.pitch = 0;
+                    }
                 }
             }
         }else {
             this.motionX = 0;
             this.motionZ = 0;
-            this.stayTime = 1; //没有目标时停止移动
         }
+
+        if (this.passengers.isEmpty() && this.stayTime <= 0) {
+            this.seeFollowTarget();
+        }
+
         x = this.motionX * (double)tickDiff;
         z = this.motionZ * (double)tickDiff;
         boolean isJump = this.checkJump(x, z);
@@ -431,6 +428,23 @@ public abstract class BaseEntityMove extends BaseEntity {
             this.target = this.route.next();
         }
         return this.followTarget != null ? this.followTarget : this.target;
+    }
+
+    protected void seeFollowTarget() {
+        if(!hasBlockInLine(this.followTarget)) {
+            if (this.followTarget != null) {
+                double dx = this.x - this.followTarget.x;
+                double dy = (this.y + this.getEyeHeight()) - (this.followTarget.y + this.followTarget.getEyeHeight());
+                double dz = this.z - this.followTarget.z;
+                double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
+                double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
+                if (dz > 0.0D) {
+                    yaw = -yaw + 180.0D;
+                }
+                this.yaw = yaw;
+                this.pitch = pitch;
+            }
+        }
     }
 
     public RouteFinder getRoute() {

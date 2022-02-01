@@ -22,7 +22,6 @@ import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
 
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
 
 /**
@@ -141,8 +140,17 @@ public abstract class BaseEntity extends EntityHuman {
         return this.followTarget != null ? this.followTarget : (this.target instanceof EntityCreature ? (EntityCreature)this.target : null);
     }
 
-    public void setFollowTarget(Entity target) {
+    public Vector3 getTargetVector() {
+        if (this.followTarget != null) {
+            return this.followTarget;
+        } else if (this.target != null) {
+            return this.target;
+        } else {
+            return null;
+        }
+    }
 
+    public void setFollowTarget(Entity target) {
         this.followTarget = target;
         this.moveTime = 0;
         this.stayTime = 0;

@@ -27,7 +27,7 @@ public class RouteFinderSearchTask implements Runnable {
             } catch (InterruptedException ignored) {
             }
          }
-         this.route.interrupt();
+         //this.route.interrupt();
       }
    }
 }
