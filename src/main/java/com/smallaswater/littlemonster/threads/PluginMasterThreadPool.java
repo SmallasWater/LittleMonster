@@ -2,9 +2,7 @@ package com.smallaswater.littlemonster.threads;
 
 import com.smallaswater.littlemonster.threads.runnables.BasePluginThreadTask;
 
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author SmallasWater
@@ -13,9 +11,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class PluginMasterThreadPool {
 
+    public static final ExecutorService ASYNC_EXECUTOR;
+
     public static final ThreadPoolExecutor EXECUTOR;
 
     static {
+        ASYNC_EXECUTOR = Executors.newSingleThreadExecutor();
         EXECUTOR = new ThreadPoolExecutor(
                 3,
                 20,

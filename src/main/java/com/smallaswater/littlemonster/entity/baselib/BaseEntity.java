@@ -298,7 +298,7 @@ public abstract class BaseEntity extends EntityHuman {
                    return targetBlock.getId() != 0;
                 }
                 return false;
-            }, PluginMasterThreadPool.EXECUTOR);
+            }, PluginMasterThreadPool.ASYNC_EXECUTOR);
             future.thenAccept(e -> isHasBlock.set(e));
         }
         return this.isHasBlock.get();
