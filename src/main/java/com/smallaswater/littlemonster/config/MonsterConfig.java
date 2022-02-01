@@ -97,7 +97,7 @@ public class MonsterConfig {
 
     private int seeLine;
 
-    private double knockBack = 0.8;
+    private double knockBack = 0.5;
 
     private Item offhand;
 
@@ -131,7 +131,7 @@ public class MonsterConfig {
         entity.setTag(config.getString("头部显示"));
         entity.setDamage(config.getInt("攻击力"));
         entity.setHealth(config.getInt("血量"));
-        entity.setKnockBack(config.getDouble("击退距离",0.8));
+        entity.setKnockBack(config.getDouble("击退距离",0.5));
         entity.setTargetPlayer(config.getBoolean("主动锁定玩家"));
         entity.setAttackHostileEntity(config.getBoolean("是否攻击敌对生物",true));
         entity.setAttackFriendEntity(config.getBoolean("是否攻击友好生物",false));
