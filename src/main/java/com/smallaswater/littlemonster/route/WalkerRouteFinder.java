@@ -4,6 +4,7 @@ import cn.nukkit.block.Block;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.SimpleAxisAlignedBB;
 import cn.nukkit.math.Vector3;
+import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
 import com.smallaswater.littlemonster.utils.Utils;
 
@@ -89,37 +90,49 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       Node presentNode = new Node(this.start);
       this.closeList.add(new Node(this.start));
 
-      while(!this.isPositionOverlap(presentNode.getVector3(), this.destination)) {
-         if (this.isInterrupted()) {
-            this.searchLimit = 0;
-            this.searching = false;
-            this.finished = true;
-            return false;
+      try {
+         while (!this.isPositionOverlap(presentNode.getVector3(), this.destination)) {
+            if (this.isInterrupted()) {
+               this.searchLimit = 0;
+               this.searching = false;
+               this.finished = true;
+               return false;
+            }
+
+            this.putNeighborNodeIntoOpen(presentNode);
+            if (this.openList.peek() == null || this.searchLimit-- <= 0) {
+               this.searching = false;
+               this.finished = true;
+               this.reachable = false;
+               this.addNode(new Node(this.destination));
+               return false;
+            }
+
+            this.closeList.add(presentNode = this.openList.poll());
          }
 
-         this.putNeighborNodeIntoOpen(presentNode);
-         if (this.openList.peek() == null || this.searchLimit-- <= 0) {
-            this.searching = false;
-            this.finished = true;
-            this.reachable = false;
-            this.addNode(new Node(this.destination));
-            return false;
+         if (!presentNode.getVector3().equals(this.destination)) {
+            this.closeList.add(new Node(this.destination, presentNode, 0, 0));
          }
 
-         this.closeList.add(presentNode = this.openList.poll());
+         ArrayList<Node> findingPath = this.getPathRoute();
+         findingPath = this.FloydSmooth(findingPath);
+         this.resetNodes();
+         this.addNode(findingPath);
+         this.finished = true;
+         this.searching = false;
+         return true;
+      }catch (Exception e) {
+         if (!(this.entity == null || this.entity.isClosed() || this.entity.getFollowTarget() == null ||
+                 this.entity.getFollowTarget().isClosed())) {
+            LittleMasterMainClass.getMasterMainClass().getLogger().error("寻路错误", e);
+         }
+         this.searching = false;
+         this.finished = true;
+         this.reachable = false;
+         this.addNode(new Node(this.destination));
+         return false;
       }
-
-      if (!presentNode.getVector3().equals(this.destination)) {
-         this.closeList.add(new Node(this.destination, presentNode, 0, 0));
-      }
-
-      ArrayList<Node> findingPath = this.getPathRoute();
-      findingPath = this.FloydSmooth(findingPath);
-      this.resetNodes();
-      this.addNode(findingPath);
-      this.finished = true;
-      this.searching = false;
-      return true;
    }
 
    private Block getHighestUnder(Vector3 vector3, int limit) {
