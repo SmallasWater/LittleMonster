@@ -347,7 +347,10 @@ public abstract class BaseEntityMove extends BaseEntity {
                 if(diff <= 0){
                     diff = 0.1;
                 }
+
+                //如果不停留 且未到达目标点
                 if (this.stayTime <= 0 && this.distance(this.target) > ((double) this.getWidth() + 0.0D) / 2.0D + 0.05D) {
+                    //计算移动方向
                     if (this.isInsideOfWater()) {
                         this.motionX = this.getSpeed() * 0.05D * (x / diff);
                         this.motionZ = this.getSpeed() * 0.05D * (z / diff);
@@ -360,14 +363,13 @@ public abstract class BaseEntityMove extends BaseEntity {
                     this.motionX = 0.0D;
                     this.motionZ = 0.0D;
                 }
-                if ((this.passengers.isEmpty()) &&
-                        (this.stayTime <= 0 || Utils.rand())) {
-                    this.yaw = Math.toDegrees(-Math.atan2(x / diff, z / diff));
+                if ((this.passengers.isEmpty()) && (this.stayTime <= 0 /*|| Utils.rand()*/)) {
                     //if(!hasBlockInLine(followTarget)) {
-                        if (followTarget != null) {
-                            double dx = this.x - followTarget.x;
-                            double dy = (this.y + this.getEyeHeight()) - (followTarget.y + followTarget.getEyeHeight());
-                            double dz = this.z - followTarget.z;
+                        //优先看向跟随目标
+                        if (this.followTarget != null) {
+                            double dx = this.x - this.followTarget.x;
+                            double dy = (this.y + this.getEyeHeight()) - (this.followTarget.y + this.followTarget.getEyeHeight());
+                            double dz = this.z - this.followTarget.z;
                             double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
                             double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
                             if (dz > 0.0D) {
@@ -376,7 +378,9 @@ public abstract class BaseEntityMove extends BaseEntity {
                             this.yaw = yaw;
                             this.pitch = pitch;
                         } else {
-                            pitch = 0;
+                            //看向移动方向
+                            this.yaw = Math.toDegrees(-Math.atan2(x / diff, z / diff));
+                            this.pitch = 0;
                         }
                     //}
                 }
@@ -384,7 +388,7 @@ public abstract class BaseEntityMove extends BaseEntity {
         }else {
             this.motionX = 0;
             this.motionZ = 0;
-            this.stayTime = 1;
+            this.stayTime = 1; //没有目标时停止移动
         }
         x = this.motionX * (double)tickDiff;
         z = this.motionZ * (double)tickDiff;
@@ -396,18 +400,16 @@ public abstract class BaseEntityMove extends BaseEntity {
             Vector2 be = new Vector2(this.x + x, this.z + z);
             if(attactMode != 3 && attactMode != 2){
                 waitTime = 0;
-                this.move(x, this.motionY, z);
             }else if(followTarget == null || (this.distance(followTarget) > seeSize)){
                 waitTime = 0;
-                this.move(x, this.motionY, z);
             }else{
-                this.move(x, this.motionY, z);
                 waitTime++;
                 if(waitTime >= 20 * 5){
                     waitTime = 0;
                     this.setFollowTarget(null,false);
                 }
             }
+            this.move(x, this.motionY, z);
             Vector2 af = new Vector2(this.x, this.z);
             if ((be.x != af.x || be.y != af.y) && !isJump) {
                 this.moveTime -= 90 * tickDiff;
