@@ -37,6 +37,8 @@ public abstract class BaseEntity extends EntityHuman {
     //停留
     int stayTime = 0;
 
+    //目前没有使用
+    @Deprecated
     int moveTime = 0;
     //目标
     Vector3 target = null;

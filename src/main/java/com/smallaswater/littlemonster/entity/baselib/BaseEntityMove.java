@@ -163,37 +163,42 @@ public abstract class BaseEntityMove extends BaseEntity {
 
             //随机移动
             if(this.config.isCanMove()) {
-                //TODO 寻找冲突原因
                 if (this.followTarget == null && this.target == null) {
-                    if (this.route.hasNext()) {
-                        this.target = this.route.next();
-                        return;
-                    }
                     int x = 0;
                     int z = 0;
                     Vector3 nextTarget = null;
                     if (this.stayTime > 0) {
-                        if (Utils.rand(1, 100) > 5) {
+                        /*if (Utils.rand(1, 100) > 5) {
                             return;
                         }
                         x = Utils.rand(10, 30);
                         z = Utils.rand(10, 30);
-                        nextTarget = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);
-                    } else if (Utils.rand(1, 10) == 1) {
-                        x = Utils.rand(5, 20);
-                        z = Utils.rand(5, 20);
-                        this.stayTime = 0/*Utils.rand(60, 200)*/;
-                        nextTarget = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);
-                    } else if (this.moveTime <= 0 || this.target == null) {
-                        x = Utils.rand(1, 5);
-                        z = Utils.rand(1, 5);
+                        nextTarget = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);*/
+                    } else if (Utils.rand(1, 5) == 1) {
+                        x = Utils.rand(10, 40);
+                        z = Utils.rand(10, 40);
+                        this.stayTime = Utils.rand(20, 100);
+                        nextTarget = this.add(Utils.rand() ? x : -x, /*Utils.rand(-20.0, 20.0) / 10*/0, Utils.rand() ? z : -z);
+                        nextTarget.y+=5;
+                        for (int i=0; i<10; i++) {
+                            if (this.level.getBlock(nextTarget).canPassThrough() &&
+                                    !this.level.getBlock(nextTarget.down()).canPassThrough()) {
+                                break;
+                            }
+                            nextTarget.y--;
+                        }
+                    }else if (this.moveTime <= 0 || this.target == null) {
+                        x = Utils.rand(10, 40);
+                        z = Utils.rand(10, 40);
                         this.stayTime = 0;
                         this.moveTime = Utils.rand(20, 60);
                         nextTarget = this.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
                     }
                     if (nextTarget != null) {
                         this.target = nextTarget;
-                        this.route.setDestination(nextTarget);
+                        if (this.route != null) {
+                            this.route.setDestination(nextTarget);
+                        }
                     }
                 }
             }
@@ -319,6 +324,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                     }
                 }
             }else if (target != null && Math.pow(this.x - target.x, 2.0D) + Math.pow(this.z - target.z, 2.0D) <= 1.0D) {
+                this.target = null;
                 this.moveTime = 0;
             }
 
