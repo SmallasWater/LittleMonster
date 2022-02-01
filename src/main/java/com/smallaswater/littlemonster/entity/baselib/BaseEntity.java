@@ -20,8 +20,10 @@ import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
+import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
 
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -262,25 +264,25 @@ public abstract class BaseEntity extends EntityHuman {
     //判断中间是否有方块
     public boolean hasBlockInLine(Vector3 target){
         if(target != null) {
-            Server.getInstance().getScheduler().scheduleAsyncTask(LittleMasterMainClass.getMasterMainClass(), new AsyncTask() {
-                @Override
-                public void onRun() {
-                    Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
-                    if (targetBlock != null) {
-                        isHasBlock.set(targetBlock.getId() != 0);
-                    }else {
-                        isHasBlock.set(false);
-                    }
-                }
-            });
-            /*CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+//            Server.getInstance().getScheduler().scheduleAsyncTask(LittleMasterMainClass.getMasterMainClass(), new AsyncTask() {
+//                @Override
+//                public void onRun() {
+//                    Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
+//                    if (targetBlock != null) {
+//                        isHasBlock.set(targetBlock.getId() != 0);
+//                    }else {
+//                        isHasBlock.set(false);
+//                    }
+//                }
+//            });
+            CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
                 Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
                 if (targetBlock != null) {
-                    return targetBlock.getId() != 0;
+                   return targetBlock.getId() != 0;
                 }
                 return false;
             }, PluginMasterThreadPool.EXECUTOR);
-            future.thenAccept(e -> isHasBlock = e);*/
+            future.thenAccept(e -> isHasBlock.set(e));
         }
         return this.isHasBlock.get();
     }
