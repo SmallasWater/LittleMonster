@@ -13,11 +13,11 @@ import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
+import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.route.RouteFinder;
 import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
 import com.smallaswater.littlemonster.threads.runnables.RouteFinderSearchTask;
 import com.smallaswater.littlemonster.utils.Utils;
-import nukkitcoders.mobplugin.entities.animal.Animal;
 import nukkitcoders.mobplugin.entities.animal.WalkingAnimal;
 import nukkitcoders.mobplugin.entities.monster.Monster;
 
@@ -144,8 +144,21 @@ public abstract class BaseEntityMove extends BaseEntity {
                     }
                 }
 
-                //TODO 更智能的选取高优先级目标
-                entities.sort((p1, p2) -> Double.compare(this.distance(p1) - this.distance(p2), 0.0D));
+                for (EntityCreature entity : this.targetWeightedMap.keySet()) {
+                    if (!entities.contains(entity)) {
+                        this.targetWeightedMap.remove(entity);
+                    }
+                }
+                for (EntityCreature entity : entities) {
+                    //更新权重
+                    TargetWeighted targetWeighted = this.getTargetWeighted(entity);
+                    targetWeighted.setDistance(this.distance(entity));
+                    //TODO 删除调试代码
+                    LittleMasterMainClass.getMasterMainClass().getLogger().info(this.getName() + " 目标" + entity.getName() + " 权重" + targetWeighted.getFinalWeighted());
+                }
+
+                //entities.sort((p1, p2) -> Double.compare(this.distance(p1) - this.distance(p2), 0.0D));
+                entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
                 if (!entities.isEmpty()) {
                     EntityCreature entity = entities.get(0);
                     if (entity != this.getFollowTarget()) {

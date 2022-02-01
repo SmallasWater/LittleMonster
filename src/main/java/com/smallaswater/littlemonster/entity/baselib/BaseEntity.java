@@ -2,7 +2,6 @@ package com.smallaswater.littlemonster.entity.baselib;
 
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
@@ -15,15 +14,16 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.MoveEntityAbsolutePacket;
 import cn.nukkit.network.protocol.SetEntityMotionPacket;
-import cn.nukkit.scheduler.AsyncTask;
 import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -66,6 +66,8 @@ public abstract class BaseEntity extends EntityHuman {
 
     boolean canAttack = true;
 
+    protected final ConcurrentHashMap<EntityCreature, TargetWeighted> targetWeightedMap = new ConcurrentHashMap<>();
+
     //开发接口
     //攻击方式
     public int attactMode = 0;
@@ -82,7 +84,6 @@ public abstract class BaseEntity extends EntityHuman {
 
     BaseEntity(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
-
     }
 
     @Override
@@ -416,4 +417,26 @@ public abstract class BaseEntity extends EntityHuman {
         }
         return true;
     }
+
+    public TargetWeighted getTargetWeighted(EntityCreature entity) {
+        if (!this.targetWeightedMap.containsKey(entity)) {
+            this.targetWeightedMap.put(entity, new TargetWeighted());
+        }
+        return this.targetWeightedMap.get(entity);
+    }
+
+    @Data
+    public static class TargetWeighted {
+
+        private int base = 1;
+        private double causeDamage = 0;
+        private double distance = 0;
+
+        public double getFinalWeighted() {
+            //TODO 计算公式
+            return this.base + (this.causeDamage * 1.2) - (this.distance * 0.5);
+        }
+
+    }
+
 }

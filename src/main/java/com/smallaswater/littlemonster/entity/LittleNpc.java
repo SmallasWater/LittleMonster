@@ -366,6 +366,7 @@ public class LittleNpc extends BaseEntityMove {
             this.level.addParticle(new DestroyBlockParticle(this,new BlockRedstone()));
             if(sure instanceof EntityDamageByEntityEvent){
                 //如果锁定的不是玩家
+                //TODO 引入权重计算
                 if(getFollowTarget() != null) {
                     if(!(getFollowTarget() instanceof Player)) {
                         if (targetOption(getFollowTarget(),
@@ -393,6 +394,20 @@ public class LittleNpc extends BaseEntityMove {
         }else{
             sure.setCancelled();
         }
+    }
+
+    @Override
+    public boolean attack(EntityDamageEvent source) {
+        boolean attack = super.attack(source);
+
+        //获取最终伤害
+        if (!source.isCancelled() && source instanceof EntityDamageByEntityEvent) {
+            EntityDamageByEntityEvent entityDamageByEntityEvent = (EntityDamageByEntityEvent) source;
+            TargetWeighted targetWeighted = this.getTargetWeighted(this);
+            targetWeighted.setCauseDamage(targetWeighted.getCauseDamage() + entityDamageByEntityEvent.getFinalDamage());
+        }
+
+        return attack;
     }
 
     private void toDamageEntity(EntityDamageByEntityEvent sure) {
