@@ -365,12 +365,39 @@ public class LittleNpc extends BaseEntityMove {
             this.damageDelay = 0;
             this.level.addParticle(new DestroyBlockParticle(this,new BlockRedstone()));
             if(sure instanceof EntityDamageByEntityEvent){
-                //如果锁定的不是玩家
-                //TODO 引入权重计算
-                if(getFollowTarget() != null) {
+                if (config.isPassiveAttackEntity()) {
+                    if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
+                        Player player = (Player) ((EntityDamageByEntityEvent) sure).getDamager();
+                        if (!targetOption(player, this.distance(player))) {
+                            this.getTargetWeighted(player).setReason(TargetWeighted.REASON_PASSIVE_ATTACK_ENTITY);
+                            //setFollowTarget(player);
+                        }
+
+                    } else {
+                        Entity damager = ((EntityDamageByEntityEvent) sure).getDamager();
+                        if (!config.isAttackHostileEntity()) {
+                            if (damager instanceof EntityMob) {
+                                return;
+                            }
+                        }
+                        if (damager instanceof LittleNpc) {
+                            if (!Utils.canAttackNpc(this, (LittleNpc) damager,true)) {
+                                return;
+                            }
+                        }
+                        if (!targetOption(damager, distance(damager)) && damager instanceof EntityCreature) {
+                            this.getTargetWeighted((EntityCreature) damager).setReason(TargetWeighted.REASON_PASSIVE_ATTACK_ENTITY);
+                            //setFollowTarget(sure.getDamager());
+                        }
+                    }
+                }
+
+                //被攻击时设置权重，而不是直接切换目标
+                //下列代码不再使用
+                /*if(getFollowTarget() != null) {
+                    //如果锁定的不是玩家
                     if(!(getFollowTarget() instanceof Player)) {
-                        if (targetOption(getFollowTarget(),
-                                distance(getFollowTarget()))) {
+                        if (targetOption(getFollowTarget(), distance(getFollowTarget()))) {
                             setFollowTarget(null, false);
                             return;
                         }
@@ -389,7 +416,7 @@ public class LittleNpc extends BaseEntityMove {
                     }
                 }else{
                     toDamageEntity((EntityDamageByEntityEvent) sure);
-                }
+                }*/
             }
         }else{
             sure.setCancelled();
@@ -422,8 +449,9 @@ public class LittleNpc extends BaseEntityMove {
                     return;
                 }
             }
-            if (!targetOption(sure.getDamager(), distance(sure.getDamager()))) {
-                setFollowTarget(sure.getDamager());
+            if (!targetOption(sure.getDamager(), distance(sure.getDamager())) && sure.getDamager() instanceof EntityCreature) {
+                this.getTargetWeighted((EntityCreature) sure.getDamager()).setReason(TargetWeighted.REASON_PASSIVE_ATTACK_ENTITY);
+                //setFollowTarget(sure.getDamager());
             }
         }
     }

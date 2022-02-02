@@ -83,37 +83,37 @@ public class Utils {
     /**
      * 判断是否可以攻击NPC
      *
-     * @param l1 攻击的NPC
-     * @param l2 被攻击的NPC
+     * @param damager 攻击的NPC
+     * @param entity 被攻击的NPC
      * @param isBack 是否为被动回击
      *
      * @return 是否可以攻击
      * */
-    public static boolean canAttackNpc(LittleNpc l1,LittleNpc l2,boolean isBack){
-        if(l1.getConfig() == null){
-            l1.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(l1.getName()));
+    public static boolean canAttackNpc(LittleNpc damager,LittleNpc entity,boolean isBack){
+        if(damager.getConfig() == null){
+            damager.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(damager.getName()));
         }
-        if(l2.getConfig() == null){
-            l2.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(l2.getName()));
+        if(entity.getConfig() == null){
+            entity.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(entity.getName()));
         }
 
         try{
-            if(l1.getConfig()
+            if(damager.getConfig()
                     .getCampName()
-                    .equalsIgnoreCase(l2
+                    .equalsIgnoreCase(entity
                             .getConfig()
                             .getCampName())){
-                return l1.getConfig().isCanAttackSameCamp();
+                return damager.getConfig().isCanAttackSameCamp();
             }else {
                 if(isBack){
-                    return l1.getConfig().getToDamageCamp().contains(l2.getConfig().getCampName());
+                    return damager.getConfig().getToDamageCamp().contains(entity.getConfig().getCampName());
                 }else{
-                    return l1.getConfig().getDamageCamp().contains(l2.getConfig().getCampName());
+                    return damager.getConfig().getDamageCamp().contains(entity.getConfig().getCampName());
                 }
             }
 
         }catch (Exception e){
-            Server.getInstance().getLogger().error("NPC配置 空！l1 config: "+l1.getConfig()+" l2 config: "+l2.getConfig(), e);
+            Server.getInstance().getLogger().error("NPC配置 空！l1 config: "+damager.getConfig()+" l2 config: "+entity.getConfig(), e);
             return false;
         }
 

@@ -214,7 +214,7 @@ public abstract class BaseEntity extends EntityHuman {
         if (creature instanceof Player) {
             return !this.isPlayerTarget((Player) creature);
         }else{
-            return creature.closed || !creature.isAlive() || !creature.getLevel().getFolderName().equalsIgnoreCase(getLevel().getFolderName()) || distance > seeSize;
+            return creature.closed || !creature.isAlive() || creature.getLevel() != this.getLevel() || distance > seeSize;
         }
     }
 
@@ -428,13 +428,33 @@ public abstract class BaseEntity extends EntityHuman {
     @Data
     public static class TargetWeighted {
 
+        /**
+         * 扫描附近实体
+         */
+        public static final double REASON_AUTO_SCAN = 10;
+        /**
+         * 被动反击
+         */
+        public static final double REASON_PASSIVE_ATTACK_ENTITY = 100.0;
+
         private int base = 1;
+        private double reason = 0;
         private double causeDamage = 0;
         private double distance = 0;
 
+        public void setReason(double reason) {
+            this.setReason(reason, false);
+        }
+
+        public void setReason(double reason, boolean forcibly) {
+            if (reason > this.reason || forcibly) {
+                this.reason = reason;
+            }
+        }
+
         public double getFinalWeighted() {
             //TODO 计算公式
-            return this.base + (this.causeDamage * 1.2) - (this.distance * 0.5);
+            return this.base + this.reason + (this.causeDamage * 1.2) - (this.distance * 0.5);
         }
 
     }
