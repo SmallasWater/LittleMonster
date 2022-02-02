@@ -16,13 +16,14 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.MoveEntityAbsolutePacket;
 import cn.nukkit.network.protocol.PlayerSkinPacket;
 import cn.nukkit.network.protocol.SetEntityMotionPacket;
-import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -260,8 +261,8 @@ public abstract class BaseEntity extends EntityHuman {
         }
     }
 
-    public void setConfig(MonsterConfig config) {
-        this.config = config;
+    public void setConfig(@NotNull MonsterConfig config) {
+        this.config = Objects.requireNonNull(config);
     }
 
     /**攻击生物

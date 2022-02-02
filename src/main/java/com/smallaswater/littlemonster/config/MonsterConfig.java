@@ -396,8 +396,7 @@ public class MonsterConfig {
 
     public void resetEntity(){
         for(LittleNpc entity: Utils.getEntitys(getName())){
-            entity.setConfig(this);
-            npcSetting(entity);
+            this.npcSetting(entity);
         }
     }
 
