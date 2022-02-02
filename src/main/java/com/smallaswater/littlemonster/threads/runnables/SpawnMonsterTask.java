@@ -33,11 +33,13 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
                 continue;
             }
             boolean spawn = true;
-            if(Utils.getEntityCount(easyEntity.getPos().level,
-                    easyEntity.getLittleNpc().getName(),easyEntity.getName())
-                    >= easyEntity.getMaxCount()){
+            int ec = Utils.getEntityCount(easyEntity.getPos().level,
+                    easyEntity.getLittleNpc().getName(),easyEntity.getName());
+            if(ec >= easyEntity.getMaxCount()){
+
                 spawn =  false;
             }
+
             if (spawn) {
                 if (LittleMasterMainClass.getMasterMainClass().time.containsKey(easyEntity.getName())) {
                     int t = LittleMasterMainClass.getMasterMainClass().time.get(easyEntity.getName());

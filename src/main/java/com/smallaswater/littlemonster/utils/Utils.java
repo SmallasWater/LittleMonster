@@ -218,9 +218,8 @@ public class Utils {
     }
 
     public static String getMonster(Entity entity) {
-        if(isMonster(entity)){
-            CompoundTag tag = entity.namedTag;
-            return tag.getString(LittleNpc.TAG);
+        if(entity instanceof LittleNpc){
+            return entity.getName();
         }
         return null;
     }
