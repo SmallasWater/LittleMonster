@@ -12,6 +12,7 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
 import com.smallaswater.littlemonster.LittleMasterMainClass;
+import com.smallaswater.littlemonster.config.PositionConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.entity.baselib.Area;
 
@@ -161,6 +162,20 @@ public class Utils {
                     .setAmplifier(Integer.parseInt(eff[1])).setDuration(Integer.parseInt(eff[2])*20));
         }
         return effects;
+    }
+
+    public static ArrayList<LittleNpc> getEntitysByPos(PositionConfig positionConfig){
+        ArrayList<LittleNpc> littleNpcs = new ArrayList<>();
+        for(Level level: Server.getInstance().getLevels().values()) {
+            for (Entity entitys : level.getEntities()) {
+                if (entitys instanceof LittleNpc && ((LittleNpc) entitys).name.equalsIgnoreCase(positionConfig.getLittleNpc().getName())) {
+                    if(((LittleNpc) entitys).spawnPos != null && ((LittleNpc) entitys).spawnPos.equalsIgnoreCase(positionConfig.getName())){
+                        littleNpcs.add((LittleNpc) entitys);
+                    }
+                }
+            }
+        }
+        return littleNpcs;
     }
 
     public static ArrayList<LittleNpc> getEntitys(String name){
