@@ -22,7 +22,7 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
         //刷怪
         for (PositionConfig easyEntity : LittleMasterMainClass.getMasterMainClass().positions.values()) {
             if(easyEntity.getMoveSize() != -1) {
-                for(LittleNpc littleNpc: Utils.getEntitys(easyEntity.getLittleNpc().getName())){
+                for(LittleNpc littleNpc: Utils.getEntitysByPos(easyEntity)){
                     if (littleNpc.distance(easyEntity.getPos()) >= easyEntity.getMoveSize()) {
                         littleNpc.teleport(easyEntity.getPos());
                         littleNpc.setHealth(littleNpc.getMaxHealth());
@@ -33,11 +33,13 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
                 continue;
             }
             boolean spawn = true;
-            if(Utils.getEntityCount(easyEntity.getPos().level,
-                    easyEntity.getLittleNpc().getName(),easyEntity.getName())
-                    >= easyEntity.getMaxCount()){
+            int ec = Utils.getEntityCount(easyEntity.getPos().level,
+                    easyEntity.getLittleNpc().getName(),easyEntity.getName());
+            if(ec >= easyEntity.getMaxCount()){
+
                 spawn =  false;
             }
+
             if (spawn) {
                 if (LittleMasterMainClass.getMasterMainClass().time.containsKey(easyEntity.getName())) {
                     int t = LittleMasterMainClass.getMasterMainClass().time.get(easyEntity.getName());

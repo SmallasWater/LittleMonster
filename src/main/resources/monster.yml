@@ -67,7 +67,6 @@
   击杀:
     是否提示: true
     信息: "&e[ &bBOSS提醒 &e] &d{name} 被 {player} 击杀"
-  是否公告: true
   死亡:
     是否提示: true
     信息: "&e[ &bBOSS &e] {name} 在坐标: x: {x} y: {y} z: {z} 处死亡"

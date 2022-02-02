@@ -12,6 +12,7 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
 import com.smallaswater.littlemonster.LittleMasterMainClass;
+import com.smallaswater.littlemonster.config.PositionConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.entity.baselib.Area;
 
@@ -163,6 +164,20 @@ public class Utils {
         return effects;
     }
 
+    public static ArrayList<LittleNpc> getEntitysByPos(PositionConfig positionConfig){
+        ArrayList<LittleNpc> littleNpcs = new ArrayList<>();
+        for(Level level: Server.getInstance().getLevels().values()) {
+            for (Entity entitys : level.getEntities()) {
+                if (entitys instanceof LittleNpc && ((LittleNpc) entitys).name.equalsIgnoreCase(positionConfig.getLittleNpc().getName())) {
+                    if(((LittleNpc) entitys).spawnPos != null && ((LittleNpc) entitys).spawnPos.equalsIgnoreCase(positionConfig.getName())){
+                        littleNpcs.add((LittleNpc) entitys);
+                    }
+                }
+            }
+        }
+        return littleNpcs;
+    }
+
     public static ArrayList<LittleNpc> getEntitys(String name){
         ArrayList<LittleNpc> littleNpcs = new ArrayList<>();
         for(Level level: Server.getInstance().getLevels().values()) {
@@ -203,9 +218,8 @@ public class Utils {
     }
 
     public static String getMonster(Entity entity) {
-        if(isMonster(entity)){
-            CompoundTag tag = entity.namedTag;
-            return tag.getString(LittleNpc.TAG);
+        if(entity instanceof LittleNpc){
+            return entity.getName();
         }
         return null;
     }

@@ -51,8 +51,8 @@ public class FlotTask extends BasePluginThreadTask{
                                     .replace("{数量}", Utils
                                             .getEntityCount(easyEntity.getPos().level, easyEntity.getLittleNpc().getName(),easyEntity.getName()) + "")
                                     .replace("{上限}", easyEntity.getMaxCount() + "")
-                                    .replace("{time}", LittleMasterMainClass.getMasterMainClass().time.containsKey(easyEntity.getLittleNpc().getName()) ?
-                                            LittleMasterMainClass.getMasterMainClass().time.get(easyEntity.getLittleNpc().getName()) + "" : "0")
+                                    .replace("{time}", LittleMasterMainClass.getMasterMainClass().time.containsKey(easyEntity.getName()) ?
+                                            LittleMasterMainClass.getMasterMainClass().time.get(easyEntity.getName()) + "" : "0")
                                     .replace("{name}", player.getName());
                             particle.setText(text);
                             particle.toUpData();
