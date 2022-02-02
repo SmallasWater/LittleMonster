@@ -9,9 +9,11 @@ import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.TextFormat;
 import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.config.PositionConfig;
+import com.smallaswater.littlemonster.entity.EntityCommandSender;
 import com.smallaswater.littlemonster.items.BaseItem;
 import com.smallaswater.littlemonster.utils.Utils;
 import com.smallaswater.littlemonster.windows.LittleWindow;
@@ -39,7 +41,7 @@ public class LittleNpcSpawnCommand extends Command {
                     sender.sendMessage("§b/lt §7del §6<名字> §a删除怪物");
                     sender.sendMessage("§b/lt §7pos §6<名字> <怪物>  §a创建怪物点");
                     sender.sendMessage("§b/lt §7dp §6<名字> §a删除怪物点");
-
+                    sender.sendMessage("§b/lt §7send §6<玩家> <消息> §a给玩家发送消息");
                     sender.sendMessage("§b/lt §7spawn §6<名字> <x> <y> <z> <level> <time(存活时间(秒))>§a生成一个怪物");
                     sender.sendMessage("§b/lt §7set §a修改怪物数据");
                     sender.sendMessage("§b/lt §7reload §a重新加载配置文件");
@@ -110,6 +112,22 @@ public class LittleNpcSpawnCommand extends Command {
                             return true;
                         }
                         sender.sendMessage("请不要在控制台执行");
+                    }
+                }
+                if("send".equalsIgnoreCase(strings[0])){
+                    if(strings.length > 2){
+                        Player player = Server.getInstance().getPlayer(strings[1]);
+                        if(player != null){
+                           player.sendMessage(TextFormat.colorize('&',strings[1]));
+                        }else{
+                            if(sender instanceof EntityCommandSender){
+                                return true;
+                            }
+                            sender.sendMessage("玩家不在线");
+                            return false;
+                        }
+                    }else{
+                        return false;
                     }
                 }
                 if("set".equalsIgnoreCase(strings[0])){

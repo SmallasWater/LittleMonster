@@ -102,7 +102,7 @@ public abstract class BaseEntity extends EntityHuman {
     }
 
     public MonsterConfig getConfig() {
-        return config == null ? config = LittleMasterMainClass.getMasterMainClass().monsters.get(getName()):config;
+        return config;
     }
 
     public int getAttackSleepTime() {

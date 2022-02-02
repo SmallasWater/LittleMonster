@@ -91,12 +91,13 @@ public class Utils {
      * @return 是否可以攻击
      * */
     public static boolean canAttackNpc(LittleNpc l1,LittleNpc l2,boolean isBack){
-        if(l1.getConfig() == null){
-            l1.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(l1.getName()));
+        if(l1.getConfig() == null || l2.getConfig() == null){
+            return false;
+//            l1.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(l1.getName()));
         }
-        if(l2.getConfig() == null){
-            l2.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(l2.getName()));
-        }
+//        if(l2.getConfig() == null){
+//            l2.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(l2.getName()));
+//        }
 
         try{
             if(l1.getConfig()
