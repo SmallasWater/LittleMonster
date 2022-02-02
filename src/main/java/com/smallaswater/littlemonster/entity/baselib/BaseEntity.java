@@ -2,11 +2,11 @@ package com.smallaswater.littlemonster.entity.baselib;
 
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.EntityHuman;
+import cn.nukkit.entity.data.Skin;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.level.format.FullChunk;
@@ -14,8 +14,8 @@ import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.MoveEntityAbsolutePacket;
+import cn.nukkit.network.protocol.PlayerSkinPacket;
 import cn.nukkit.network.protocol.SetEntityMotionPacket;
-import cn.nukkit.scheduler.AsyncTask;
 import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
@@ -82,7 +82,6 @@ public abstract class BaseEntity extends EntityHuman {
 
     BaseEntity(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
-
     }
 
     @Override
@@ -276,7 +275,7 @@ public abstract class BaseEntity extends EntityHuman {
      * */
     abstract public float getDamage();
 
-    private AtomicBoolean isHasBlock = new AtomicBoolean();
+    private final AtomicBoolean isHasBlock = new AtomicBoolean();
 
     //判断中间是否有方块
     public boolean hasBlockInLine(Vector3 target){
@@ -292,14 +291,13 @@ public abstract class BaseEntity extends EntityHuman {
 //                    }
 //                }
 //            });
-            CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+            CompletableFuture.supplyAsync(() -> {
                 Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
                 if (targetBlock != null) {
                    return targetBlock.getId() != 0;
                 }
                 return false;
-            }, PluginMasterThreadPool.ASYNC_EXECUTOR);
-            future.thenAccept(e -> isHasBlock.set(e));
+            }, PluginMasterThreadPool.ASYNC_EXECUTOR).thenAccept(isHasBlock::set);
         }
         return this.isHasBlock.get();
     }
@@ -399,8 +397,6 @@ public abstract class BaseEntity extends EntityHuman {
         this.onGround = (movY != dy && movY < 0);
     }
 
-
-
     @Override
     public void resetFallDistance() {
         this.highestPosition = this.y;
@@ -416,4 +412,19 @@ public abstract class BaseEntity extends EntityHuman {
         }
         return true;
     }
+
+    @Override
+    public void setSkin(Skin skin) {
+        PlayerSkinPacket packet = new PlayerSkinPacket();
+        packet.skin = skin;
+        packet.newSkinName = skin.getSkinId();
+        packet.oldSkinName = this.getSkin() != null ? this.getSkin().getSkinId() : new Skin().getSkinId();
+        packet.uuid = this.getUniqueId();
+        for (Player player : this.getViewers().values()) {
+            player.dataPacket(packet);
+        }
+
+        super.setSkin(skin);
+    }
+
 }
