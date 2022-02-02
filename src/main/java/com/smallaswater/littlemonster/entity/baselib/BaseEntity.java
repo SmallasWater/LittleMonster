@@ -20,8 +20,10 @@ import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
 import lombok.Data;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -103,7 +105,7 @@ public abstract class BaseEntity extends EntityHuman {
     }
 
     public MonsterConfig getConfig() {
-        return config == null ? config = LittleMasterMainClass.getMasterMainClass().monsters.get(getName()):config;
+        return config;
     }
 
     public int getAttackSleepTime() {
@@ -262,8 +264,8 @@ public abstract class BaseEntity extends EntityHuman {
         }
     }
 
-    public void setConfig(MonsterConfig config) {
-        this.config = config;
+    public void setConfig(@NotNull MonsterConfig config) {
+        this.config = Objects.requireNonNull(config);
     }
 
     /**攻击生物
@@ -277,7 +279,7 @@ public abstract class BaseEntity extends EntityHuman {
      * */
     abstract public float getDamage();
 
-    private AtomicBoolean isHasBlock = new AtomicBoolean();
+    private final AtomicBoolean isHasBlock = new AtomicBoolean();
 
     //判断中间是否有方块
     public boolean hasBlockInLine(Vector3 target){
@@ -293,14 +295,13 @@ public abstract class BaseEntity extends EntityHuman {
 //                    }
 //                }
 //            });
-            CompletableFuture<Boolean> future = CompletableFuture.supplyAsync(() -> {
+            CompletableFuture.supplyAsync(() -> {
                 Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
                 if (targetBlock != null) {
                    return targetBlock.getId() != 0;
                 }
                 return false;
-            }, PluginMasterThreadPool.ASYNC_EXECUTOR);
-            future.thenAccept(e -> isHasBlock.set(e));
+            }, PluginMasterThreadPool.ASYNC_EXECUTOR).thenAccept(isHasBlock::set);
         }
         return this.isHasBlock.get();
     }
@@ -400,8 +401,6 @@ public abstract class BaseEntity extends EntityHuman {
         this.onGround = (movY != dy && movY < 0);
     }
 
-
-
     @Override
     public void resetFallDistance() {
         this.highestPosition = this.y;
@@ -417,6 +416,21 @@ public abstract class BaseEntity extends EntityHuman {
         }
         return true;
     }
+
+    @Override
+    public void setSkin(Skin skin) {
+        PlayerSkinPacket packet = new PlayerSkinPacket();
+        packet.skin = skin;
+        packet.newSkinName = skin.getSkinId();
+        packet.oldSkinName = this.getSkin() != null ? this.getSkin().getSkinId() : new Skin().getSkinId();
+        packet.uuid = this.getUniqueId();
+        for (Player player : this.getViewers().values()) {
+            player.dataPacket(packet);
+        }
+
+        super.setSkin(skin);
+    }
+
 
     public TargetWeighted getTargetWeighted(EntityCreature entity) {
         if (!this.targetWeightedMap.containsKey(entity)) {

@@ -1,11 +1,7 @@
 package com.smallaswater.littlemonster.skill.defaultskill;
 
-import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
-import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.data.Skin;
-import cn.nukkit.network.protocol.PlayerSkinPacket;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
 
 /**
@@ -37,31 +33,29 @@ public class AttributeHealthSkill extends BaseSkillManager {
 
     @Override
     public void display(Entity... player) {
-        if(getMaster() != null){
-            switch (attributeType){
+        if(this.getMaster() != null){
+            switch (this.attributeType){
                 case SKIN:
-                    PlayerSkinPacket data = new PlayerSkinPacket();
+                    /*PlayerSkinPacket data = new PlayerSkinPacket();
                     data.skin = skin;
                     data.newSkinName = skin.getSkinId();
                     data.oldSkinName = getMaster().getSkin().getSkinId();
-                    data.uuid = getMaster().getUniqueId();
-                    getMaster().setSkin(skin);
-                    Server.getInstance().getOnlinePlayers().values().forEach(p -> p.dataPacket(data));
+                    data.uuid = getMaster().getUniqueId();*/
+                    this.getMaster().setSkin(this.skin);
+                    //Server.getInstance().getOnlinePlayers().values().forEach(p -> p.dataPacket(data));
                     break;
                 case SCALE:
-                    getMaster().setScale(getEffect().floatValue());
+                    this.getMaster().setScale(getEffect().floatValue());
                     break;
                 case DAMAGE:
-                    getMaster().damage = getEffect().doubleValue();
+                    this.getMaster().damage = getEffect().doubleValue();
                     break;
                 case ATTACK_SPEED:
-                    getMaster().attackSleepTime = getEffect().intValue();
+                    this.getMaster().attackSleepTime = getEffect().intValue();
                     break;
                 default:break;
             }
         }
-
-
     }
 
     public enum AttributeType{

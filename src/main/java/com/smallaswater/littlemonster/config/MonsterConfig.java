@@ -1,12 +1,10 @@
 package com.smallaswater.littlemonster.config;
 
-import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.data.Skin;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Position;
 import cn.nukkit.nbt.tag.CompoundTag;
-import cn.nukkit.network.protocol.PlayerSkinPacket;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
 import com.smallaswater.littlemonster.LittleMasterMainClass;
@@ -228,7 +226,7 @@ public class MonsterConfig {
                         putCompound("Skin", new CompoundTag()
                 .putByteArray("Data", skin.getSkinData().data)
                 .putString("ModelId", skin.getSkinId())),this);
-        npcSetting(littleNpc);
+        this.npcSetting(littleNpc);
         if(time > 0){
             littleNpc.setLiveTime(time);
         }
@@ -262,16 +260,9 @@ public class MonsterConfig {
         if(LittleMasterMainClass.loadSkins.containsKey(getSkin())){
             skin =  LittleMasterMainClass.loadSkins.get(getSkin());
         }
-        PlayerSkinPacket data = new PlayerSkinPacket();
-        data.skin = skin;
-        data.newSkinName = skin.getSkinId();
-        data.oldSkinName = littleNpc.getSkin().getSkinId();
-        data.uuid = littleNpc.getUniqueId();
         littleNpc.getInventory().setItemInHand(item);
         littleNpc.getInventory().setArmorContents(armor.toArray(new Item[0]));
         littleNpc.getOffhandInventory().setItem(0,offhand);
-        littleNpc.setSkin(skin);
-        Server.getInstance().getOnlinePlayers().values().forEach(p -> p.dataPacket(data));
         littleNpc.setSkin(skin);
     }
 
@@ -408,8 +399,7 @@ public class MonsterConfig {
 
     public void resetEntity(){
         for(LittleNpc entity: Utils.getEntitys(getName())){
-            entity.setConfig(this);
-            npcSetting(entity);
+            this.npcSetting(entity);
         }
     }
 
