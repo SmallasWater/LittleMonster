@@ -1,6 +1,6 @@
 package com.smallaswater.littlemonster.threads.runnables;
 
-import com.smallaswater.littlemonster.LittleMasterMainClass;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 
 /**
  * @author SmallasWater
@@ -11,7 +11,7 @@ public abstract class BasePluginThreadTask implements Runnable {
 
     @Override
     public final void run() {
-        while (LittleMasterMainClass.getMasterMainClass().isEnabled()) {
+        while (LittleMonsterMainClass.getMasterMainClass().isEnabled()) {
             if(!scheduler()) {
                 break;
             }

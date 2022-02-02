@@ -1,20 +1,13 @@
 package com.smallaswater.littlemonster.entity.autospawn;
 
-/**
- * @author SmallasWater
- * Create on 2021/12/6 15:29
- * Package com.smallaswater.littlemonster.entity.autospawn
- */
-
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.level.GameRule;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
-import com.smallaswater.littlemonster.LittleMasterMainClass;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.threads.runnables.AutoSpawnTask;
 import com.smallaswater.littlemonster.utils.Utils;
-
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,7 +29,7 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
     public AbstractEntitySpawner(AutoSpawnTask spawnTask) {
         this.spawnTask = spawnTask;
         this.server = Server.getInstance();
-        List<String> disabledWorlds = LittleMasterMainClass.getMasterMainClass().getConfig().getStringList("npcs.worlds-spawning");
+        List<String> disabledWorlds = LittleMonsterMainClass.getMasterMainClass().getConfig().getStringList("npcs.worlds-spawning");
         if (disabledWorlds != null && !disabledWorlds.isEmpty()) {
             spawnWorlds = new ArrayList<>(disabledWorlds);
         }
@@ -68,9 +61,9 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
         Level level = player.getLevel();
         if (this.spawnTask.entitySpawnAllowed(level, this.getEntityName(), player)) {
             if (pos != null) {
-                pos.x += (double)this.spawnTask.getRandomSafeXZCoord(50, 26, 6);
-                pos.z += (double)this.spawnTask.getRandomSafeXZCoord(50, 26, 6);
-                pos.y = (double)this.spawnTask.getSafeYCoord(level, pos, 3);
+                pos.x += this.spawnTask.getRandomSafeXZCoord(50, 26, 6);
+                pos.z += this.spawnTask.getRandomSafeXZCoord(50, 26, 6);
+                pos.y = this.spawnTask.getSafeYCoord(level, pos, 3);
                 return this.spawn(player, pos, level);
             } else {
                 return SpawnResult.POSITION_MISMATCH;

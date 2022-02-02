@@ -2,7 +2,7 @@ package com.smallaswater.littlemonster.manager;
 
 import cn.nukkit.Player;
 import cn.nukkit.level.Position;
-import com.smallaswater.littlemonster.LittleMasterMainClass;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.flot.FlotText;
 import com.smallaswater.littlemonster.utils.Utils;
 
@@ -73,10 +73,10 @@ public class PlayerFlotTextManager {
     public static PlayerFlotTextManager getInstance(Player player){
 
         PlayerFlotTextManager flotTextManager = new PlayerFlotTextManager(player);
-        if(!LittleMasterMainClass.getMasterMainClass().texts.contains(flotTextManager)){
-            LittleMasterMainClass.getMasterMainClass().texts.add(flotTextManager);
+        if(!LittleMonsterMainClass.getMasterMainClass().texts.contains(flotTextManager)){
+            LittleMonsterMainClass.getMasterMainClass().texts.add(flotTextManager);
         }
-        return LittleMasterMainClass.getMasterMainClass().texts.get(LittleMasterMainClass.getMasterMainClass().texts.indexOf(flotTextManager));
+        return LittleMonsterMainClass.getMasterMainClass().texts.get(LittleMonsterMainClass.getMasterMainClass().texts.indexOf(flotTextManager));
     }
 
     @Override

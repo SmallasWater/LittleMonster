@@ -5,13 +5,15 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.utils.Config;
-import com.smallaswater.littlemonster.LittleMasterMainClass;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.entity.autospawn.AbstractEntitySpawner;
 import com.smallaswater.littlemonster.entity.spawner.LittleNpcSpawner;
 import com.smallaswater.littlemonster.utils.Utils;
 
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author MobPlugin
@@ -24,9 +26,9 @@ public class AutoSpawnTask extends Thread{
 
     private Config pluginConfig;
 
-    private LittleMasterMainClass plugin;
+    private LittleMonsterMainClass plugin;
 
-    public AutoSpawnTask(LittleMasterMainClass plugin) {
+    public AutoSpawnTask(LittleMonsterMainClass plugin) {
         this.pluginConfig = plugin.getConfig();
         this.plugin = plugin;
         this.prepareSpawnerClasses();
@@ -34,7 +36,7 @@ public class AutoSpawnTask extends Thread{
     }
 
     private void prepareMaxSpawns() {
-        int size  = 0;
+        int size = 0;
         for(AbstractEntitySpawner spawner : entitySpawners){
             size = pluginConfig.getInt("autospawn."+spawner.getEntityName()+".maxCount");
             plugin.getLogger().info("加载自动生成 "+spawner.getEntityName()+" 模块 最大数量: "+size);

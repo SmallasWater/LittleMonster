@@ -2,8 +2,6 @@ package com.smallaswater.littlemonster.events;
 
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
-import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
@@ -12,24 +10,17 @@ import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityDeathEvent;
 import cn.nukkit.event.player.PlayerFormRespondedEvent;
 import cn.nukkit.event.player.PlayerMoveEvent;
-import cn.nukkit.form.element.Element;
 import cn.nukkit.form.response.FormResponseCustom;
 import cn.nukkit.form.response.FormResponseSimple;
 import cn.nukkit.form.window.FormWindow;
 import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.form.window.FormWindowSimple;
-import cn.nukkit.item.Item;
-import com.smallaswater.littlemonster.LittleMasterMainClass;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
-import com.smallaswater.littlemonster.items.DeathCommand;
-import com.smallaswater.littlemonster.items.DropItem;
 import com.smallaswater.littlemonster.manager.KeyHandleManager;
 import com.smallaswater.littlemonster.manager.TimerHandleManager;
-import com.smallaswater.littlemonster.utils.Utils;
 import com.smallaswater.littlemonster.windows.LittleWindow;
-
-import java.util.LinkedList;
 
 
 /**
@@ -94,7 +85,7 @@ public class LittleMasterListener implements Listener {
             }else{
                 FormWindow window = event.getWindow();
                 if(window instanceof FormWindowCustom){
-                    MonsterConfig config = LittleMasterMainClass.getMasterMainClass().monsters.get(KeyHandleManager.getKey(player,"menu").toString());
+                    MonsterConfig config = LittleMonsterMainClass.getMasterMainClass().monsters.get(KeyHandleManager.getKey(player,"menu").toString());
                     String h = ((FormResponseCustom)event.getResponse()).getInputResponse(0);
                     if(h != null){
                         config.setHealth(Integer.parseInt(h));

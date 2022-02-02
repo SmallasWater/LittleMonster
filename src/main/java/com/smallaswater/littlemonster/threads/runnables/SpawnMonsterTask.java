@@ -2,9 +2,8 @@ package com.smallaswater.littlemonster.threads.runnables;
 
 
 import cn.nukkit.Server;
-import cn.nukkit.level.Position;
 import cn.nukkit.utils.TextFormat;
-import com.smallaswater.littlemonster.LittleMasterMainClass;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.PositionConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.utils.Utils;
@@ -20,7 +19,7 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
     @Override
     public boolean scheduler() {
         //刷怪
-        for (PositionConfig easyEntity : LittleMasterMainClass.getMasterMainClass().positions.values()) {
+        for (PositionConfig easyEntity : LittleMonsterMainClass.getMasterMainClass().positions.values()) {
             if(easyEntity.getMoveSize() != -1) {
                 for(LittleNpc littleNpc: Utils.getEntitysByPos(easyEntity)){
                     if (littleNpc.distance(easyEntity.getPos()) >= easyEntity.getMoveSize()) {
@@ -41,11 +40,11 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
             }
 
             if (spawn) {
-                if (LittleMasterMainClass.getMasterMainClass().time.containsKey(easyEntity.getName())) {
-                    int t = LittleMasterMainClass.getMasterMainClass().time.get(easyEntity.getName());
+                if (LittleMonsterMainClass.getMasterMainClass().time.containsKey(easyEntity.getName())) {
+                    int t = LittleMonsterMainClass.getMasterMainClass().time.get(easyEntity.getName());
                     t--;
                     if (t <= 0) {
-                        if(LittleMasterMainClass.getMasterMainClass().monsters.containsKey(easyEntity.getLittleNpc().getName())){
+                        if(LittleMonsterMainClass.getMasterMainClass().monsters.containsKey(easyEntity.getLittleNpc().getName())){
                             if(easyEntity.getConfig().getBoolean("公告.是否提示",true)) {
                                 Server.getInstance().broadcastMessage(TextFormat.colorize('&', easyEntity.getConfig()
                                         .getString("公告.复活提醒", "&e[ &bBOSS提醒 &e] &a{name} 已复活")
@@ -67,9 +66,9 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
                             }
                         }
                     }
-                    LittleMasterMainClass.getMasterMainClass().time.put(easyEntity.getName(), t);
+                    LittleMonsterMainClass.getMasterMainClass().time.put(easyEntity.getName(), t);
                 } else {
-                    LittleMasterMainClass.getMasterMainClass().time.put(easyEntity.getName(),easyEntity.getRound());
+                    LittleMonsterMainClass.getMasterMainClass().time.put(easyEntity.getName(),easyEntity.getRound());
                 }
             }
         }

@@ -22,8 +22,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -34,11 +32,11 @@ import java.util.Map;
  * Create on 2021/6/28 7:48
  * Package com.smallaswater.littlemaster
  */
-public class LittleMasterMainClass extends PluginBase {
+public class LittleMonsterMainClass extends PluginBase {
 
     public Config nbtItem;
 
-    private static LittleMasterMainClass masterMainClass;
+    private static LittleMonsterMainClass masterMainClass;
 
     public static LinkedHashMap<String, Skin> loadSkins = new LinkedHashMap<>();
 
@@ -63,7 +61,7 @@ public class LittleMasterMainClass extends PluginBase {
         init();
         saveDefaultConfig();
         reloadConfig();
-        this.saveResource("LittleMaster介绍.pdf",true);
+        this.saveResource("LittleMonster介绍.pdf",true);
         this.getServer().getCommandMap().register("lt",new LittleNpcSpawnCommand());
         this.getLogger().info("副本信息读取成功");
 
@@ -104,7 +102,7 @@ public class LittleMasterMainClass extends PluginBase {
         }
     }
 
-    public static LittleMasterMainClass getMasterMainClass() {
+    public static LittleMonsterMainClass getMasterMainClass() {
         return masterMainClass;
     }
 
