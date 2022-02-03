@@ -71,18 +71,22 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          this.destination = this.entity.getTargetVector().clone();
       }
 
-      if (this.destinationDeviate > 0) {
-         double x = Utils.rand(this.destinationDeviate - 3, this.destinationDeviate);
-         double z = Utils.rand(this.destinationDeviate - 3, this.destinationDeviate);
-         Vector3 vector3 = this.destination.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
-         vector3.y += 5;
-         for (int i=0; i<10; i++) {
-            if (this.level.getBlock(vector3).canPassThrough() && !this.level.getBlock(vector3.down()).canPassThrough()) {
-               this.destination = vector3;
-               break;
+      try {
+         if (this.destinationDeviate > 0) {
+            double x = Utils.rand(this.destinationDeviate - 3, this.destinationDeviate);
+            double z = Utils.rand(this.destinationDeviate - 3, this.destinationDeviate);
+            Vector3 vector3 = this.destination.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
+            vector3.y += 5;
+            for (int i=0; i<10; i++) {
+               if (this.level.getBlock(vector3).canPassThrough() && !this.level.getBlock(vector3.down()).canPassThrough()) {
+                  this.destination = vector3;
+                  break;
+               }
+               vector3.y--;
             }
-            vector3.y--;
          }
+      } catch (Exception e) {
+         LittleMonsterMainClass.getMasterMainClass().getLogger().error("设置终点偏移错误", e);
       }
 
       this.resetTemporary();
