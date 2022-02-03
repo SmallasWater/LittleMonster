@@ -181,6 +181,7 @@ public class LittleNpcSpawnCommand extends Command {
                                     }
                                 } else {
                                     sender.sendMessage("§c不存在" + strings[2] + "怪物");
+                                    return true;
                                 }
                                 sender.sendMessage("§a创建成功");
                             } catch (Exception e) {
