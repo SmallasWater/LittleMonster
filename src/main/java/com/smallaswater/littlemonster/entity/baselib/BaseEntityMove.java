@@ -421,8 +421,8 @@ public abstract class BaseEntityMove extends BaseEntity {
             this.seeFollowTarget();
         }
 
-        x = this.motionX * (double)tickDiff;
-        z = this.motionZ * (double)tickDiff;
+        x = this.motionX;
+        z = this.motionZ;
         boolean isJump = this.checkJump(x, z);
         if (this.stayTime > 0) {
             this.stayTime -= tickDiff;
