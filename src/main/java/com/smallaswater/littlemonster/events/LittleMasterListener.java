@@ -10,6 +10,7 @@ import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityDeathEvent;
 import cn.nukkit.event.player.PlayerFormRespondedEvent;
 import cn.nukkit.event.player.PlayerMoveEvent;
+import cn.nukkit.event.server.ServerStopEvent;
 import cn.nukkit.form.response.FormResponseCustom;
 import cn.nukkit.form.response.FormResponseSimple;
 import cn.nukkit.form.window.FormWindow;
@@ -20,6 +21,8 @@ import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.manager.KeyHandleManager;
 import com.smallaswater.littlemonster.manager.TimerHandleManager;
+import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
+import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
 import com.smallaswater.littlemonster.windows.LittleWindow;
 
 
@@ -117,5 +120,11 @@ public class LittleMasterListener implements Listener {
                 }
             }
         }
+    }
+
+    @EventHandler
+    public void onServerStop(ServerStopEvent event) {
+        RouteFinderThreadPool.shutDownNow();
+        PluginMasterThreadPool.shutDownNow();
     }
 }
