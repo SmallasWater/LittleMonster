@@ -123,7 +123,7 @@ public class LittleNpcSpawnCommand extends Command {
                                 stringBuilder.append(strings[i]).append("\n");
                             }
                             stringBuilder.deleteCharAt(stringBuilder.length()-1);
-                           player.sendMessage(TextFormat.colorize('&', stringBuilder.toString()));
+                            player.sendMessage(TextFormat.colorize('&', stringBuilder.toString()));
                            return true;
                         }else{
                             if(sender instanceof EntityCommandSender){
