@@ -74,15 +74,16 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       if (this.destinationDeviate > 0) {
          double x = Utils.rand(this.destinationDeviate - 3, this.destinationDeviate);
          double z = Utils.rand(this.destinationDeviate - 3, this.destinationDeviate);
-         Vector3 vector3 = this.destination.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
-         vector3.y += 5;
+         Vector3 vector3 = this.destination.add(Utils.rand() ? x : -x, 10, Utils.rand() ? z : -z);
+         this.destination = this.getHighestUnder(vector3, 5);
+         /*vector3.y += 5;
          for (int i=0; i<10; i++) {
             if (this.level.getBlock(vector3).canPassThrough() && !this.level.getBlock(vector3.down()).canPassThrough()) {
                this.destination = vector3;
                break;
             }
             vector3.y--;
-         }
+         }*/
       }
 
       this.resetTemporary();

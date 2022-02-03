@@ -36,6 +36,7 @@ import com.smallaswater.littlemonster.skill.defaultskill.SummonHealthSkill;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -70,7 +71,7 @@ public class LittleNpc extends BaseEntityMove {
         this.close();
     }
 
-    public LittleNpc(FullChunk chunk, CompoundTag nbt, MonsterConfig config){
+    public LittleNpc(FullChunk chunk, CompoundTag nbt, @NotNull MonsterConfig config){
         super(chunk, nbt);
         this.config = config;
         this.name = config.getName();
@@ -82,13 +83,7 @@ public class LittleNpc extends BaseEntityMove {
         this.setMaxHealth(config.getHealth());
         this.namedTag.putString(TAG,name);
         this.route = new WalkerRouteFinder(this);
-        if (this.config.getAttackDistance() > 5) {
-            if (this.route.getDestinationDeviate() <= 0) {
-                this.route.setDestinationDeviate(this.config.getAttackDistance() * 0.8);
-            }
-        }else {
-            this.route.setDestinationDeviate(0);
-        }
+        this.route.setDestinationDeviate(Math.max(1, config.getAttackDistance() * 0.8));
     }
 
     private Player getDamageMax(){
