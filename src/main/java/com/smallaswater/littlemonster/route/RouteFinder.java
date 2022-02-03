@@ -162,7 +162,7 @@ public abstract class RouteFinder {
          lock.readLock().lock();
          if (this.hasNext() &&  this.getCurrentNode().getVector3()!=null) {
             Vector3 cur = this.getCurrentNode().getVector3();
-            return cur.distance(vec) < 0.8;
+            return cur.distance(vec) < 1;
          }
          return false;
       } finally {

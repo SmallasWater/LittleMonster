@@ -159,18 +159,16 @@ public abstract class BaseEntityMove extends BaseEntity {
                 }
 
                 //entities.sort((p1, p2) -> Double.compare(this.distance(p1) - this.distance(p2), 0.0D));
-                PluginMasterThreadPool.ASYNC_EXECUTOR.submit(()->{
-                    ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
-                    entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
-                    if (!entities.isEmpty()) {
-                        EntityCreature entity = entities.get(0);
-                        if (entity != this.getFollowTarget()) {
-                            if(canAttackEntity(entity)) {
-                                this.fightEntity(entity);
-                            }
+                ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
+                entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
+                if (!entities.isEmpty()) {
+                    EntityCreature entity = entities.get(0);
+                    if (entity != this.getFollowTarget()) {
+                        if(canAttackEntity(entity)) {
+                            this.fightEntity(entity);
                         }
                     }
-                });
+                }
 
 //                CompletableFuture<>.supplyAsync(() -> {
 //
@@ -188,7 +186,7 @@ public abstract class BaseEntityMove extends BaseEntity {
 
             //获取寻路目标点
             if (this.route != null){
-                if (!this.route.isSearching() && this.route.hasArrivedNodeInaccurate(this) && this.route.hasNext()) {
+                if (!this.route.needSearching() && this.route.hasArrivedNodeInaccurate(this)) {
                     this.target = this.route.next();
                     return;
                 }else if (this.followTarget != null && !this.route.isSearching()){
@@ -210,18 +208,18 @@ public abstract class BaseEntityMove extends BaseEntity {
                         x = Utils.rand(10, 30);
                         z = Utils.rand(10, 30);
                         nextTarget = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);*/
-                    } else if (Utils.rand(1, 5) == 1) {
-                        x = Utils.rand(10, 40);
-                        z = Utils.rand(10, 40);
-                        this.stayTime = Utils.rand(20, 100);
+                    } else if (Utils.rand(1, 10) == 1) {
+                        x = Utils.rand(10, 50);
+                        z = Utils.rand(10, 50);
+                        this.stayTime = Utils.rand(60, 200);
                         nextTarget = this.add(Utils.rand() ? x : -x, /*Utils.rand(-20.0, 20.0) / 10*/0, Utils.rand() ? z : -z);
                         nextTarget.y+=5;
                         for (int i=0; i<10; i++) {
+                            nextTarget.y--;
                             if (this.level.getBlock(nextTarget).canPassThrough() &&
                                     !this.level.getBlock(nextTarget.down()).canPassThrough()) {
                                 break;
                             }
-                            nextTarget.y--;
                         }
                     }/*else if (this.moveTime <= 0 || this.target == null) {
                         x = Utils.rand(10, 40);
@@ -370,7 +368,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                         this.attackEntity((EntityCreature) target);
                     }
                 }
-            }else if (target != null && Math.pow(this.x - target.x, 2.0D) + Math.pow(this.z - target.z, 2.0D) <= 1.0D) {
+            }else if (target != null && this.distance(target) < 0.8) {
                 this.target = null;
                 this.moveTime = 0;
             }

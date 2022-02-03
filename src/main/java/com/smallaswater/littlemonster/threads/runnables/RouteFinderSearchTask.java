@@ -17,7 +17,7 @@ public class RouteFinderSearchTask implements Runnable {
    public void run() {
       if (this.route != null) {
          while(this.retryTime < 50) {
-            if (!this.route.isSearching()) {
+            if (this.route.needSearching()) {
                this.route.research();
                return;
             }

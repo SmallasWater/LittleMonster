@@ -51,7 +51,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    public boolean search() {
       LittleMonsterMainClass.getMasterMainClass().getLogger().info("寻路开始");
 
-      if (this.entity.isClosed() || this.entity.getFollowTarget() == null ) {
+      if ((this.entity.isClosed() || this.entity.getFollowTarget() == null) && this.entity.getTargetVector() == null && this.destination == null) {
          this.searching = false;
          this.finished = true;
          return false;
@@ -64,7 +64,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       }
 
       if (this.destination == null) {
-         if (this.entity.getFollowTarget() == null || this.entity.getFollowTarget().isClosed()) {
+         if ((this.entity.getFollowTarget() == null || this.entity.getFollowTarget().isClosed()) && this.entity.getTargetVector() == null) {
             this.searching = false;
             this.finished = true;
             return false;
@@ -104,6 +104,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
                this.searchLimit = 0;
                this.searching = false;
                this.finished = true;
+               LittleMonsterMainClass.getMasterMainClass().getLogger().info("寻路被打断");
                return false;
             }
 
@@ -113,6 +114,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
                this.finished = true;
                this.reachable = false;
                this.addNode(new Node(this.destination));
+               LittleMonsterMainClass.getMasterMainClass().getLogger().info("寻路找不到路径");
                return false;
             }
 
@@ -142,6 +144,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          this.finished = true;
          this.reachable = false;
          this.addNode(new Node(this.destination));
+         LittleMonsterMainClass.getMasterMainClass().getLogger().info("寻路失败");
          return false;
       }
    }
