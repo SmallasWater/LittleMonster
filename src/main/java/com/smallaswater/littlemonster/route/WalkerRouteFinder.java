@@ -73,8 +73,8 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
       try {
          if (this.destinationDeviate > 0) {
-            double x = Utils.rand(this.destinationDeviate - 3, this.destinationDeviate);
-            double z = Utils.rand(this.destinationDeviate - 3, this.destinationDeviate);
+            double x = Utils.rand(this.destinationDeviate * 0.8, this.destinationDeviate);
+            double z = Utils.rand(this.destinationDeviate * 0.8, this.destinationDeviate);
             Vector3 vector3 = this.destination.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
             vector3.y += 5;
             for (int i=0; i<10; i++) {
