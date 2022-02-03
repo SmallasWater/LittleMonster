@@ -44,6 +44,9 @@ public class LittleMonsterMainClass extends PluginBase {
 
     public LinkedHashMap<String, PositionConfig> positions = new LinkedHashMap<>();
 
+    /**
+     * 刷怪点刷新倒计时
+     */
     public HashMap<String, Integer> time = new HashMap<>();
 
     public ArrayList<PlayerFlotTextManager> texts = new ArrayList<>();

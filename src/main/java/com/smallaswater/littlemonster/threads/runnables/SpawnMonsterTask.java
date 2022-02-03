@@ -19,56 +19,56 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
     @Override
     public boolean scheduler() {
         //刷怪
-        for (PositionConfig easyEntity : LittleMonsterMainClass.getMasterMainClass().positions.values()) {
-            if(easyEntity.getMoveSize() != -1) {
-                for(LittleNpc littleNpc: Utils.getEntitysByPos(easyEntity)){
-                    if (littleNpc.distance(easyEntity.getPos()) >= easyEntity.getMoveSize()) {
-                        littleNpc.teleport(easyEntity.getPos());
+        for (PositionConfig positionConfig : LittleMonsterMainClass.getMasterMainClass().positions.values()) {
+            if(positionConfig.getMoveSize() != -1) {
+                for(LittleNpc littleNpc: Utils.getEntitysByPos(positionConfig)){
+                    if (littleNpc.distance(positionConfig.getPos()) >= positionConfig.getMoveSize()) {
+                        littleNpc.teleport(positionConfig.getPos());
                         littleNpc.setHealth(littleNpc.getMaxHealth());
                     }
                 }
             }
-            if(!easyEntity.isOpen()){
+            if(!positionConfig.isOpen()){
                 continue;
             }
             boolean spawn = true;
-            int ec = Utils.getEntityCount(easyEntity.getPos().level,
-                    easyEntity.getLittleNpc().getName(),easyEntity.getName());
-            if(ec >= easyEntity.getMaxCount()){
+            int ec = Utils.getEntityCount(positionConfig.getPos().level,
+                    positionConfig.getLittleNpc().getName(),positionConfig.getName());
+            if(ec >= positionConfig.getMaxCount()){
 
                 spawn =  false;
             }
 
             if (spawn) {
-                if (LittleMonsterMainClass.getMasterMainClass().time.containsKey(easyEntity.getName())) {
-                    int t = LittleMonsterMainClass.getMasterMainClass().time.get(easyEntity.getName());
+                if (LittleMonsterMainClass.getMasterMainClass().time.containsKey(positionConfig.getName())) {
+                    int t = LittleMonsterMainClass.getMasterMainClass().time.get(positionConfig.getName());
                     t--;
                     if (t <= 0) {
-                        if(LittleMonsterMainClass.getMasterMainClass().monsters.containsKey(easyEntity.getLittleNpc().getName())){
-                            if(easyEntity.getConfig().getBoolean("公告.是否提示",true)) {
-                                Server.getInstance().broadcastMessage(TextFormat.colorize('&', easyEntity.getConfig()
+                        if(LittleMonsterMainClass.getMasterMainClass().monsters.containsKey(positionConfig.getLittleNpc().getName())){
+                            if(positionConfig.getConfig().getBoolean("公告.是否提示",true)) {
+                                Server.getInstance().broadcastMessage(TextFormat.colorize('&', positionConfig.getConfig()
                                         .getString("公告.复活提醒", "&e[ &bBOSS提醒 &e] &a{name} 已复活")
-                                        .replace("{name}", easyEntity.getLittleNpc().getName())));
+                                        .replace("{name}", positionConfig.getLittleNpc().getName())));
                             }
-                            for(int i = 0;i < easyEntity.getCount();i++) {
-                                LittleNpc npc = easyEntity.getLittleNpc().spawn(easyEntity.getPos(),easyEntity.getLiveTime());
-                                npc.spawnPos = easyEntity.getName();
+                            for(int i = 0;i < positionConfig.getCount();i++) {
+                                LittleNpc npc = positionConfig.getLittleNpc().spawn(positionConfig.getPos(),positionConfig.getLiveTime());
+                                npc.spawnPos = positionConfig.getName();
                             }
                         }
-                        t = easyEntity.getRound();
+                        t = positionConfig.getRound();
                     }
-                    if(easyEntity.getConfig().getBoolean("公告.是否提示",true)) {
-                        for(int i: easyEntity.getConfig().getIntegerList("公告.时间")){
+                    if(positionConfig.getConfig().getBoolean("公告.是否提示",true)) {
+                        for(int i: positionConfig.getConfig().getIntegerList("公告.时间")){
                             if(i == t){
-                                Server.getInstance().broadcastMessage(TextFormat.colorize('&', easyEntity.getConfig()
+                                Server.getInstance().broadcastMessage(TextFormat.colorize('&', positionConfig.getConfig()
                                         .getString("公告.信息", "&e[ &bBOSS提醒 &e] &a{name} 将在 {time} 后复活")
-                                        .replace("{name}", easyEntity.getLittleNpc().getName()).replace("{time}", t + "")));
+                                        .replace("{name}", positionConfig.getLittleNpc().getName()).replace("{time}", t + "")));
                             }
                         }
                     }
-                    LittleMonsterMainClass.getMasterMainClass().time.put(easyEntity.getName(), t);
+                    LittleMonsterMainClass.getMasterMainClass().time.put(positionConfig.getName(), t);
                 } else {
-                    LittleMonsterMainClass.getMasterMainClass().time.put(easyEntity.getName(),easyEntity.getRound());
+                    LittleMonsterMainClass.getMasterMainClass().time.put(positionConfig.getName(),positionConfig.getRound());
                 }
             }
         }
