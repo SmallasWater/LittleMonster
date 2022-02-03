@@ -357,7 +357,7 @@ public class LittleNpc extends BaseEntityMove {
             if(isImmobile() && !config.isImmobile()){
                 sure.setCancelled();
             }
-            if(!config.isKonck()){
+            if(!config.isKnock()){
                 if(sure instanceof EntityDamageByEntityEvent){
                     ((EntityDamageByEntityEvent) sure).setKnockBack(0);
                 }

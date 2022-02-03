@@ -47,7 +47,7 @@ public class MonsterConfig {
 
     private Item item;
 
-    private boolean konck;
+    private boolean knock;
 
     private int healTime;
 
@@ -151,7 +151,7 @@ public class MonsterConfig {
         entity.setDisplayDamage(config.getBoolean("显示伤害榜",true));
         entity.setArea(config.getInt("群体攻击范围",5));
         entity.setCanMove(config.getBoolean("未锁定时是否移动",true));
-        entity.setKonck(config.getBoolean("是否可击退",false));
+        entity.setKnock(config.getBoolean("是否可击退",false));
         entity.setSkin(config.getString("皮肤","粉蓝双瞳猫耳少女"));
         entity.setAttaceSpeed(config.getInt("攻击速度",23));
         entity.setAttaceMode(config.getInt("攻击方式",0));
