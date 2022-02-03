@@ -3,7 +3,7 @@ package com.smallaswater.littlemonster.threads.runnables;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.network.protocol.RemoveEntityPacket;
-import com.smallaswater.littlemonster.LittleMasterMainClass;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.PositionConfig;
 import com.smallaswater.littlemonster.flot.FlotText;
 import com.smallaswater.littlemonster.manager.PlayerFlotTextManager;
@@ -26,44 +26,44 @@ public class FlotTask extends BasePluginThreadTask{
         for(Player player: Server.getInstance().getOnlinePlayers().values()) {
             PlayerFlotTextManager manager = PlayerFlotTextManager.getInstance(player);
             if (player.isOnline()) {
-                for (PositionConfig easyEntity : LittleMasterMainClass.getMasterMainClass().positions.values()) {
-                    if(!easyEntity.isDispalFloat()){
-                        if(manager.hasPosition(easyEntity.getPos())){
-                            particle = manager.get(easyEntity.getPos());
+                for (PositionConfig positionConfig : LittleMonsterMainClass.getMasterMainClass().positions.values()) {
+                    if(!positionConfig.isDispalFloat()){
+                        if(manager.hasPosition(positionConfig.getPos())){
+                            particle = manager.get(positionConfig.getPos());
                             RemoveEntityPacket pk = new RemoveEntityPacket();
                             pk.eid = particle.getEntityId();
                             player.dataPacket(pk);
-                            manager.remove(easyEntity.getPos());
+                            manager.remove(positionConfig.getPos());
                         }
                         continue;
                     }
-                    if (easyEntity.getPos().level.getFolderName().equals(player.getLevel().getFolderName())) {
-                        if (!manager.hasPosition(easyEntity.getPos())) {
-                            particle = new FlotText(easyEntity.getName(), easyEntity.getPos().add(0.5, 2, 0.5), easyEntity.getTitle(), player);
-                            easyEntity.getPos().getLevel().addParticle(particle, player);
+                    if (positionConfig.getPos().level.getFolderName().equals(player.getLevel().getFolderName())) {
+                        if (!manager.hasPosition(positionConfig.getPos())) {
+                            particle = new FlotText(positionConfig.getName(), positionConfig.getPos().add(0.5, 2, 0.5), positionConfig.getTitle(), player);
+                            positionConfig.getPos().getLevel().addParticle(particle, player);
                             manager.add(particle);
                         } else {
 
-                            particle = manager.get(easyEntity.getPos());
-                            particle.setTitle(easyEntity.getTitle());
-                            String text = easyEntity.getText();
-                            text = text.replace("{名称}", easyEntity.getLittleNpc().getName())
-                                    .replace("{数量}", Utils
-                                            .getEntityCount(easyEntity.getPos().level, easyEntity.getLittleNpc().getName(),easyEntity.getName()) + "")
-                                    .replace("{上限}", easyEntity.getMaxCount() + "")
-                                    .replace("{time}", LittleMasterMainClass.getMasterMainClass().time.containsKey(easyEntity.getName()) ?
-                                            LittleMasterMainClass.getMasterMainClass().time.get(easyEntity.getName()) + "" : "0")
+                            particle = manager.get(positionConfig.getPos());
+                            particle.setTitle(positionConfig.getTitle());
+                            String text = positionConfig.getText();
+                            int time = LittleMonsterMainClass.getMasterMainClass().time.getOrDefault(positionConfig.getName(), 0);
+                            int entityCount = Utils.getEntityCount(positionConfig.getPos().level, positionConfig.getLittleNpc().getName(), positionConfig.getName());
+                            text = text.replace("{名称}", positionConfig.getLittleNpc().getName())
+                                    .replace("{数量}", entityCount + "")
+                                    .replace("{上限}", positionConfig.getMaxCount() + "")
+                                    .replace("{time}", (entityCount >= positionConfig.getMaxCount() ? "已刷新" : String.valueOf(time)))
                                     .replace("{name}", player.getName());
                             particle.setText(text);
                             particle.toUpData();
                         }
                     } else {
-                        if (manager.hasPosition(easyEntity.getPos())) {
-                            particle = manager.get(easyEntity.getPos());
+                        if (manager.hasPosition(positionConfig.getPos())) {
+                            particle = manager.get(positionConfig.getPos());
                             RemoveEntityPacket pk = new RemoveEntityPacket();
                             pk.eid = particle.getEntityId();
                             player.dataPacket(pk);
-                            manager.remove(easyEntity.getPos());
+                            manager.remove(positionConfig.getPos());
                         }
                     }
                 }
@@ -76,14 +76,14 @@ public class FlotTask extends BasePluginThreadTask{
                         manager.remove(position);
                     }
                 }
-                LittleMasterMainClass.getMasterMainClass().texts.clear();
+                LittleMonsterMainClass.getMasterMainClass().texts.clear();
             }
             if (PlayerFlotTextManager.getInstance(player).getFlotTexts().size() > 0) {
                 try {
                     ArrayList< FlotText> texts = PlayerFlotTextManager.getInstance(player).getFlotTexts();
                     if (texts.size() > 0) {
                         for (FlotText position : texts) {
-                            if (!LittleMasterMainClass.getMasterMainClass().positions.containsKey(position.getName())) {
+                            if (!LittleMonsterMainClass.getMasterMainClass().positions.containsKey(position.getName())) {
                                 RemoveEntityPacket pk = new RemoveEntityPacket();
                                 pk.eid = position.getEntityId();
                                 player.dataPacket(pk);

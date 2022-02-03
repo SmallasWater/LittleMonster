@@ -4,7 +4,7 @@ import cn.nukkit.block.Block;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.SimpleAxisAlignedBB;
 import cn.nukkit.math.Vector3;
-import com.smallaswater.littlemonster.LittleMasterMainClass;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
 import com.smallaswater.littlemonster.utils.Utils;
 
@@ -125,7 +125,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       }catch (Exception e) {
          if (!(this.entity == null || this.entity.isClosed() || this.entity.getFollowTarget() == null ||
                  this.entity.getFollowTarget().isClosed())) {
-            LittleMasterMainClass.getMasterMainClass().getLogger().error("寻路错误", e);
+            LittleMonsterMainClass.getMasterMainClass().getLogger().error("寻路错误", e);
          }
          this.searching = false;
          this.finished = true;

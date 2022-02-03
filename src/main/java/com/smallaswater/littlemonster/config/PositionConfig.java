@@ -4,8 +4,9 @@ import cn.nukkit.Server;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import cn.nukkit.utils.Config;
-import com.smallaswater.littlemonster.LittleMasterMainClass;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import lombok.Data;
+
 import java.util.Map;
 
 /**
@@ -68,7 +69,7 @@ public class PositionConfig {
 
     public static PositionConfig loadPosition(String name, Config config) {
         PositionConfig entity = new PositionConfig(name,config);
-        MonsterConfig monsterConfig = LittleMasterMainClass.getMasterMainClass().monsters
+        MonsterConfig monsterConfig = LittleMonsterMainClass.getMasterMainClass().monsters
                 .getOrDefault(config.getString("刷新怪物",null),null);
         if(monsterConfig == null){
             return null;

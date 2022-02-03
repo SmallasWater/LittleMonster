@@ -1,5 +1,7 @@
 package com.smallaswater.littlemonster.threads.runnables;
 
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
+
 /**
  * @author SmallasWater
  * Create on 2021/6/29 8:17
@@ -8,9 +10,9 @@ package com.smallaswater.littlemonster.threads.runnables;
 public abstract class BasePluginThreadTask implements Runnable {
 
     @Override
-    public void run() {
-        while (true){
-            if(!scheduler()){
+    public final void run() {
+        while (LittleMonsterMainClass.getMasterMainClass().isEnabled()) {
+            if(!scheduler()) {
                 break;
             }
             try {
@@ -20,6 +22,7 @@ public abstract class BasePluginThreadTask implements Runnable {
             }
         }
     }
+
     /**
      * 循环执行
      * @return 是否终止

@@ -7,7 +7,7 @@ import cn.nukkit.level.Position;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
-import com.smallaswater.littlemonster.LittleMasterMainClass;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.items.DeathCommand;
 import com.smallaswater.littlemonster.items.DropItem;
@@ -217,8 +217,8 @@ public class MonsterConfig {
 
     public LittleNpc spawn(Position spawn, int time){
         Skin skin = new Skin();
-        if(LittleMasterMainClass.loadSkins.containsKey(getSkin())){
-            skin = LittleMasterMainClass.loadSkins.get(getSkin());
+        if(LittleMonsterMainClass.loadSkins.containsKey(getSkin())){
+            skin = LittleMonsterMainClass.loadSkins.get(getSkin());
         }
 
         LittleNpc littleNpc = new LittleNpc(spawn.getChunk(),
@@ -257,8 +257,8 @@ public class MonsterConfig {
         littleNpc.healSettingTime = getHealTime();
         littleNpc.setImmobile(isImmobile());
         Skin skin = new Skin();
-        if(LittleMasterMainClass.loadSkins.containsKey(getSkin())){
-            skin =  LittleMasterMainClass.loadSkins.get(getSkin());
+        if(LittleMonsterMainClass.loadSkins.containsKey(getSkin())){
+            skin =  LittleMonsterMainClass.loadSkins.get(getSkin());
         }
         littleNpc.getInventory().setItemInHand(item);
         littleNpc.getInventory().setArmorContents(armor.toArray(new Item[0]));
@@ -281,8 +281,8 @@ public class MonsterConfig {
             skillManager.health = Integer.parseInt(health);
             if(skillManager instanceof AttributeHealthSkill){
                 if(((AttributeHealthSkill) skillManager).getAttributeType() == AttributeHealthSkill.AttributeType.SKIN){
-                    if(LittleMasterMainClass.loadSkins.containsKey(effect.toString())){
-                        Skin skin = LittleMasterMainClass.loadSkins.get(effect.toString());
+                    if(LittleMonsterMainClass.loadSkins.containsKey(effect.toString())){
+                        Skin skin = LittleMonsterMainClass.loadSkins.get(effect.toString());
                         ((AttributeHealthSkill) skillManager).setSkin(skin);
                     }else{
                         return null;

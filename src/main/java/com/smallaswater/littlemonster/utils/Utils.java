@@ -11,7 +11,7 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
-import com.smallaswater.littlemonster.LittleMasterMainClass;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.PositionConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.entity.baselib.Area;
@@ -228,7 +228,7 @@ public class Utils {
 
     public static String[] getDefaultFiles(String fileName) {
         List<String> names = new ArrayList<>();
-        File files = new File(LittleMasterMainClass.getMasterMainClass().getDataFolder()+ "/"+fileName);
+        File files = new File(LittleMonsterMainClass.getMasterMainClass().getDataFolder()+ "/"+fileName);
         if(files.isDirectory()){
             File[] filesArray = files.listFiles();
             if(filesArray != null){
@@ -243,14 +243,14 @@ public class Utils {
     }
 
     public static Config getNbtItemConfig(){
-        if(LittleMasterMainClass.getMasterMainClass().nbtItem == null){
-            LittleMasterMainClass.getMasterMainClass().nbtItem = new Config(LittleMasterMainClass.getMasterMainClass().getDataFolder()+"/nbtitem.yml",Config.YAML);
+        if(LittleMonsterMainClass.getMasterMainClass().nbtItem == null){
+            LittleMonsterMainClass.getMasterMainClass().nbtItem = new Config(LittleMonsterMainClass.getMasterMainClass().getDataFolder()+"/nbtitem.yml",Config.YAML);
         }
-        return LittleMasterMainClass.getMasterMainClass().nbtItem;
+        return LittleMonsterMainClass.getMasterMainClass().nbtItem;
     }
 
     public static String getNbtItem(String string){
-        return LittleMasterMainClass.getMasterMainClass().nbtItem.getString(string,"");
+        return LittleMonsterMainClass.getMasterMainClass().nbtItem.getString(string,"");
     }
 
     public static LinkedHashMap<String,Number> toRankList(LinkedHashMap<String, ? extends Number> map){
