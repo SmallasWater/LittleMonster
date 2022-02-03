@@ -1,6 +1,9 @@
 package com.smallaswater.littlemonster.route;
 
+import cn.nukkit.Server;
+import cn.nukkit.block.Block;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.math.Vector3;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
 import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
@@ -206,5 +209,48 @@ public abstract class RouteFinder {
 
    public boolean interrupt() {
       return this.interrupt ^= true;
+   }
+
+   public Block getBlockFast(Vector3 vector3) {
+      return this.getBlockFast(vector3, true);
+   }
+
+   public Block getBlockFast(Vector3 vector3, boolean load) {
+      return this.getBlockFast(vector3.getFloorX(), vector3.getFloorY(), vector3.getFloorZ(), load);
+   }
+
+   public Block getBlockFast(int x, int y, int z) {
+      return this.getBlockFast(x, y, z, true);
+   }
+
+   public Block getBlockFast(int x, int y, int z, boolean load) {
+      if (!"Nukkit".equals(Server.getInstance().getName())) {
+         return this.level.getBlock(x, y, z);
+      }
+
+      int fullState;
+      if (y >= 0 && y < 256) {
+         int cx = x >> 4;
+         int cz = z >> 4;
+         BaseFullChunk chunk;
+         if (load) {
+            chunk = this.getLevel().getChunk(cx, cz);
+         } else {
+            chunk = this.getLevel().getChunkIfLoaded(cx, cz);
+         }
+         if (chunk != null) {
+            fullState = chunk.getFullBlock(x & 0xF, y, z & 0xF);
+         } else {
+            fullState = 0;
+         }
+      } else {
+         fullState = 0;
+      }
+      Block block = Block.fullList[fullState & 0xFFF].clone();
+      block.x = x;
+      block.y = y;
+      block.z = z;
+      block.level = this.getLevel();
+      return block;
    }
 }
