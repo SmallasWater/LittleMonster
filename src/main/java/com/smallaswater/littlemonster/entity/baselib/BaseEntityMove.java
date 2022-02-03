@@ -15,6 +15,7 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.route.RouteFinder;
+import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
 import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
 import com.smallaswater.littlemonster.threads.runnables.RouteFinderSearchTask;
 import com.smallaswater.littlemonster.utils.Utils;
@@ -22,6 +23,7 @@ import nukkitcoders.mobplugin.entities.animal.WalkingAnimal;
 import nukkitcoders.mobplugin.entities.monster.Monster;
 
 import java.util.ArrayList;
+import java.util.concurrent.CompletableFuture;
 
 
 /**
@@ -157,14 +159,31 @@ public abstract class BaseEntityMove extends BaseEntity {
                 }
 
                 //entities.sort((p1, p2) -> Double.compare(this.distance(p1) - this.distance(p2), 0.0D));
-                ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
-                entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
-                if (!entities.isEmpty()) {
-                    EntityCreature entity = entities.get(0);
-                    if (entity != this.getFollowTarget()) {
-                        this.fightEntity(entity);
+                PluginMasterThreadPool.ASYNC_EXECUTOR.submit(()->{
+                    ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
+                    entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
+                    if (!entities.isEmpty()) {
+                        EntityCreature entity = entities.get(0);
+                        if (entity != this.getFollowTarget()) {
+                            if(canAttackEntity(entity)) {
+                                this.fightEntity(entity);
+                            }
+                        }
                     }
-                }
+                });
+
+//                CompletableFuture<>.supplyAsync(() -> {
+//
+//                }, PluginMasterThreadPool.ASYNC_EXECUTOR).thenAccept(isHasBlock::set);
+                //要不这种操作放在异步
+//                ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
+//                entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
+//                if (!entities.isEmpty()) {
+//                    EntityCreature entity = entities.get(0);
+//                    if (entity != this.getFollowTarget()) {
+//                        this.fightEntity(entity);
+//                    }
+//                }
             }
 
             //获取寻路目标点
@@ -377,7 +396,8 @@ public abstract class BaseEntityMove extends BaseEntity {
         }
 
         Vector3 before = this.target;
-        this.checkTarget();
+        PluginMasterThreadPool.ASYNC_EXECUTOR.submit(this::checkTarget);
+//        this.checkTarget();
         double x;
         double z;
         if (this.target != null || before != this.target) {
