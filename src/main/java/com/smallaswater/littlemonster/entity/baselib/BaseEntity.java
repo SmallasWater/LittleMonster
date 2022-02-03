@@ -20,11 +20,13 @@ import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
+import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -66,6 +68,8 @@ public abstract class BaseEntity extends EntityHuman {
     protected MonsterConfig config;
 
     boolean canAttack = true;
+
+    protected final ConcurrentHashMap<EntityCreature, TargetWeighted> targetWeightedMap = new ConcurrentHashMap<>();
 
     //开发接口
     //攻击方式
@@ -213,7 +217,7 @@ public abstract class BaseEntity extends EntityHuman {
         if (creature instanceof Player) {
             return !this.isPlayerTarget((Player) creature);
         }else{
-            return creature.closed || !creature.isAlive() || !creature.getLevel().getFolderName().equalsIgnoreCase(getLevel().getFolderName()) || distance > seeSize;
+            return creature.closed || !creature.isAlive() || creature.getLevel() != this.getLevel() || distance > seeSize;
         }
     }
 
@@ -426,6 +430,48 @@ public abstract class BaseEntity extends EntityHuman {
         }
 
         super.setSkin(skin);
+    }
+
+
+    public TargetWeighted getTargetWeighted(EntityCreature entity) {
+        if (!this.targetWeightedMap.containsKey(entity)) {
+            this.targetWeightedMap.put(entity, new TargetWeighted());
+        }
+        return this.targetWeightedMap.get(entity);
+    }
+
+    @Data
+    public static class TargetWeighted {
+
+        /**
+         * 扫描附近实体
+         */
+        public static final double REASON_AUTO_SCAN = 10;
+        /**
+         * 被动反击
+         */
+        public static final double REASON_PASSIVE_ATTACK_ENTITY = 100.0;
+
+        private int base = 1;
+        private double reason = 0;
+        private double causeDamage = 0;
+        private double distance = 0;
+
+        public void setReason(double reason) {
+            this.setReason(reason, false);
+        }
+
+        public void setReason(double reason, boolean forcibly) {
+            if (reason > this.reason || forcibly) {
+                this.reason = reason;
+            }
+        }
+
+        public double getFinalWeighted() {
+            //TODO 计算公式
+            return this.base + this.reason + (this.causeDamage * 1.2) - (this.distance * 0.5);
+        }
+
     }
 
 }

@@ -86,6 +86,9 @@ public class MonsterConfig {
      */
     private boolean targetPlayer;
 
+    /**
+     * 被动回击生物
+     */
     private boolean passiveAttackEntity;
 
     /**
