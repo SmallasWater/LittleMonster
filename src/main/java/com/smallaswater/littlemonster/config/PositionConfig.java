@@ -31,17 +31,13 @@ public class PositionConfig {
 
     private int liveTime = -1;
 
-
     private double size = 1;
 
-
     private int count;
-
 
     private int round;
 
     private int maxCount;
-
 
     private String title;
 
@@ -49,13 +45,9 @@ public class PositionConfig {
 
     private int spawnSize;
 
-
-
     private boolean dispalFloat;
 
-
-
-
+    public int time = -1;
 
 
     private PositionConfig(String name, Config config){

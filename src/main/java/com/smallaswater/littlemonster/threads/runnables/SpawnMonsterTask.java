@@ -40,10 +40,9 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
             }
 
             if (spawn) {
-                if (LittleMonsterMainClass.getMasterMainClass().time.containsKey(positionConfig.getName())) {
-                    int t = LittleMonsterMainClass.getMasterMainClass().time.get(positionConfig.getName());
-                    t--;
-                    if (t <= 0) {
+                if (positionConfig.time > 0) {
+                    positionConfig.time--;
+                    if (positionConfig.time <= 0) {
                         if(LittleMonsterMainClass.getMasterMainClass().monsters.containsKey(positionConfig.getLittleNpc().getName())){
                             if(positionConfig.getConfig().getBoolean("公告.是否提示",true)) {
                                 Server.getInstance().broadcastMessage(TextFormat.colorize('&', positionConfig.getConfig()
@@ -55,20 +54,20 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
                                 npc.spawnPos = positionConfig.getName();
                             }
                         }
-                        t = positionConfig.getRound();
+                        positionConfig.time = positionConfig.getRound();
                     }
                     if(positionConfig.getConfig().getBoolean("公告.是否提示",true)) {
                         for(int i: positionConfig.getConfig().getIntegerList("公告.时间")){
-                            if(i == t){
+                            if(i == positionConfig.time){
                                 Server.getInstance().broadcastMessage(TextFormat.colorize('&', positionConfig.getConfig()
                                         .getString("公告.信息", "&e[ &bBOSS提醒 &e] &a{name} 将在 {time} 后复活")
-                                        .replace("{name}", positionConfig.getLittleNpc().getName()).replace("{time}", t + "")));
+                                        .replace("{name}", positionConfig.getLittleNpc().getName()).replace("{time}", positionConfig.time + "")));
                             }
                         }
                     }
-                    LittleMonsterMainClass.getMasterMainClass().time.put(positionConfig.getName(), t);
+
                 } else {
-                    LittleMonsterMainClass.getMasterMainClass().time.put(positionConfig.getName(),positionConfig.getRound());
+                    positionConfig.time = positionConfig.getRound();
                 }
             }
         }

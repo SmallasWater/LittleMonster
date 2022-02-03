@@ -47,7 +47,7 @@ public class FlotTask extends BasePluginThreadTask{
                             particle = manager.get(positionConfig.getPos());
                             particle.setTitle(positionConfig.getTitle());
                             String text = positionConfig.getText();
-                            int time = LittleMonsterMainClass.getMasterMainClass().time.getOrDefault(positionConfig.getName(), 0);
+                            int time = positionConfig.time;
                             int entityCount = Utils.getEntityCount(positionConfig.getPos().level, positionConfig.getLittleNpc().getName(), positionConfig.getName());
                             text = text.replace("{名称}", positionConfig.getLittleNpc().getName())
                                     .replace("{数量}", entityCount + "")

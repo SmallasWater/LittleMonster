@@ -44,11 +44,6 @@ public class LittleMonsterMainClass extends PluginBase {
 
     public LinkedHashMap<String, PositionConfig> positions = new LinkedHashMap<>();
 
-    /**
-     * 刷怪点刷新倒计时
-     */
-    public HashMap<String, Integer> time = new HashMap<>();
-
     public ArrayList<PlayerFlotTextManager> texts = new ArrayList<>();
 
     private static final String[] SKINS = {"粉蓝双瞳猫耳少女","小丸子","小埋","小黑苦力怕","尸鬼","拉姆","熊孩子","狂三","米奇","考拉","黑岩射手"};
