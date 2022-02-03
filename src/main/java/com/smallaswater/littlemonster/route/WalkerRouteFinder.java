@@ -167,7 +167,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
    private boolean isPassable(Vector3 now, Vector3 target) {
       //跳跃检查
-      if (target.getY() > now.getY() && !this.getLevel().getBlock(now.add(0, 2, 0)).canPassThrough()) {
+      if (target.getFloorY() > now.getFloorY() && !this.getLevel().getBlock(now.add(0, 2, 0)).canPassThrough()) {
          return false;
       }
 
