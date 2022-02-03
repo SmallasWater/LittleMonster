@@ -13,7 +13,6 @@ import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
-import com.smallaswater.littlemonster.LittleMasterMainClass;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.route.RouteFinder;
 import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
@@ -165,11 +164,6 @@ public abstract class BaseEntityMove extends BaseEntity {
                     if (entity != this.getFollowTarget()) {
                         this.fightEntity(entity);
                     }
-
-                    //TODO 删除调试代码
-                    TargetWeighted targetWeighted = this.getTargetWeighted(entity);
-                    LittleMasterMainClass.getMasterMainClass().getLogger().info(this.getName() + " 目标" + entity.getName() + " 权重" + targetWeighted.getFinalWeighted());
-
                 }
             }
 
