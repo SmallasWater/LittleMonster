@@ -6,19 +6,19 @@
 
     <groupId>com.smallaswater.littlemonster</groupId>
     <artifactId>LittleMonster</artifactId>
-    <version>1.6.2</version>
+    <version>1.6.3-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
     </properties>
 
-    <distributionManagement>
+    <!--distributionManagement>
         <repository>
             <id>maven-repo</id>
             <url>file:/www/wwwroot/repo.lanink.cn</url>
         </repository>
-    </distributionManagement>
+    </distributionManagement-->
 
     <repositories>
         <repository>
@@ -42,23 +42,25 @@
             </snapshots>
         </repository>
     </repositories>
+
     <dependencies>
         <dependency>
             <groupId>cn.nukkit</groupId>
             <artifactId>nukkit</artifactId>
             <version>1.0-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>21.0.1</version>
+            <version>22.0.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>RELEASE</version>
-            <scope>compile</scope>
+            <version>1.18.22</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>me.onebone</groupId>
@@ -73,8 +75,8 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/MobPlugin-1.21.4.jar</systemPath>
         </dependency>
-
     </dependencies>
+
     <build>
         <finalName>${project.artifactId}_v${project.version}</finalName>
         <plugins>
@@ -87,9 +89,32 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <version>1.5.3</version>
+                <executions>
+                    <execution>
+                        <id>add-version</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                <include>${project.basedir}/src/main/resources/plugin.yml</include>
+                            </includes>
+                            <replacements>
+                                <replacement>
+                                    <token>version: ".*"</token>
+                                    <value>version: "${project.version}"</value>
+                                </replacement>
+                            </replacements>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-
-
 
 </project>
