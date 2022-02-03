@@ -10,7 +10,6 @@ import com.smallaswater.littlemonster.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.PriorityQueue;
 
 
@@ -20,9 +19,9 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
    private static final int OBLIQUE_MOVE_COST = 14;
 
-   private PriorityQueue<Node> openList = new PriorityQueue<>();
+   private final PriorityQueue<Node> openList = new PriorityQueue<>();
 
-   private ArrayList<Node> closeList = new ArrayList<>();
+   private final ArrayList<Node> closeList = new ArrayList<>();
 
    private int searchLimit = 100;
 
@@ -136,27 +135,18 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    }
 
    private Block getHighestUnder(Vector3 vector3, int limit) {
-      int y;
-      Block block;
       if (limit > 0) {
-         for(y = vector3.getFloorY(); y >= vector3.getFloorY() - limit; --y) {
-            block = this.level.getBlock(vector3.getFloorX(), y, vector3.getFloorZ(), false);
-            if (this.isWalkable(block) && this.level.getBlock(block.add(0.0D, 1.0D, 0.0D), false).getId() == 0) {
-               return block;
-            }
+         for (int y = vector3.getFloorY(); y >= vector3.getFloorY() - limit; y--) {
+            Block block = this.level.getBlock(vector3.getFloorX(), y, vector3.getFloorZ(), false);
+            if (this.isWalkable(block) && level.getBlock(block.add(0, 1, 0), false).getId() == Block.AIR) return block;
          }
-
-         return null;
-      } else {
-         for(y = vector3.getFloorY(); y >= 0; --y) {
-            block = this.level.getBlock(vector3.getFloorX(), y, vector3.getFloorZ(), false);
-            if (this.isWalkable(block) && this.level.getBlock(block.add(0.0D, 1.0D, 0.0D), false).getId() == 0) {
-               return block;
-            }
-         }
-
          return null;
       }
+      for (int y = vector3.getFloorY(); y >= 0; y--) {
+         Block block = this.level.getBlock(vector3.getFloorX(), y, vector3.getFloorZ(), false);
+         if (this.isWalkable(block) && level.getBlock(block.add(0, 1, 0), false).getId() == Block.AIR) return block;
+      }
+      return null;
    }
 
    private boolean canWalkOn(Block block) {
@@ -176,8 +166,11 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    }
 
    private int getWalkableHorizontalOffset(Vector3 vector3) {
-      Block block = this.getHighestUnder(vector3, 4);
-      return block != null ? block.getFloorY() - vector3.getFloorY() + 1 : -256;
+      Block block = getHighestUnder(vector3, 4);
+      if (block != null) {
+         return (block.getFloorY() - vector3.getFloorY()) + 1;
+      }
+      return -256;
    }
 
    public int getSearchLimit() {
@@ -189,122 +182,136 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    }
 
    private void putNeighborNodeIntoOpen(Node node) {
-      Vector3 vector3 = new Vector3((double)node.getVector3().getFloorX() + 0.5D, node.getVector3().getY(), (double)node.getVector3().getFloorZ() + 0.5D);
-      boolean E;
+      boolean N, E, S, W;
+
+      Vector3 vector3 = new Vector3(node.getVector3().getFloorX() + 0.5, node.getVector3().getY(), node.getVector3().getFloorZ() + 0.5);
+
       double y;
-      Vector3 vec;
-      Node nodeNear;
-      if (E = (y = (double)this.getWalkableHorizontalOffset(vector3.add(1.0D, 0.0D, 0.0D))) != -256.0D) {
-         vec = vector3.add(1.0D, y, 0.0D);
-         if (this.isPassable(vec) && !this.isContainsInClose(vec)) {
-            nodeNear = this.getNodeInOpenByVector2(vec);
+
+      if (E = ((y = getWalkableHorizontalOffset(vector3.add(1, 0, 0))) != -256)) {
+         Vector3 vec = vector3.add(1, y, 0);
+         if (isPassable(vec) && !isContainsInClose(vec)) {
+            Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
-               this.openList.offer(new Node(vec, node, 10 + node.getG(), this.calHeuristic(vec, this.destination)));
-            } else if (node.getG() + 10 < nodeNear.getG()) {
-               nodeNear.setParent(node);
-               nodeNear.setG(node.getG() + 10);
-               nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               this.openList.offer(new Node(vec, node, DIRECT_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
+            } else {
+               if (node.getG() + DIRECT_MOVE_COST < nodeNear.getG()) {
+                  nodeNear.setParent(node);
+                  nodeNear.setG(node.getG() + DIRECT_MOVE_COST);
+                  nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               }
             }
          }
       }
 
-      boolean S;
-      if (S = (y = (double)this.getWalkableHorizontalOffset(vector3.add(0.0D, 0.0D, 1.0D))) != -256.0D) {
-         vec = vector3.add(0.0D, y, 1.0D);
-         if (this.isPassable(vec) && !this.isContainsInClose(vec)) {
-            nodeNear = this.getNodeInOpenByVector2(vec);
+      if (S = ((y = getWalkableHorizontalOffset(vector3.add(0, 0, 1))) != -256)) {
+         Vector3 vec = vector3.add(0, y, 1);
+         if (isPassable(vec) && !isContainsInClose(vec)) {
+            Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
-               this.openList.offer(new Node(vec, node, 10 + node.getG(), this.calHeuristic(vec, this.destination)));
-            } else if (node.getG() + 10 < nodeNear.getG()) {
-               nodeNear.setParent(node);
-               nodeNear.setG(node.getG() + 10);
-               nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               this.openList.offer(new Node(vec, node, DIRECT_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
+            } else {
+               if (node.getG() + DIRECT_MOVE_COST < nodeNear.getG()) {
+                  nodeNear.setParent(node);
+                  nodeNear.setG(node.getG() + DIRECT_MOVE_COST);
+                  nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               }
             }
          }
       }
 
-      boolean W;
-      if (W = (y = (double)this.getWalkableHorizontalOffset(vector3.add(-1.0D, 0.0D, 0.0D))) != -256.0D) {
-         vec = vector3.add(-1.0D, y, 0.0D);
-         if (this.isPassable(vec) && !this.isContainsInClose(vec)) {
-            nodeNear = this.getNodeInOpenByVector2(vec);
+      if (W = ((y = getWalkableHorizontalOffset(vector3.add(-1, 0, 0))) != -256)) {
+         Vector3 vec = vector3.add(-1, y, 0);
+         if (isPassable(vec) && !isContainsInClose(vec)) {
+            Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
-               this.openList.offer(new Node(vec, node, 10 + node.getG(), this.calHeuristic(vec, this.destination)));
-            } else if (node.getG() + 10 < nodeNear.getG()) {
-               nodeNear.setParent(node);
-               nodeNear.setG(node.getG() + 10);
-               nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               this.openList.offer(new Node(vec, node, DIRECT_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
+            } else {
+               if (node.getG() + DIRECT_MOVE_COST < nodeNear.getG()) {
+                  nodeNear.setParent(node);
+                  nodeNear.setG(node.getG() + DIRECT_MOVE_COST);
+                  nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               }
             }
          }
       }
 
-      boolean N;
-      if (N = (y = (double)this.getWalkableHorizontalOffset(vector3.add(0.0D, 0.0D, -1.0D))) != -256.0D) {
-         vec = vector3.add(0.0D, y, -1.0D);
-         if (this.isPassable(vec) && !this.isContainsInClose(vec)) {
-            nodeNear = this.getNodeInOpenByVector2(vec);
+      if (N = ((y = getWalkableHorizontalOffset(vector3.add(0, 0, -1))) != -256)) {
+         Vector3 vec = vector3.add(0, y, -1);
+         if (isPassable(vec) && !isContainsInClose(vec)) {
+            Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
-               this.openList.offer(new Node(vec, node, 10 + node.getG(), this.calHeuristic(vec, this.destination)));
-            } else if (node.getG() + 10 < nodeNear.getG()) {
-               nodeNear.setParent(node);
-               nodeNear.setG(node.getG() + 10);
-               nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               this.openList.offer(new Node(vec, node, DIRECT_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
+            } else {
+               if (node.getG() + DIRECT_MOVE_COST < nodeNear.getG()) {
+                  nodeNear.setParent(node);
+                  nodeNear.setG(node.getG() + DIRECT_MOVE_COST);
+                  nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               }
             }
          }
       }
 
-      if (N && E && (y = (double)this.getWalkableHorizontalOffset(vector3.add(1.0D, 0.0D, -1.0D))) != -256.0D) {
-         vec = vector3.add(1.0D, y, -1.0D);
-         if (this.isPassable(vec) && !this.isContainsInClose(vec)) {
-            nodeNear = this.getNodeInOpenByVector2(vec);
+      if (N && E && ((y = getWalkableHorizontalOffset(vector3.add(1, 0, -1))) != -256)) {
+         Vector3 vec = vector3.add(1, y, -1);
+         if (isPassable(vec) && !isContainsInClose(vec)) {
+            Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
-               this.openList.offer(new Node(vec, node, 14 + node.getG(), this.calHeuristic(vec, this.destination)));
-            } else if (node.getG() + 14 < nodeNear.getG()) {
-               nodeNear.setParent(node);
-               nodeNear.setG(node.getG() + 14);
-               nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               this.openList.offer(new Node(vec, node, OBLIQUE_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
+            } else {
+               if (node.getG() + OBLIQUE_MOVE_COST < nodeNear.getG()) {
+                  nodeNear.setParent(node);
+                  nodeNear.setG(node.getG() + OBLIQUE_MOVE_COST);
+                  nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               }
             }
          }
       }
 
-      if (E && S && (y = (double)this.getWalkableHorizontalOffset(vector3.add(1.0D, 0.0D, 1.0D))) != -256.0D) {
-         vec = vector3.add(1.0D, y, 1.0D);
-         if (this.isPassable(vec) && !this.isContainsInClose(vec)) {
-            nodeNear = this.getNodeInOpenByVector2(vec);
+      if (E && S && ((y = getWalkableHorizontalOffset(vector3.add(1, 0, 1))) != -256)) {
+         Vector3 vec = vector3.add(1, y, 1);
+         if (isPassable(vec) && !isContainsInClose(vec)) {
+            Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
-               this.openList.offer(new Node(vec, node, 14 + node.getG(), this.calHeuristic(vec, this.destination)));
-            } else if (node.getG() + 14 < nodeNear.getG()) {
-               nodeNear.setParent(node);
-               nodeNear.setG(node.getG() + 14);
-               nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               this.openList.offer(new Node(vec, node, OBLIQUE_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
+            } else {
+               if (node.getG() + OBLIQUE_MOVE_COST < nodeNear.getG()) {
+                  nodeNear.setParent(node);
+                  nodeNear.setG(node.getG() + OBLIQUE_MOVE_COST);
+                  nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               }
             }
          }
       }
 
-      if (W && S && (y = (double)this.getWalkableHorizontalOffset(vector3.add(-1.0D, 0.0D, 1.0D))) != -256.0D) {
-         vec = vector3.add(-1.0D, y, 1.0D);
-         if (this.isPassable(vec) && !this.isContainsInClose(vec)) {
-            nodeNear = this.getNodeInOpenByVector2(vec);
+      if (W && S && ((y = getWalkableHorizontalOffset(vector3.add(-1, 0, 1))) != -256)) {
+         Vector3 vec = vector3.add(-1, y, 1);
+         if (isPassable(vec) && !isContainsInClose(vec)) {
+            Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
-               this.openList.offer(new Node(vec, node, 14 + node.getG(), this.calHeuristic(vec, this.destination)));
-            } else if (node.getG() + 14 < nodeNear.getG()) {
-               nodeNear.setParent(node);
-               nodeNear.setG(node.getG() + 14);
-               nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               this.openList.offer(new Node(vec, node, OBLIQUE_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
+            } else {
+               if (node.getG() + OBLIQUE_MOVE_COST < nodeNear.getG()) {
+                  nodeNear.setParent(node);
+                  nodeNear.setG(node.getG() + OBLIQUE_MOVE_COST);
+                  nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               }
             }
          }
       }
 
-      if (W && N && (y = (double)this.getWalkableHorizontalOffset(vector3.add(-1.0D, 0.0D, -1.0D))) != -256.0D) {
-         vec = vector3.add(-1.0D, y, -1.0D);
-         if (this.isPassable(vec) && !this.isContainsInClose(vec)) {
-            nodeNear = this.getNodeInOpenByVector2(vec);
+      if (W && N && ((y = getWalkableHorizontalOffset(vector3.add(-1, 0, -1))) != -256)) {
+         Vector3 vec = vector3.add(-1, y, -1);
+         if (isPassable(vec) && !isContainsInClose(vec)) {
+            Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
-               this.openList.offer(new Node(vec, node, 14 + node.getG(), this.calHeuristic(vec, this.destination)));
-            } else if (node.getG() + 14 < nodeNear.getG()) {
-               nodeNear.setParent(node);
-               nodeNear.setG(node.getG() + 14);
-               nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               this.openList.offer(new Node(vec, node, OBLIQUE_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
+            } else {
+               if (node.getG() + OBLIQUE_MOVE_COST < nodeNear.getG()) {
+                  nodeNear.setParent(node);
+                  nodeNear.setG(node.getG() + OBLIQUE_MOVE_COST);
+                  nodeNear.setF(nodeNear.getG() + nodeNear.getH());
+               }
             }
          }
       }
@@ -344,106 +351,89 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    private boolean hasBarrier(Vector3 pos1, Vector3 pos2) {
       if (pos1.equals(pos2)) {
          return false;
-      } else if (pos1.getFloorY() != pos2.getFloorY()) {
-         return true;
-      } else {
-         boolean traverseDirection = Math.abs(pos1.getX() - pos2.getX()) > Math.abs(pos1.getZ() - pos2.getZ());
-         double loopStart;
-         double loopEnd;
-         ArrayList list;
-         double i;
-         double result;
-         if (traverseDirection) {
-            loopStart = Math.min(pos1.getX(), pos2.getX());
-            loopEnd = Math.max(pos1.getX(), pos2.getX());
-            list = new ArrayList();
-
-            for(i = Math.ceil(loopStart); i <= Math.floor(loopEnd); ++i) {
-               if ((result = Utils.calLinearFunction(pos1, pos2, i, 0)) != Double.MAX_VALUE) {
-                  list.add(new Vector3(i, pos1.getY(), result));
-               }
-            }
-
-            return this.hasBlocksAround(list);
-         } else {
-            loopStart = Math.min(pos1.getZ(), pos2.getZ());
-            loopEnd = Math.max(pos1.getZ(), pos2.getZ());
-            list = new ArrayList();
-
-            for(i = Math.ceil(loopStart); i <= Math.floor(loopEnd); ++i) {
-               if ((result = Utils.calLinearFunction(pos1, pos2, i, 1)) != Double.MAX_VALUE) {
-                  list.add(new Vector3(result, pos1.getY(), i));
-               }
-            }
-
-            return this.hasBlocksAround(list);
-         }
       }
+      if (pos1.getFloorY() != pos2.getFloorY()) {
+         return true;
+      }
+      boolean traverseDirection = Math.abs(pos1.getX() - pos2.getX()) > Math.abs(pos1.getZ() - pos2.getZ());
+      if (traverseDirection) {
+         double loopStart = Math.min(pos1.getX(), pos2.getX());
+         double loopEnd = Math.max(pos1.getX(), pos2.getX());
+         ArrayList<Vector3> list = new ArrayList<>();
+         for (double i = Math.ceil(loopStart); i <= Math.floor(loopEnd); i += 1.0) {
+            double result;
+            if ((result = Utils.calLinearFunction(pos1, pos2, i, Utils.ACCORDING_X_OBTAIN_Y)) != Double.MAX_VALUE)
+               list.add(new Vector3(i, pos1.getY(), result));
+         }
+         return hasBlocksAround(list);
+      } else {
+         double loopStart = Math.min(pos1.getZ(), pos2.getZ());
+         double loopEnd = Math.max(pos1.getZ(), pos2.getZ());
+         ArrayList<Vector3> list = new ArrayList<>();
+         for (double i = Math.ceil(loopStart); i <= Math.floor(loopEnd); i += 1.0) {
+            double result;
+            if ((result = Utils.calLinearFunction(pos1, pos2, i, Utils.ACCORDING_Y_OBTAIN_X)) != Double.MAX_VALUE)
+               list.add(new Vector3(result, pos1.getY(), i));
+         }
+
+         return hasBlocksAround(list);
+      }
+
    }
 
    private boolean hasBlocksAround(ArrayList<Vector3> list) {
-      double radius = (double)(this.entity.getWidth() * this.entity.getScale() / 2.0F) + 0.1D;
-      double height = (double)(this.entity.getHeight() * this.entity.getScale());
-      Iterator var6 = list.iterator();
-
-      while(var6.hasNext()) {
-         Vector3 vector3 = (Vector3)var6.next();
+      double radius = (this.entity.getWidth() * this.entity.getScale()) / 2 + 0.1;
+      double height = this.entity.getHeight() * this.entity.getScale();
+      for (Vector3 vector3 : list) {
          AxisAlignedBB bb = new SimpleAxisAlignedBB(vector3.getX() - radius, vector3.getY(), vector3.getZ() - radius, vector3.getX() + radius, vector3.getY() + height, vector3.getZ() + radius);
          if (this.level.getCollisionBlocks(bb, true).length != 0) {
             return true;
          }
 
-         boolean xIsInt = vector3.getX() % 1.0D == 0.0D;
-         boolean zIsInt = vector3.getZ() % 1.0D == 0.0D;
+         boolean xIsInt = vector3.getX() % 1 == 0;
+         boolean zIsInt = vector3.getZ() % 1 == 0;
          if (xIsInt && zIsInt) {
-            if (this.level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1.0D, vector3.getZ()), false).canPassThrough() || this.level.getBlock(new Vector3(vector3.getX() - 1.0D, vector3.getY() - 1.0D, vector3.getZ()), false).canPassThrough() || this.level.getBlock(new Vector3(vector3.getX() - 1.0D, vector3.getY() - 1.0D, vector3.getZ() - 1.0D), false).canPassThrough() || this.level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1.0D, vector3.getZ() - 1.0D), false).canPassThrough()) {
-               return true;
-            }
+            if (level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
+                    level.getBlock(new Vector3(vector3.getX() - 1, vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
+                    level.getBlock(new Vector3(vector3.getX() - 1, vector3.getY() - 1, vector3.getZ() - 1), false).canPassThrough() ||
+                    level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ() - 1), false).canPassThrough()) return true;
          } else if (xIsInt) {
-            if (this.level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1.0D, vector3.getZ()), false).canPassThrough() || this.level.getBlock(new Vector3(vector3.getX() - 1.0D, vector3.getY() - 1.0D, vector3.getZ()), false).canPassThrough()) {
-               return true;
-            }
+            if (level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
+                    level.getBlock(new Vector3(vector3.getX() - 1, vector3.getY() - 1, vector3.getZ()), false).canPassThrough()) return true;
          } else if (zIsInt) {
-            if (this.level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1.0D, vector3.getZ()), false).canPassThrough() || this.level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1.0D, vector3.getZ() - 1.0D), false).canPassThrough()) {
-               return true;
-            }
-         } else if (this.level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1.0D, vector3.getZ()), false).canPassThrough()) {
-            return true;
+            if (level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
+                    level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ() - 1), false).canPassThrough()) return true;
+         } else {
+            if (level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough()) return true;
          }
       }
-
       return false;
    }
 
    private ArrayList<Node> FloydSmooth(ArrayList<Node> array) {
       int current = 0;
       int total = 2;
-      if (array.size() <= 2) {
-         return array;
-      } else {
-         while(true) {
-            while(total < array.size()) {
-               if (!this.hasBarrier(array.get(current), array.get(total)) && total != array.size() - 1) {
-                  ++total;
-               } else {
-                  array.get(total - 1).setParent(array.get(current));
-                  current = total - 1;
-                  ++total;
-               }
+      if (array.size() > 2) {
+         while (total < array.size()) {
+            if (!hasBarrier(array.get(current), array.get(total)) && total != array.size() - 1) {
+               total++;
+            } else {
+               array.get(total - 1).setParent(array.get(current));
+               current = total - 1;
+               total++;
             }
-
-            Node temp = array.get(array.size() - 1);
-            ArrayList<Node> tempL = new ArrayList<>();
-            tempL.add(temp);
-
-            while(temp.getParent() != null) {
-               tempL.add(temp = temp.getParent());
-            }
-
-            Collections.reverse(tempL);
-            return tempL;
          }
+
+         Node temp = array.get(array.size() - 1);
+         ArrayList<Node> tempL = new ArrayList<>();
+         tempL.add(temp);
+         while (temp.getParent() != null) {
+            tempL.add((temp = temp.getParent()));
+         }
+         Collections.reverse(tempL);
+         return tempL;
       }
+      return array;
    }
 
    private ArrayList<Node> getPathRoute() {
@@ -464,7 +454,9 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       if (vector2 == null || vector2_ == null) {
          return false;
       }
-      return vector2.getFloorX() == vector2_.getFloorX() && vector2.getFloorZ() == vector2_.getFloorZ() && vector2.getFloorY() == vector2_.getFloorY();
+      return vector2.getFloorX() == vector2_.getFloorX() &&
+              vector2.getFloorZ() == vector2_.getFloorZ() &&
+              vector2.getFloorY() == vector2_.getFloorY();
    }
 
    public void resetTemporary() {
