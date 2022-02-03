@@ -118,7 +118,12 @@ public class LittleNpcSpawnCommand extends Command {
                     if(strings.length > 2){
                         Player player = Server.getInstance().getPlayer(strings[1]);
                         if(player != null){
-                           player.sendMessage(TextFormat.colorize('&',strings[2]));
+                            StringBuilder stringBuilder = new StringBuilder();
+                            for (int i = 2; i < strings.length; i++) {
+                                stringBuilder.append(strings[i]).append("\n");
+                            }
+                            stringBuilder.deleteCharAt(stringBuilder.length()-1);
+                           player.sendMessage(TextFormat.colorize('&', stringBuilder.toString()));
                            return true;
                         }else{
                             if(sender instanceof EntityCommandSender){
