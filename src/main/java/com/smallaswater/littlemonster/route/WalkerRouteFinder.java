@@ -166,6 +166,15 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       return this.level.getCollisionBlocks(bb, true).length == 0 && !this.level.getBlock(vector3.add(0.0D, -1.0D, 0.0D), false).canPassThrough();
    }
 
+   private boolean isPassable(Vector3 now, Vector3 target) {
+      //跳跃检查
+      if (target.getY() > now.getY() && !this.getLevel().getBlock(now.add(0, 2, 0)).canPassThrough()) {
+         return false;
+      }
+
+      return this.isPassable(target);
+   }
+
    private int getWalkableHorizontalOffset(Vector3 vector3) {
       Block block = getHighestUnder(vector3, 4);
       if (block != null) {
@@ -191,7 +200,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
       if (E = ((y = getWalkableHorizontalOffset(vector3.add(1, 0, 0))) != -256)) {
          Vector3 vec = vector3.add(1, y, 0);
-         if (isPassable(vec) && !isContainsInClose(vec)) {
+         if (isPassable(vector3, vec) && !isContainsInClose(vec)) {
             Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
                this.openList.offer(new Node(vec, node, DIRECT_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
@@ -207,7 +216,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
       if (S = ((y = getWalkableHorizontalOffset(vector3.add(0, 0, 1))) != -256)) {
          Vector3 vec = vector3.add(0, y, 1);
-         if (isPassable(vec) && !isContainsInClose(vec)) {
+         if (isPassable(vector3, vec) && !isContainsInClose(vec)) {
             Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
                this.openList.offer(new Node(vec, node, DIRECT_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
@@ -223,7 +232,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
       if (W = ((y = getWalkableHorizontalOffset(vector3.add(-1, 0, 0))) != -256)) {
          Vector3 vec = vector3.add(-1, y, 0);
-         if (isPassable(vec) && !isContainsInClose(vec)) {
+         if (isPassable(vector3, vec) && !isContainsInClose(vec)) {
             Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
                this.openList.offer(new Node(vec, node, DIRECT_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
@@ -239,7 +248,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
       if (N = ((y = getWalkableHorizontalOffset(vector3.add(0, 0, -1))) != -256)) {
          Vector3 vec = vector3.add(0, y, -1);
-         if (isPassable(vec) && !isContainsInClose(vec)) {
+         if (isPassable(vector3, vec) && !isContainsInClose(vec)) {
             Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
                this.openList.offer(new Node(vec, node, DIRECT_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
@@ -255,7 +264,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
       if (N && E && ((y = getWalkableHorizontalOffset(vector3.add(1, 0, -1))) != -256)) {
          Vector3 vec = vector3.add(1, y, -1);
-         if (isPassable(vec) && !isContainsInClose(vec)) {
+         if (isPassable(vector3, vec) && !isContainsInClose(vec)) {
             Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
                this.openList.offer(new Node(vec, node, OBLIQUE_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
@@ -271,7 +280,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
       if (E && S && ((y = getWalkableHorizontalOffset(vector3.add(1, 0, 1))) != -256)) {
          Vector3 vec = vector3.add(1, y, 1);
-         if (isPassable(vec) && !isContainsInClose(vec)) {
+         if (isPassable(vector3, vec) && !isContainsInClose(vec)) {
             Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
                this.openList.offer(new Node(vec, node, OBLIQUE_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
@@ -287,7 +296,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
       if (W && S && ((y = getWalkableHorizontalOffset(vector3.add(-1, 0, 1))) != -256)) {
          Vector3 vec = vector3.add(-1, y, 1);
-         if (isPassable(vec) && !isContainsInClose(vec)) {
+         if (isPassable(vector3, vec) && !isContainsInClose(vec)) {
             Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
                this.openList.offer(new Node(vec, node, OBLIQUE_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
@@ -303,7 +312,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
       if (W && N && ((y = getWalkableHorizontalOffset(vector3.add(-1, 0, -1))) != -256)) {
          Vector3 vec = vector3.add(-1, y, -1);
-         if (isPassable(vec) && !isContainsInClose(vec)) {
+         if (isPassable(vector3, vec) && !isContainsInClose(vec)) {
             Node nodeNear = getNodeInOpenByVector2(vec);
             if (nodeNear == null) {
                this.openList.offer(new Node(vec, node, OBLIQUE_MOVE_COST + node.getG(), calHeuristic(vec, destination)));
