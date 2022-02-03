@@ -70,6 +70,9 @@ public abstract class RouteFinder {
 
    public void setDestination(Vector3 destination) {
       this.destination = destination.clone();
+      if (this.isFinished()) {
+         this.finished = false;
+      }
       if (this.isSearching()) {
          this.interrupt = true;
          RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this));
@@ -83,6 +86,10 @@ public abstract class RouteFinder {
 
    public boolean isSearching() {
       return this.searching;
+   }
+
+   public boolean needSearching() {
+      return !this.isFinished() && !this.isSearching();
    }
 
    public void addNode(Node node) {

@@ -27,7 +27,6 @@ import com.smallaswater.littlemonster.items.BaseItem;
 import com.smallaswater.littlemonster.items.DeathCommand;
 import com.smallaswater.littlemonster.items.DropItem;
 import com.smallaswater.littlemonster.manager.BossBarManager;
-import com.smallaswater.littlemonster.route.WalkerRouteFinder;
 import com.smallaswater.littlemonster.skill.BaseSkillAreaManager;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import com.smallaswater.littlemonster.skill.defaultskill.AttributeHealthSkill;
@@ -67,7 +66,6 @@ public class LittleNpc extends BaseEntityMove {
 
     public LittleNpc(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
-        this.route = new WalkerRouteFinder(this);
         this.close();
     }
 
@@ -82,7 +80,6 @@ public class LittleNpc extends BaseEntityMove {
         this.setHealth(config.getHealth());
         this.setMaxHealth(config.getHealth());
         this.namedTag.putString(TAG,name);
-        this.route = new WalkerRouteFinder(this);
         this.route.setDestinationDeviate(Math.max(1, config.getAttackDistance() * 0.8));
     }
 

@@ -15,6 +15,7 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.route.RouteFinder;
+import com.smallaswater.littlemonster.route.WalkerRouteFinder;
 import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
 import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
 import com.smallaswater.littlemonster.threads.runnables.RouteFinderSearchTask;
@@ -23,7 +24,6 @@ import nukkitcoders.mobplugin.entities.animal.WalkingAnimal;
 import nukkitcoders.mobplugin.entities.monster.Monster;
 
 import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
 
 
 /**
@@ -37,7 +37,7 @@ public abstract class BaseEntityMove extends BaseEntity {
 
     private static final double FLOW_MULTIPLIER = .1;
 
-    protected RouteFinder route = null;
+    protected RouteFinder route = new WalkerRouteFinder(this);
 
     public BaseEntityMove(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
@@ -223,13 +223,13 @@ public abstract class BaseEntityMove extends BaseEntity {
                             }
                             nextTarget.y--;
                         }
-                    }else if (this.moveTime <= 0 || this.target == null) {
+                    }/*else if (this.moveTime <= 0 || this.target == null) {
                         x = Utils.rand(10, 40);
                         z = Utils.rand(10, 40);
                         this.stayTime = 0;
                         this.moveTime = Utils.rand(20, 60);
                         nextTarget = this.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
-                    }
+                    }*/
                     if (nextTarget != null) {
                         this.target = nextTarget;
                         if (this.route != null) {
@@ -384,7 +384,7 @@ public abstract class BaseEntityMove extends BaseEntity {
             return null;
         }
 
-        if (this.age % 10 == 0 && this.route != null && !this.route.isSearching()) {
+        if (this.age % 10 == 0 && this.route != null && this.route.needSearching()) {
             RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this.route));
         }
 
@@ -485,19 +485,31 @@ public abstract class BaseEntityMove extends BaseEntity {
     }
 
     protected void seeFollowTarget() {
+        Vector3 target = null;
         if(!hasBlockInLine(this.followTarget)) {
             if (this.followTarget != null) {
-                double dx = this.x - this.followTarget.x;
-                double dy = (this.y + this.getEyeHeight()) - (this.followTarget.y + this.followTarget.getEyeHeight());
-                double dz = this.z - this.followTarget.z;
-                double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
-                double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
-                if (dz > 0.0D) {
-                    yaw = -yaw + 180.0D;
-                }
-                this.yaw = yaw;
-                this.pitch = pitch;
+                target = this.followTarget;
             }
+        }else {
+            target = this.target;
+        }
+
+        if (target != null) {
+            boolean setPitch = false;
+            if (target instanceof Entity) {
+                target = target.add(0, ((Entity) target).getEyeHeight(), 0);
+                setPitch = true;
+            }
+            double dx = this.x - target.x;
+            double dy = (this.y + this.getEyeHeight()) - target.y;
+            double dz = this.z - target.z;
+            double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
+            double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
+            if (dz > 0.0D) {
+                yaw = -yaw + 180.0D;
+            }
+            this.yaw = yaw;
+            this.pitch = setPitch ? pitch : 0;
         }
     }
 

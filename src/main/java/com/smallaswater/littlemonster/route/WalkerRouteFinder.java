@@ -49,6 +49,8 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
    @Override
    public boolean search() {
+      LittleMonsterMainClass.getMasterMainClass().getLogger().info("寻路开始");
+
       if (this.entity.isClosed() || this.entity.getFollowTarget() == null ) {
          this.searching = false;
          this.finished = true;
@@ -127,6 +129,9 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          this.addNode(findingPath);
          this.finished = true;
          this.searching = false;
+
+         LittleMonsterMainClass.getMasterMainClass().getLogger().info("寻路完成");
+
          return true;
       }catch (Exception e) {
          if (!(this.entity == null || this.entity.isClosed() || this.entity.getFollowTarget() == null ||
