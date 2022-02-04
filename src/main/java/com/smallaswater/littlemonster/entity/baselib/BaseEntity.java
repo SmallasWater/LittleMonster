@@ -69,7 +69,7 @@ public abstract class BaseEntity extends EntityHuman {
 
     boolean canAttack = true;
 
-    protected final ConcurrentHashMap<EntityCreature, TargetWeighted> targetWeightedMap = new ConcurrentHashMap<>();
+    protected ConcurrentHashMap<EntityCreature, TargetWeighted> targetWeightedMap = new ConcurrentHashMap<>();
 
     //开发接口
     //攻击方式

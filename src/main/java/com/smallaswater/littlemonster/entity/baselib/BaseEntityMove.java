@@ -157,16 +157,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                 }
 
                 //entities.sort((p1, p2) -> Double.compare(this.distance(p1) - this.distance(p2), 0.0D));
-                ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
-                entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
-                if (!entities.isEmpty()) {
-                    EntityCreature entity = entities.get(0);
-                    if (entity != this.getFollowTarget()) {
-                        if(canAttackEntity(entity)) {
-                            this.fightEntity(entity);
-                        }
-                    }
-                }
+               PluginMasterThreadPool.ASYNC_EXECUTOR.submit(this::fight);
 
 //                CompletableFuture<>.supplyAsync(() -> {
 //
@@ -254,6 +245,19 @@ public abstract class BaseEntityMove extends BaseEntity {
                 this.target = this.route.next();
             }
         }*/
+    }
+
+    private void fight(){
+        ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
+        entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
+        if (!entities.isEmpty()) {
+            EntityCreature entity = entities.get(0);
+            if (entity != this.getFollowTarget()) {
+                if(canAttackEntity(entity)) {
+                    this.fightEntity(entity);
+                }
+            }
+        }
     }
 
     /**

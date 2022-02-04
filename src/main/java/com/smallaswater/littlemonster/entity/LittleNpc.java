@@ -183,12 +183,18 @@ public class LittleNpc extends BaseEntityMove {
             BossBarManager.BossBarApi.removeBossBar(boss);
             boss = null;
         }
-        if(config == null){
-            return;
+        if(config != null){
+            if(config.isDisplayDamage()){
+                handle.display();
+            }
         }
-        if(config.isDisplayDamage()){
-            handle.display();
-        }
+        targetWeightedMap.clear();
+        targetWeightedMap = null;
+        skillManagers.clear();
+        healthList.clear();
+        handle = null;
+        route = null;
+
     }
 
     private ArrayList<Player> getDamagePlayers(){
@@ -576,6 +582,7 @@ public class LittleNpc extends BaseEntityMove {
         if (this.route != null) {
             this.route.interrupt();
         }
+
         this.onClose();
     }
 
