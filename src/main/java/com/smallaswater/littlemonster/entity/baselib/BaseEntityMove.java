@@ -16,7 +16,6 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.route.RouteFinder;
 import com.smallaswater.littlemonster.route.WalkerRouteFinder;
-import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
 import com.smallaswater.littlemonster.utils.Utils;
 import nukkitcoders.mobplugin.entities.animal.WalkingAnimal;
 import nukkitcoders.mobplugin.entities.monster.Monster;
@@ -65,6 +64,9 @@ public abstract class BaseEntityMove extends BaseEntity {
         if (!down.isSolid() && !block.isSolid() && !down.down().isSolid()) {
             this.stayTime = 10;
         } else if (!block.canPassThrough() && block.up().canPassThrough() && that.up(2).canPassThrough()) {
+            if (block instanceof BlockSnowLayer) {
+                return false;
+            }
             if (block instanceof BlockFence || block instanceof BlockFenceGate) {
                 this.motionY = this.getGravity();
             } else if (this.motionY <= this.getGravity() * 4) {
