@@ -75,9 +75,9 @@ public abstract class RouteFinder {
       }
       if (this.isSearching()) {
          this.interrupt = true;
-         RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this));
          //this.research();
       }
+      RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this));
    }
 
    public boolean isFinished() {

@@ -17,8 +17,6 @@ import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.route.RouteFinder;
 import com.smallaswater.littlemonster.route.WalkerRouteFinder;
 import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
-import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
-import com.smallaswater.littlemonster.threads.runnables.RouteFinderSearchTask;
 import com.smallaswater.littlemonster.utils.Utils;
 import nukkitcoders.mobplugin.entities.animal.WalkingAnimal;
 import nukkitcoders.mobplugin.entities.monster.Monster;
@@ -186,7 +184,7 @@ public abstract class BaseEntityMove extends BaseEntity {
 
             //获取寻路目标点
             if (this.route != null){
-                if (!this.route.needSearching() && this.route.hasArrivedNodeInaccurate(this)) {
+                if (this.route.isFinished() && this.route.hasArrivedNodeInaccurate(this)) {
                     this.target = this.route.next();
                     return;
                 }else if (this.followTarget != null && !this.route.isSearching()){
@@ -195,7 +193,7 @@ public abstract class BaseEntityMove extends BaseEntity {
             }
 
             //没有目标时
-            if(this.getFollowTarget() == null) {
+            if(this.getTargetVector() == null) {
                 //随机移动
                 if (this.config.isCanMove()) {
                     int x;
@@ -209,8 +207,8 @@ public abstract class BaseEntityMove extends BaseEntity {
                         z = Utils.rand(10, 30);
                         nextTarget = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);*/
                     } else if (Utils.rand(1, 10) == 1) {
-                        x = Utils.rand(10, 50);
-                        z = Utils.rand(10, 50);
+                        x = Utils.rand(5, 20);
+                        z = Utils.rand(5, 20);
                         this.stayTime = Utils.rand(60, 200);
                         nextTarget = this.add(Utils.rand() ? x : -x, /*Utils.rand(-20.0, 20.0) / 10*/0, Utils.rand() ? z : -z);
                         nextTarget.y+=5;
@@ -383,7 +381,7 @@ public abstract class BaseEntityMove extends BaseEntity {
         }
 
         if (this.age % 10 == 0 && this.route != null && this.route.needSearching()) {
-            RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this.route));
+            //RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this.route));
         }
 
         if (this.isKnockback()) {
@@ -476,9 +474,9 @@ public abstract class BaseEntityMove extends BaseEntity {
             }
         }
         this.updateMovement();
-        if (this.route != null && this.route.hasCurrentNode() && this.route.hasArrivedNode(this) && this.route.hasNext()) {
+        /*if (this.route != null && this.route.hasCurrentNode() && this.route.hasArrivedNode(this) && this.route.hasNext()) {
             this.target = this.route.next();
-        }
+        }*/
         return this.followTarget != null ? this.followTarget : this.target;
     }
 
