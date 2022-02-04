@@ -73,11 +73,14 @@ public abstract class RouteFinder {
 
    public void setDestination(Vector3 destination) {
       this.destination = destination.clone();
+      if (this.isFinished()) {
+         this.finished = false;
+      }
       if (this.isSearching()) {
          this.interrupt = true;
-         RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this));
          //this.research();
       }
+      RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this));
    }
 
    public boolean isFinished() {
@@ -86,6 +89,10 @@ public abstract class RouteFinder {
 
    public boolean isSearching() {
       return this.searching;
+   }
+
+   public boolean needSearching() {
+      return !this.isFinished() && !this.isSearching();
    }
 
    public void addNode(Node node) {
@@ -158,7 +165,7 @@ public abstract class RouteFinder {
          lock.readLock().lock();
          if (this.hasNext() &&  this.getCurrentNode().getVector3()!=null) {
             Vector3 cur = this.getCurrentNode().getVector3();
-            return cur.distance(vec) < 0.8;
+            return vec.getFloorX() == cur.getFloorX() && vec.getFloorZ() == cur.getFloorZ();
          }
          return false;
       } finally {

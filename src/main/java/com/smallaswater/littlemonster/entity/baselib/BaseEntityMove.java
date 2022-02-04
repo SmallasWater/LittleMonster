@@ -15,8 +15,7 @@ import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.route.RouteFinder;
-import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
-import com.smallaswater.littlemonster.threads.runnables.RouteFinderSearchTask;
+import com.smallaswater.littlemonster.route.WalkerRouteFinder;
 import com.smallaswater.littlemonster.utils.Utils;
 import nukkitcoders.mobplugin.entities.animal.WalkingAnimal;
 import nukkitcoders.mobplugin.entities.monster.Monster;
@@ -35,7 +34,7 @@ public abstract class BaseEntityMove extends BaseEntity {
 
     private static final double FLOW_MULTIPLIER = .1;
 
-    protected RouteFinder route = null;
+    protected RouteFinder route = new WalkerRouteFinder(this);
 
     public BaseEntityMove(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
@@ -65,6 +64,9 @@ public abstract class BaseEntityMove extends BaseEntity {
         if (!down.isSolid() && !block.isSolid() && !down.down().isSolid()) {
             this.stayTime = 10;
         } else if (!block.canPassThrough() && block.up().canPassThrough() && that.up(2).canPassThrough()) {
+            if (block instanceof BlockSnowLayer) {
+                return false;
+            }
             if (block instanceof BlockFence || block instanceof BlockFenceGate) {
                 this.motionY = this.getGravity();
             } else if (this.motionY <= this.getGravity() * 4) {
@@ -157,19 +159,35 @@ public abstract class BaseEntityMove extends BaseEntity {
                 }
 
                 //entities.sort((p1, p2) -> Double.compare(this.distance(p1) - this.distance(p2), 0.0D));
+
                 ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
                 entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
                 if (!entities.isEmpty()) {
                     EntityCreature entity = entities.get(0);
                     if (entity != this.getFollowTarget()) {
-                        this.fightEntity(entity);
+                        if(canAttackEntity(entity)) {
+                            this.fightEntity(entity);
+                        }
                     }
                 }
+
+//                CompletableFuture<>.supplyAsync(() -> {
+//
+//                }, PluginMasterThreadPool.ASYNC_EXECUTOR).thenAccept(isHasBlock::set);
+                //要不这种操作放在异步
+//                ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
+//                entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
+//                if (!entities.isEmpty()) {
+//                    EntityCreature entity = entities.get(0);
+//                    if (entity != this.getFollowTarget()) {
+//                        this.fightEntity(entity);
+//                    }
+//                }
             }
 
             //获取寻路目标点
             if (this.route != null){
-                if (!this.route.isSearching() && this.route.hasArrivedNodeInaccurate(this) && this.route.hasNext()) {
+                if (this.route.isFinished() && this.route.hasArrivedNodeInaccurate(this)) {
                     this.target = this.route.next();
                     return;
                 }else if (this.followTarget != null && !this.route.isSearching()){
@@ -178,7 +196,7 @@ public abstract class BaseEntityMove extends BaseEntity {
             }
 
             //没有目标时
-            if(this.getFollowTarget() == null) {
+            if(this.getTargetVector() == null) {
                 //随机移动
                 if (this.config.isCanMove()) {
                     int x;
@@ -191,26 +209,26 @@ public abstract class BaseEntityMove extends BaseEntity {
                         x = Utils.rand(10, 30);
                         z = Utils.rand(10, 30);
                         nextTarget = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);*/
-                    } else if (Utils.rand(1, 5) == 1) {
-                        x = Utils.rand(10, 40);
-                        z = Utils.rand(10, 40);
-                        this.stayTime = Utils.rand(20, 100);
+                    } else if (Utils.rand(1, 10) == 1) {
+                        x = Utils.rand(5, 20);
+                        z = Utils.rand(5, 20);
+                        this.stayTime = Utils.rand(60, 200);
                         nextTarget = this.add(Utils.rand() ? x : -x, /*Utils.rand(-20.0, 20.0) / 10*/0, Utils.rand() ? z : -z);
                         nextTarget.y+=5;
                         for (int i=0; i<10; i++) {
+                            nextTarget.y--;
                             if (this.level.getBlock(nextTarget).canPassThrough() &&
                                     !this.level.getBlock(nextTarget.down()).canPassThrough()) {
                                 break;
                             }
-                            nextTarget.y--;
                         }
-                    }else if (this.moveTime <= 0 || this.target == null) {
+                    }/*else if (this.moveTime <= 0 || this.target == null) {
                         x = Utils.rand(10, 40);
                         z = Utils.rand(10, 40);
                         this.stayTime = 0;
                         this.moveTime = Utils.rand(20, 60);
                         nextTarget = this.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
-                    }
+                    }*/
                     if (nextTarget != null) {
                         this.target = nextTarget;
                         if (this.route != null) {
@@ -240,6 +258,8 @@ public abstract class BaseEntityMove extends BaseEntity {
             }
         }*/
     }
+
+
 
     /**
      * 是否可以攻击目标实体 （主要为NPC配置文件规则限制）
@@ -351,7 +371,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                         this.attackEntity((EntityCreature) target);
                     }
                 }
-            }else if (target != null && Math.pow(this.x - target.x, 2.0D) + Math.pow(this.z - target.z, 2.0D) <= 1.0D) {
+            }else if (target != null && this.distance(target) < 0.8) {
                 this.target = null;
                 this.moveTime = 0;
             }
@@ -365,8 +385,8 @@ public abstract class BaseEntityMove extends BaseEntity {
             return null;
         }
 
-        if (this.age % 10 == 0 && this.route != null && !this.route.isSearching()) {
-            RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this.route));
+        if (this.age % 10 == 0 && this.route != null && this.route.needSearching()) {
+            //RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this.route));
         }
 
         if (this.isKnockback()) {
@@ -377,6 +397,7 @@ public abstract class BaseEntityMove extends BaseEntity {
         }
 
         Vector3 before = this.target;
+//        PluginMasterThreadPool.ASYNC_EXECUTOR.submit(this::checkTarget);
         this.checkTarget();
         double x;
         double z;
@@ -421,8 +442,8 @@ public abstract class BaseEntityMove extends BaseEntity {
             this.seeFollowTarget();
         }
 
-        x = this.motionX * (double)tickDiff;
-        z = this.motionZ * (double)tickDiff;
+        x = this.motionX;
+        z = this.motionZ;
         boolean isJump = this.checkJump(x, z);
         if (this.stayTime > 0) {
             this.stayTime -= tickDiff;
@@ -458,26 +479,38 @@ public abstract class BaseEntityMove extends BaseEntity {
             }
         }
         this.updateMovement();
-        if (this.route != null && this.route.hasCurrentNode() && this.route.hasArrivedNode(this) && this.route.hasNext()) {
+        /*if (this.route != null && this.route.hasCurrentNode() && this.route.hasArrivedNode(this) && this.route.hasNext()) {
             this.target = this.route.next();
-        }
+        }*/
         return this.followTarget != null ? this.followTarget : this.target;
     }
 
     protected void seeFollowTarget() {
+        Vector3 target = null;
         if(!hasBlockInLine(this.followTarget)) {
             if (this.followTarget != null) {
-                double dx = this.x - this.followTarget.x;
-                double dy = (this.y + this.getEyeHeight()) - (this.followTarget.y + this.followTarget.getEyeHeight());
-                double dz = this.z - this.followTarget.z;
-                double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
-                double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
-                if (dz > 0.0D) {
-                    yaw = -yaw + 180.0D;
-                }
-                this.yaw = yaw;
-                this.pitch = pitch;
+                target = this.followTarget;
             }
+        }else {
+            target = this.target;
+        }
+
+        if (target != null) {
+            boolean setPitch = false;
+            if (target instanceof Entity) {
+                target = target.add(0, ((Entity) target).getEyeHeight(), 0);
+                setPitch = true;
+            }
+            double dx = this.x - target.x;
+            double dy = (this.y + this.getEyeHeight()) - target.y;
+            double dz = this.z - target.z;
+            double yaw = Math.asin(dx / Math.sqrt(dx * dx + dz * dz)) / Math.PI * 180.0D;
+            double pitch = Math.round(Math.asin(dy / Math.sqrt(dx * dx + dz * dz + dy * dy)) / Math.PI * 180.0D);
+            if (dz > 0.0D) {
+                yaw = -yaw + 180.0D;
+            }
+            this.yaw = yaw;
+            this.pitch = setPitch ? pitch : 0;
         }
     }
 
