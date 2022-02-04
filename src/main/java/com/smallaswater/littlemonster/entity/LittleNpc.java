@@ -188,7 +188,8 @@ public class LittleNpc extends BaseEntityMove {
                 handle.display();
             }
         }
-        targetWeightedMap.clear();
+
+
         targetWeightedMap = null;
         skillManagers.clear();
         healthList.clear();

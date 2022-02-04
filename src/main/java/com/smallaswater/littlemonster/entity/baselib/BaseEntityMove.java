@@ -157,7 +157,17 @@ public abstract class BaseEntityMove extends BaseEntity {
                 }
 
                 //entities.sort((p1, p2) -> Double.compare(this.distance(p1) - this.distance(p2), 0.0D));
-               PluginMasterThreadPool.ASYNC_EXECUTOR.submit(this::fight);
+
+                ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
+                entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
+                if (!entities.isEmpty()) {
+                    EntityCreature entity = entities.get(0);
+                    if (entity != this.getFollowTarget()) {
+                        if(canAttackEntity(entity)) {
+                            this.fightEntity(entity);
+                        }
+                    }
+                }
 
 //                CompletableFuture<>.supplyAsync(() -> {
 //
@@ -247,18 +257,7 @@ public abstract class BaseEntityMove extends BaseEntity {
         }*/
     }
 
-    private void fight(){
-        ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
-        entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
-        if (!entities.isEmpty()) {
-            EntityCreature entity = entities.get(0);
-            if (entity != this.getFollowTarget()) {
-                if(canAttackEntity(entity)) {
-                    this.fightEntity(entity);
-                }
-            }
-        }
-    }
+
 
     /**
      * 是否可以攻击目标实体 （主要为NPC配置文件规则限制）
@@ -396,8 +395,8 @@ public abstract class BaseEntityMove extends BaseEntity {
         }
 
         Vector3 before = this.target;
-        PluginMasterThreadPool.ASYNC_EXECUTOR.submit(this::checkTarget);
-//        this.checkTarget();
+//        PluginMasterThreadPool.ASYNC_EXECUTOR.submit(this::checkTarget);
+        this.checkTarget();
         double x;
         double z;
         if (this.target != null || before != this.target) {
