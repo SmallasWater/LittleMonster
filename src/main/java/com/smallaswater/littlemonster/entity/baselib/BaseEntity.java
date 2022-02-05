@@ -37,6 +37,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class BaseEntity extends EntityHuman {
 
+    //如果主人死了 本体是否死亡
+    public boolean isToDeath = false;
+
     protected EntityHuman masterHuman = null;
 
     protected float moveMultiplier = 1.0f;

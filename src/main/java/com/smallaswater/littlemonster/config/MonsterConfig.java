@@ -234,8 +234,8 @@ public class MonsterConfig {
         return littleNpc;
     }
 
-    public void spawn(Position spawn){
-        this.spawn(spawn,-1);
+    public LittleNpc spawn(Position spawn){
+        return this.spawn(spawn,-1);
     }
 
     public void npcSetting(LittleNpc littleNpc) {

@@ -251,8 +251,11 @@ public class LittleNpc extends BaseEntityMove {
                         }
                     }
                 } else {
-                    if (skillManager instanceof AttributeHealthSkill || skillManager instanceof SummonHealthSkill) {
+                    if (skillManager instanceof AttributeHealthSkill) {
                         skillManager.display((Player) null);
+                    }
+                    if(skillManager instanceof SummonHealthSkill){
+                        skillManager.display(this);
                     }
                     if (skillManager instanceof MessageHealthSkill) {
                         skillManager.display(getDamagePlayers().toArray(new Player[0]));
@@ -279,6 +282,13 @@ public class LittleNpc extends BaseEntityMove {
                     ParticleEffect.BASIC_SMOKE);
             this.close();
             return;
+        }
+        // 技能召唤的
+        if(isToDeath && masterHuman != null){
+            if(masterHuman.isClosed()){
+                this.close();
+                return;
+            }
         }
         if(config == null){
             this.close();
@@ -504,7 +514,7 @@ public class LittleNpc extends BaseEntityMove {
                             projectile.kill();
                         } else {
                             projectile.spawnToAll();
-                            projectile.namedTag.putBoolean("canNotPickup", true);
+                            projectile.namedTag.putByte("pickup", 0);
                             this.level.addSound(this, Sound.RANDOM_BOW);
                         }
                     }
