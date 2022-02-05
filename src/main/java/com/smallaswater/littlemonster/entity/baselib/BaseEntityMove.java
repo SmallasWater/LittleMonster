@@ -34,6 +34,7 @@ public abstract class BaseEntityMove extends BaseEntity {
 
     private static final double FLOW_MULTIPLIER = .1;
 
+    protected double destinationDeviate = 0.8;
     protected RouteFinder route = new WalkerRouteFinder(this);
 
     public BaseEntityMove(FullChunk chunk, CompoundTag nbt) {
@@ -111,8 +112,8 @@ public abstract class BaseEntityMove extends BaseEntity {
     private boolean isNeedCheck(){
         return this.targetOption(this.followTarget) || //followTarget 不满足继续被锁定的要求
                 this.target == null ||
-                (config.isTargetPlayer() && !(followTarget instanceof Player)) || //主动锁定玩家，但现有目标不是玩家
-                this.distance(this.target) < 1; //已移动到指定位置
+                //(config.isTargetPlayer() && !(followTarget instanceof Player)) || //主动锁定玩家，但现有目标不是玩家 (基于权重 此判断已失效)
+                this.distance(this.target) < this.destinationDeviate; //已移动到指定位置
     }
 
     /*private boolean checkFight(){
@@ -129,7 +130,7 @@ public abstract class BaseEntityMove extends BaseEntity {
             return;
         }
 
-        if(/*this.isNeedCheck()*/ currentTick%10 == 0) {
+        if(this.isNeedCheck() || currentTick%15 == 0) {
             //扫描附近实体
             if (this.passengers.isEmpty()) {
                 //获取范围内可以攻击的生物
@@ -158,8 +159,6 @@ public abstract class BaseEntityMove extends BaseEntity {
                         targetWeighted.setDistance(this.distance(entity));
                     }
                 }
-
-                //entities.sort((p1, p2) -> Double.compare(this.distance(p1) - this.distance(p2), 0.0D));
 
                 ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
                 entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
@@ -338,7 +337,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                         this.attackEntity((EntityCreature) target);
                     }
                 }
-            }else if (target != null && this.distance(target) < 0.8) {
+            }else if (target != null && this.distance(target) < this.destinationDeviate) {
                 this.target = null;
                 this.moveTime = 0;
             }
@@ -364,7 +363,6 @@ public abstract class BaseEntityMove extends BaseEntity {
         }
 
         Vector3 before = this.target;
-//        PluginMasterThreadPool.ASYNC_EXECUTOR.submit(this::checkTarget);
         this.checkTarget(currentTick);
         double x;
         double z;

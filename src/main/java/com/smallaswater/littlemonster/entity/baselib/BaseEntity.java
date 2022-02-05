@@ -28,6 +28,7 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -56,13 +57,9 @@ public abstract class BaseEntity extends EntityHuman {
     //锁定生物
     Entity followTarget = null;
 
-//    protected boolean disPlayAnim = false;
-
     private boolean movement = true;
 
     protected ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
-
-    private boolean friendly = false;
 
     protected int attackDelay = 0;
 
@@ -116,22 +113,12 @@ public abstract class BaseEntity extends EntityHuman {
         return attackSleepTime;
     }
 
-    public abstract int getKillExperience();
-
-    public boolean isFriendly() {
-        return this.friendly;
-    }
-
     public boolean isMovement() {
         return this.movement;
     }
 
     public boolean isKnockback() {
         return this.attackTime > 0;
-    }
-
-    public void setFriendly(boolean bool) {
-        this.friendly = bool;
     }
 
     public void setMovement(boolean value) {
@@ -283,29 +270,27 @@ public abstract class BaseEntity extends EntityHuman {
      * */
     abstract public float getDamage();
 
+    private final ReentrantLock hasBlockInLineLock = new ReentrantLock();
     private final AtomicBoolean isHasBlock = new AtomicBoolean();
 
     //判断中间是否有方块
     public boolean hasBlockInLine(Vector3 target){
-        if(target != null) {
-//            Server.getInstance().getScheduler().scheduleAsyncTask(LittleMasterMainClass.getMasterMainClass(), new AsyncTask() {
-//                @Override
-//                public void onRun() {
-//                    Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
-//                    if (targetBlock != null) {
-//                        isHasBlock.set(targetBlock.getId() != 0);
-//                    }else {
-//                        isHasBlock.set(false);
-//                    }
-//                }
-//            });
-            CompletableFuture.supplyAsync(() -> {
-                Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
-                if (targetBlock != null) {
-                   return targetBlock.getId() != 0;
-                }
-                return false;
-            }, PluginMasterThreadPool.ASYNC_EXECUTOR).thenAccept(isHasBlock::set);
+        if(target != null && !this.hasBlockInLineLock.isLocked()) {
+            try {
+                CompletableFuture.supplyAsync(() -> {
+                    hasBlockInLineLock.lock();
+                    Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
+                    if (targetBlock != null) {
+                        return targetBlock.getId() != 0;
+                    }
+                    return false;
+                }, PluginMasterThreadPool.ASYNC_EXECUTOR).thenAccept(value -> {
+                    this.isHasBlock.set(value);
+                    hasBlockInLineLock.unlock();
+                });
+            } catch (Exception e) {
+                this.hasBlockInLineLock.unlock();
+            }
         }
         return this.isHasBlock.get();
     }

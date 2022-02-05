@@ -75,12 +75,13 @@ public class LittleNpc extends BaseEntityMove {
         this.name = config.getName();
         this.setNameTagAlwaysVisible();
         this.setNameTagVisible();
-        loadSkill();
+        this.loadSkill();
         this.setDataFlag(Entity.DATA_LEAD_HOLDER_EID,-1);
         this.setHealth(config.getHealth());
         this.setMaxHealth(config.getHealth());
         this.namedTag.putString(TAG,name);
-        this.route.setDestinationDeviate(Math.max(1, config.getAttackDistance() * 0.8));
+        this.destinationDeviate = Math.max(1, config.getAttackDistance() * 0.8);
+        this.route.setDestinationDeviate(this.destinationDeviate);
     }
 
     private Player getDamageMax(){
