@@ -2,6 +2,7 @@ package com.smallaswater.littlemonster.entity.baselib;
 
 
 import cn.nukkit.Player;
+import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.EntityHuman;
@@ -18,13 +19,16 @@ import cn.nukkit.network.protocol.SetEntityMotionPacket;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
+import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -280,33 +284,29 @@ public abstract class BaseEntity extends EntityHuman {
      * */
     abstract public float getDamage();
 
+    private final ReentrantLock hasBlockInLineLock = new ReentrantLock();
     private final AtomicBoolean isHasBlock = new AtomicBoolean();
 
     //判断中间是否有方块
     public boolean hasBlockInLine(Vector3 target){
-        //TODO
-        return false;
-        /*if(target != null) {
-//            Server.getInstance().getScheduler().scheduleAsyncTask(LittleMasterMainClass.getMasterMainClass(), new AsyncTask() {
-//                @Override
-//                public void onRun() {
-//                    Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
-//                    if (targetBlock != null) {
-//                        isHasBlock.set(targetBlock.getId() != 0);
-//                    }else {
-//                        isHasBlock.set(false);
-//                    }
-//                }
-//            });
-            CompletableFuture.supplyAsync(() -> {
-                Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
-                if (targetBlock != null) {
-                   return targetBlock.getId() != 0;
-                }
-                return false;
-            }, PluginMasterThreadPool.ASYNC_EXECUTOR).thenAccept(isHasBlock::set);
+        if(target != null && !this.hasBlockInLineLock.isLocked()) {
+            try {
+                CompletableFuture.supplyAsync(() -> {
+                    hasBlockInLineLock.lock();
+                    Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
+                    if (targetBlock != null) {
+                        return targetBlock.getId() != 0;
+                    }
+                    return false;
+                }, PluginMasterThreadPool.ASYNC_EXECUTOR).thenAccept(value -> {
+                    this.isHasBlock.set(value);
+                    hasBlockInLineLock.unlock();
+                });
+            } catch (Exception e) {
+                this.hasBlockInLineLock.unlock();
+            }
         }
-        return this.isHasBlock.get();*/
+        return this.isHasBlock.get();
     }
 
     @Override
