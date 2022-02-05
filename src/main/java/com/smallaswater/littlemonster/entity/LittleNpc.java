@@ -189,13 +189,11 @@ public class LittleNpc extends BaseEntityMove {
             }
         }
 
-
-        targetWeightedMap = null;
+        targetWeightedMap.clear();
         skillManagers.clear();
         healthList.clear();
         handle = null;
         route = null;
-
     }
 
     private ArrayList<Player> getDamagePlayers(){
