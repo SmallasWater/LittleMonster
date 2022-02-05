@@ -169,8 +169,6 @@ public abstract class BaseEntityMove extends BaseEntity {
                             this.fightEntity(entity);
                         }
                     }
-                }else if (this.followTarget != null) {
-                    this.setFollowTarget(null, false);
                 }
             }
         }
