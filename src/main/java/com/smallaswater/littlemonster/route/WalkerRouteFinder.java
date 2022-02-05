@@ -192,13 +192,14 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       double radius = this.entity.getWidth() * this.entity.getScale() / 2.0F;
       float height = this.entity.getHeight() * this.entity.getScale();
       AxisAlignedBB bb = new SimpleAxisAlignedBB(vector3.getX() - radius, vector3.getY(), vector3.getZ() - radius, vector3.getX() + radius, vector3.getY() + (double)height, vector3.getZ() + radius);
-      Block[] collisionBlocks = this.level.getCollisionBlocks(bb, true);
+      Block[] collisionBlocks = this.level.getCollisionBlocks(bb);
       for (Block block : collisionBlocks) {
          if (!block.canPassThrough()) {
             return false;
          }
       }
-      return this.isWalkable(vector3.add(0.0D, -1.0D, 0.0D));
+      Block block = this.getBlockFast(vector3.add(0.0D, -1.0D, 0.0D), false);
+      return !block.canPassThrough() || (block instanceof BlockWater);
    }
 
    private boolean isPassable(Vector3 now, Vector3 target) {
