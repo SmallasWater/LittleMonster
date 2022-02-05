@@ -23,7 +23,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -33,6 +32,8 @@ import java.util.Map;
  * Package com.smallaswater.littlemaster
  */
 public class LittleMonsterMainClass extends PluginBase {
+
+    public static boolean debug = false;
 
     public Config nbtItem;
 
@@ -60,6 +61,20 @@ public class LittleMonsterMainClass extends PluginBase {
         saveDefaultConfig();
         reloadConfig();
         this.saveResource("LittleMonster介绍.pdf",true);
+
+        if (this.getConfig().getBoolean("debug", false)) {
+            debug = true;
+            this.getLogger().warning("§c=========================================");
+            this.getLogger().warning("§c 警告：您开启了debug模式！");
+            this.getLogger().warning("§c Warning: You have turned on debug mode!");
+            this.getLogger().warning("§c=========================================");
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ignored) {
+
+            }
+        }
+
         this.getServer().getCommandMap().register("lt",new LittleNpcSpawnCommand());
         this.getLogger().info("副本信息读取成功");
 

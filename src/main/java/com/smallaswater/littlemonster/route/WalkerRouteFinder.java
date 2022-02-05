@@ -1,6 +1,7 @@
 package com.smallaswater.littlemonster.route;
 
 import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockWater;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.SimpleAxisAlignedBB;
 import cn.nukkit.math.Vector3;
@@ -49,9 +50,15 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
    @Override
    public boolean search() {
+      if (LittleMonsterMainClass.debug) {
+         LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路开始");
+      }
       if (this.entity.getTargetVector() == null && this.destination == null) {
          this.searching = false;
          this.finished = true;
+         if (LittleMonsterMainClass.debug) {
+            LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 没有目标");
+         }
          return false;
       }
 
@@ -65,6 +72,9 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          if (this.entity.getTargetVector() == null) {
             this.searching = false;
             this.finished = true;
+            if (LittleMonsterMainClass.debug) {
+               LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 没有目标");
+            }
             return false;
          }
 
@@ -102,6 +112,9 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
                this.searchLimit = 0;
                this.searching = false;
                this.finished = true;
+               if (LittleMonsterMainClass.debug) {
+                  LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 被中断");
+               }
                return false;
             }
 
@@ -111,6 +124,9 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
                this.finished = true;
                this.reachable = false;
                this.addNode(new Node(this.destination));
+               if (LittleMonsterMainClass.debug) {
+                  LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 找不到路径");
+               }
                return false;
             }
 
@@ -127,6 +143,9 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          this.addNode(findingPath);
          this.finished = true;
          this.searching = false;
+         if (LittleMonsterMainClass.debug) {
+            LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路完成 路径数量" + this.getPathRoute().size());
+         }
          return true;
       }catch (Exception e) {
          if (!(this.entity == null || this.entity.isClosed() || this.entity.getFollowTarget() == null ||
@@ -137,6 +156,9 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          this.finished = true;
          this.reachable = false;
          this.addNode(new Node(this.destination));
+         if (LittleMonsterMainClass.debug) {
+            LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败", e);
+         }
          return false;
       }
    }
@@ -162,14 +184,21 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
    private boolean isWalkable(Vector3 vector3) {
       Block block = this.level.getBlock(vector3, false);
-      return !block.canPassThrough() && this.canWalkOn(block);
+      return (!block.canPassThrough() && this.canWalkOn(block)) ||
+              (block instanceof BlockWater); //允许在水上走
    }
 
    private boolean isPassable(Vector3 vector3) {
       double radius = this.entity.getWidth() * this.entity.getScale() / 2.0F;
       float height = this.entity.getHeight() * this.entity.getScale();
       AxisAlignedBB bb = new SimpleAxisAlignedBB(vector3.getX() - radius, vector3.getY(), vector3.getZ() - radius, vector3.getX() + radius, vector3.getY() + (double)height, vector3.getZ() + radius);
-      return this.level.getCollisionBlocks(bb, true).length == 0 && !this.level.getBlock(vector3.add(0.0D, -1.0D, 0.0D), false).canPassThrough();
+      Block[] collisionBlocks = this.level.getCollisionBlocks(bb, true);
+      for (Block block : collisionBlocks) {
+         if (!block.canPassThrough()) {
+            return false;
+         }
+      }
+      return this.isWalkable(vector3.add(0.0D, -1.0D, 0.0D));
    }
 
    private boolean isPassable(Vector3 now, Vector3 target) {
