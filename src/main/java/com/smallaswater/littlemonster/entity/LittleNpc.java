@@ -80,9 +80,7 @@ public class LittleNpc extends BaseEntityMove {
         this.setHealth(config.getHealth());
         this.setMaxHealth(config.getHealth());
         this.namedTag.putString(TAG,name);
-        if (config.getAttackDistance() > 5) {
-            this.route.setDestinationDeviate(Math.max(1, config.getAttackDistance() * 0.8));
-        }
+        this.route.setDestinationDeviate(Math.max(1, config.getAttackDistance() * 0.8));
     }
 
     private Player getDamageMax(){
