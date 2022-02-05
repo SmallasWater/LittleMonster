@@ -166,14 +166,14 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    private Block getHighestUnder(Vector3 vector3, int limit) {
       if (limit > 0) {
          for (int y = vector3.getFloorY(); y >= vector3.getFloorY() - limit; y--) {
-            Block block = this.level.getBlock(vector3.getFloorX(), y, vector3.getFloorZ(), false);
+            Block block = this.getBlockFast(vector3.getFloorX(), y, vector3.getFloorZ(), false);
             if (this.isWalkable(block) && level.getBlock(block.add(0, 1, 0), false).getId() == Block.AIR) return block;
          }
          return null;
       }
       for (int y = vector3.getFloorY(); y >= 0; y--) {
-         Block block = this.level.getBlock(vector3.getFloorX(), y, vector3.getFloorZ(), false);
-         if (this.isWalkable(block) && level.getBlock(block.add(0, 1, 0), false).getId() == Block.AIR) return block;
+         Block block = this.getBlockFast(vector3.getFloorX(), y, vector3.getFloorZ(), false);
+         if (this.isWalkable(block) && this.getBlockFast(block.add(0, 1, 0), false).getId() == Block.AIR) return block;
       }
       return null;
    }
@@ -438,18 +438,18 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          boolean xIsInt = vector3.getX() % 1 == 0;
          boolean zIsInt = vector3.getZ() % 1 == 0;
          if (xIsInt && zIsInt) {
-            if (level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
-                    level.getBlock(new Vector3(vector3.getX() - 1, vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
-                    level.getBlock(new Vector3(vector3.getX() - 1, vector3.getY() - 1, vector3.getZ() - 1), false).canPassThrough() ||
-                    level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ() - 1), false).canPassThrough()) return true;
+            if (this.getBlockFast(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
+                    this.getBlockFast(new Vector3(vector3.getX() - 1, vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
+                    this.getBlockFast(new Vector3(vector3.getX() - 1, vector3.getY() - 1, vector3.getZ() - 1), false).canPassThrough() ||
+                    this.getBlockFast(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ() - 1), false).canPassThrough()) return true;
          } else if (xIsInt) {
-            if (level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
-                    level.getBlock(new Vector3(vector3.getX() - 1, vector3.getY() - 1, vector3.getZ()), false).canPassThrough()) return true;
+            if (this.getBlockFast(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
+                    this.getBlockFast(new Vector3(vector3.getX() - 1, vector3.getY() - 1, vector3.getZ()), false).canPassThrough()) return true;
          } else if (zIsInt) {
-            if (level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
-                    level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ() - 1), false).canPassThrough()) return true;
+            if (this.getBlockFast(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
+                    this.getBlockFast(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ() - 1), false).canPassThrough()) return true;
          } else {
-            if (level.getBlock(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough()) return true;
+            if (this.getBlockFast(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough()) return true;
          }
       }
       return false;
