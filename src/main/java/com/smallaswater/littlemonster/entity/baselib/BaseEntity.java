@@ -57,13 +57,9 @@ public abstract class BaseEntity extends EntityHuman {
     //锁定生物
     Entity followTarget = null;
 
-//    protected boolean disPlayAnim = false;
-
     private boolean movement = true;
 
     protected ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
-
-    private boolean friendly = false;
 
     protected int attackDelay = 0;
 
@@ -117,22 +113,12 @@ public abstract class BaseEntity extends EntityHuman {
         return attackSleepTime;
     }
 
-    public abstract int getKillExperience();
-
-    public boolean isFriendly() {
-        return this.friendly;
-    }
-
     public boolean isMovement() {
         return this.movement;
     }
 
     public boolean isKnockback() {
         return this.attackTime > 0;
-    }
-
-    public void setFriendly(boolean bool) {
-        this.friendly = bool;
     }
 
     public void setMovement(boolean value) {
