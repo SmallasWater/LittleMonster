@@ -34,6 +34,7 @@ public abstract class BaseEntityMove extends BaseEntity {
 
     private static final double FLOW_MULTIPLIER = .1;
 
+    protected double destinationDeviate = 0.8;
     protected RouteFinder route = new WalkerRouteFinder(this);
 
     public BaseEntityMove(FullChunk chunk, CompoundTag nbt) {
@@ -336,7 +337,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                         this.attackEntity((EntityCreature) target);
                     }
                 }
-            }else if (target != null && this.distance(target) < 0.8) {
+            }else if (target != null && this.distance(target) < this.destinationDeviate) {
                 this.target = null;
                 this.moveTime = 0;
             }
