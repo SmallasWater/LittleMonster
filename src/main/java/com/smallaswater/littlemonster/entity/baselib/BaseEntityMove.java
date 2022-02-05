@@ -112,8 +112,8 @@ public abstract class BaseEntityMove extends BaseEntity {
     private boolean isNeedCheck(){
         return this.targetOption(this.followTarget) || //followTarget 不满足继续被锁定的要求
                 this.target == null ||
-                (config.isTargetPlayer() && !(followTarget instanceof Player)) || //主动锁定玩家，但现有目标不是玩家
-                this.distance(this.target) < 1; //已移动到指定位置
+                //(config.isTargetPlayer() && !(followTarget instanceof Player)) || //主动锁定玩家，但现有目标不是玩家 (基于权重 此判断已失效)
+                this.distance(this.target) < this.destinationDeviate; //已移动到指定位置
     }
 
     /*private boolean checkFight(){
@@ -130,7 +130,7 @@ public abstract class BaseEntityMove extends BaseEntity {
             return;
         }
 
-        if(/*this.isNeedCheck()*/ currentTick%15 == 0) {
+        if(this.isNeedCheck() || currentTick%15 == 0) {
             //扫描附近实体
             if (this.passengers.isEmpty()) {
                 //获取范围内可以攻击的生物
