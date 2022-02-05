@@ -124,11 +124,12 @@ public abstract class BaseEntityMove extends BaseEntity {
     /**
      * 寻找目标并锁定
      */
-    private void checkTarget() {
+    private void checkTarget(int currentTick) {
         if (this.isKnockback()) {
             return;
         }
-        //if(this.isNeedCheck()) {
+
+        if(/*this.isNeedCheck()*/ currentTick%10 == 0) {
             //扫描附近实体
             if (this.passengers.isEmpty()) {
                 //获取范围内可以攻击的生物
@@ -170,96 +171,62 @@ public abstract class BaseEntityMove extends BaseEntity {
                         }
                     }
                 }
-
-//                CompletableFuture<>.supplyAsync(() -> {
-//
-//                }, PluginMasterThreadPool.ASYNC_EXECUTOR).thenAccept(isHasBlock::set);
-                //要不这种操作放在异步
-//                ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
-//                entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
-//                if (!entities.isEmpty()) {
-//                    EntityCreature entity = entities.get(0);
-//                    if (entity != this.getFollowTarget()) {
-//                        this.fightEntity(entity);
-//                    }
-//                }
             }
+        }
 
-            //获取寻路目标点
-            if (this.route != null){
-                if (this.route.isFinished() && this.route.hasArrivedNodeInaccurate(this)) {
-                    this.target = this.route.next();
-                    return;
-                }else if (this.followTarget != null && !this.route.isSearching()){
-                    this.route.setDestination(this.followTarget);
-                }
+        //获取寻路目标点
+        if (this.route != null){
+            if (this.route.isFinished() && this.route.hasArrivedNodeInaccurate(this)) {
+                this.target = this.route.next();
+                return;
+            }else if (this.followTarget != null && !this.route.isSearching()){
+                this.route.setDestination(this.followTarget);
             }
+        }
 
-            //没有目标时
-            if(this.getTargetVector() == null) {
-                //随机移动
-                if (this.config.isCanMove()) {
-                    int x;
-                    int z;
-                    Vector3 nextTarget = null;
-                    if (this.stayTime > 0) {
-                        /*if (Utils.rand(1, 100) > 5) {
-                            return;
+        //没有目标时
+        if(this.getTargetVector() == null) {
+            //随机移动
+            if (this.config.isCanMove()) {
+                int x;
+                int z;
+                Vector3 nextTarget = null;
+                if (this.stayTime > 0) {
+                    /*if (Utils.rand(1, 100) > 5) {
+                        return;
+                    }
+                    x = Utils.rand(10, 30);
+                    z = Utils.rand(10, 30);
+                    nextTarget = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);*/
+                } else if (Utils.rand(1, 10) == 1) {
+                    x = Utils.rand(5, 20);
+                    z = Utils.rand(5, 20);
+                    this.stayTime = Utils.rand(60, 200);
+                    nextTarget = this.add(Utils.rand() ? x : -x, /*Utils.rand(-20.0, 20.0) / 10*/0, Utils.rand() ? z : -z);
+                    nextTarget.y+=5;
+                    for (int i=0; i<10; i++) {
+                        nextTarget.y--;
+                        if (this.level.getBlock(nextTarget).canPassThrough() &&
+                                !this.level.getBlock(nextTarget.down()).canPassThrough()) {
+                            break;
                         }
-                        x = Utils.rand(10, 30);
-                        z = Utils.rand(10, 30);
-                        nextTarget = this.add(Utils.rand() ? x : -x, Utils.rand(-20.0, 20.0) / 10, Utils.rand() ? z : -z);*/
-                    } else if (Utils.rand(1, 10) == 1) {
-                        x = Utils.rand(5, 20);
-                        z = Utils.rand(5, 20);
-                        this.stayTime = Utils.rand(60, 200);
-                        nextTarget = this.add(Utils.rand() ? x : -x, /*Utils.rand(-20.0, 20.0) / 10*/0, Utils.rand() ? z : -z);
-                        nextTarget.y+=5;
-                        for (int i=0; i<10; i++) {
-                            nextTarget.y--;
-                            if (this.level.getBlock(nextTarget).canPassThrough() &&
-                                    !this.level.getBlock(nextTarget.down()).canPassThrough()) {
-                                break;
-                            }
-                        }
-                    }/*else if (this.moveTime <= 0 || this.target == null) {
-                        x = Utils.rand(10, 40);
-                        z = Utils.rand(10, 40);
-                        this.stayTime = 0;
-                        this.moveTime = Utils.rand(20, 60);
-                        nextTarget = this.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
-                    }*/
-                    if (nextTarget != null) {
-                        this.target = nextTarget;
-                        if (this.route != null) {
-                            this.route.setDestination(nextTarget);
-                        }
+                    }
+                }/*else if (this.moveTime <= 0 || this.target == null) {
+                    x = Utils.rand(10, 40);
+                    z = Utils.rand(10, 40);
+                    this.stayTime = 0;
+                    this.moveTime = Utils.rand(20, 60);
+                    nextTarget = this.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
+                }*/
+                if (nextTarget != null) {
+                    this.target = nextTarget;
+                    if (this.route != null) {
+                        this.route.setDestination(nextTarget);
                     }
                 }
             }
-
-            //TODO 未知用途，需要进一步测试
-            /*double distance = this.followTarget != null ? this.distance(followTarget) : 0;
-            if (distance > seeSize || this.targetOption(followTarget, distance)) {
-                this.setFollowTarget(null,false);
-                return;
-            }
-            if(this.target == null) {
-                this.stayTime = 0;
-                this.moveTime = 0;
-                if (this.passengers.isEmpty()) {
-                    this.target = followTarget;
-                }
-            }*/
-        /*}else {
-            //如果有寻路节点 更新目标
-            if (this.route != null && this.route.hasCurrentNode() && this.route.hasArrivedNode(this) && this.route.hasNext()) {
-                this.target = this.route.next();
-            }
-        }*/
+        }
     }
-
-
 
     /**
      * 是否可以攻击目标实体 （主要为NPC配置文件规则限制）
@@ -354,7 +321,7 @@ public abstract class BaseEntityMove extends BaseEntity {
             this.lastUpdate = currentTick;
             this.entityBaseTick(tickDiff);
 
-            Vector3 target = this.updateMove(tickDiff);
+            Vector3 target = this.updateMove(currentTick, tickDiff);
             //攻击目标实体
             if(target instanceof EntityCreature) {
                 if(this.targetOption((EntityCreature) target, this.distance(target))){
@@ -380,7 +347,7 @@ public abstract class BaseEntityMove extends BaseEntity {
         }
     }
 
-    private Vector3 updateMove(int tickDiff) {
+    private Vector3 updateMove(int currentTick, int tickDiff) {
         if (this.isImmobile() || !this.isMovement()) {
             return null;
         }
@@ -398,7 +365,7 @@ public abstract class BaseEntityMove extends BaseEntity {
 
         Vector3 before = this.target;
 //        PluginMasterThreadPool.ASYNC_EXECUTOR.submit(this::checkTarget);
-        this.checkTarget();
+        this.checkTarget(currentTick);
         double x;
         double z;
         if (this.target != null || before != this.target) {
