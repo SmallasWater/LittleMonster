@@ -129,7 +129,7 @@ public abstract class BaseEntityMove extends BaseEntity {
             return;
         }
 
-        if(/*this.isNeedCheck()*/ currentTick%10 == 0) {
+        if(/*this.isNeedCheck()*/ currentTick%15 == 0) {
             //扫描附近实体
             if (this.passengers.isEmpty()) {
                 //获取范围内可以攻击的生物
@@ -158,8 +158,6 @@ public abstract class BaseEntityMove extends BaseEntity {
                         targetWeighted.setDistance(this.distance(entity));
                     }
                 }
-
-                //entities.sort((p1, p2) -> Double.compare(this.distance(p1) - this.distance(p2), 0.0D));
 
                 ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
                 entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
@@ -364,7 +362,6 @@ public abstract class BaseEntityMove extends BaseEntity {
         }
 
         Vector3 before = this.target;
-//        PluginMasterThreadPool.ASYNC_EXECUTOR.submit(this::checkTarget);
         this.checkTarget(currentTick);
         double x;
         double z;
