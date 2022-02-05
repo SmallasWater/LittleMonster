@@ -183,7 +183,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    }
 
    private boolean isWalkable(Vector3 vector3) {
-      Block block = this.level.getBlock(vector3, false);
+      Block block = this.getBlockFast(vector3, false);
       return (!block.canPassThrough() && this.canWalkOn(block)) ||
               (block instanceof BlockWater); //允许在水上走
    }
