@@ -464,11 +464,6 @@ public class LittleNpc extends BaseEntityMove {
         }
     }
 
-    @Override
-    public int getKillExperience() {
-        return 0;
-    }
-
     //攻击玩家~
 
     @Override
