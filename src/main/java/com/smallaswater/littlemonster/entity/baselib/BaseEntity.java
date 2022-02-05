@@ -2,7 +2,6 @@ package com.smallaswater.littlemonster.entity.baselib;
 
 
 import cn.nukkit.Player;
-import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.EntityHuman;
@@ -19,13 +18,11 @@ import cn.nukkit.network.protocol.SetEntityMotionPacket;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
-import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -287,7 +284,9 @@ public abstract class BaseEntity extends EntityHuman {
 
     //判断中间是否有方块
     public boolean hasBlockInLine(Vector3 target){
-        if(target != null) {
+        //TODO
+        return false;
+        /*if(target != null) {
 //            Server.getInstance().getScheduler().scheduleAsyncTask(LittleMasterMainClass.getMasterMainClass(), new AsyncTask() {
 //                @Override
 //                public void onRun() {
@@ -307,7 +306,7 @@ public abstract class BaseEntity extends EntityHuman {
                 return false;
             }, PluginMasterThreadPool.ASYNC_EXECUTOR).thenAccept(isHasBlock::set);
         }
-        return this.isHasBlock.get();
+        return this.isHasBlock.get();*/
     }
 
     @Override
