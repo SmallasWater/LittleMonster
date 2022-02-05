@@ -383,6 +383,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                     if (this.isInsideOfWater()) {
                         this.motionX = this.getSpeed() * 0.05D * (x / diff);
                         this.motionZ = this.getSpeed() * 0.05D * (z / diff);
+                        this.motionY = this.getSpeed() * 0.05D * ((this.target.y - this.y) / diff);
                         this.level.addParticle(new BubbleParticle(this.add(Utils.rand(-2.0D, 2.0D), Utils.rand(-0.5D, 0.0D), Utils.rand(-2.0D, 2.0D))));
                     } else {
                         this.motionX = this.getSpeed() * 0.15D * (x / diff);
