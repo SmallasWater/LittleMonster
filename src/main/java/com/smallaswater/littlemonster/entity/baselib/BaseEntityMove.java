@@ -130,7 +130,7 @@ public abstract class BaseEntityMove extends BaseEntity {
             return;
         }
 
-        if(this.isNeedCheck() || currentTick%15 == 0) {
+        if(currentTick%15 == 0 || this.targetOption(this.followTarget)) {
             //扫描附近实体
             if (this.passengers.isEmpty()) {
                 //获取范围内可以攻击的生物
