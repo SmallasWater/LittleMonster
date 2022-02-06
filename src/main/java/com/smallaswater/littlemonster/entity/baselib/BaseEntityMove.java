@@ -264,7 +264,9 @@ public abstract class BaseEntityMove extends BaseEntity {
             }
         }
         if(!config.isAttackFriendEntity()){
-            return !(targetEntity instanceof EntityAnimal);
+            if (targetEntity instanceof EntityAnimal) {
+                return false;
+            }
         }
         if(!config.isAttackHostileEntity()) {
             return !(targetEntity instanceof EntityMob);
@@ -351,9 +353,9 @@ public abstract class BaseEntityMove extends BaseEntity {
             return null;
         }
 
-        if (this.age % 10 == 0 && this.route != null && this.route.needSearching()) {
+        //if (this.age % 10 == 0 && this.route != null && this.route.needSearching()) {
             //RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this.route));
-        }
+        //}
 
         if (this.isKnockback()) {
             this.move(this.motionX, this.motionY, this.motionZ);
