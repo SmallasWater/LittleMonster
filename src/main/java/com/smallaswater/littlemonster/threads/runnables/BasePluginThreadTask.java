@@ -16,7 +16,6 @@ public abstract class BasePluginThreadTask implements Runnable {
                 if(!scheduler()) {
                     break;
                 }
-
                 Thread.sleep(1000);
             } catch (Exception e) {
                 LittleMonsterMainClass.getMasterMainClass().getLogger().error("BasePluginThreadTask Error", e);

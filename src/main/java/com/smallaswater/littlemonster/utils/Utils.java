@@ -193,6 +193,9 @@ public class Utils {
 
     public static int getEntityCount(Level level, String entityName,String pos){
         int count = 0;
+        if(level == null){
+            return count;
+        }
         for(Entity entitys: level.getEntities()){
             String name = getMonster(entitys);
             if(name != null && name.equals(entityName)){
