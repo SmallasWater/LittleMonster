@@ -142,7 +142,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                     }
 
                     if(entity instanceof EntityCreature && entity != this) {
-                        if (this.canAttackEntity(entity)) {
+                        if (this.canAttackEntity(entity, true)) {
                             scanEntities.add((EntityCreature) entity);
                             TargetWeighted targetWeighted = this.getTargetWeighted((EntityCreature) entity);
                             targetWeighted.setReason(TargetWeighted.REASON_AUTO_SCAN);
@@ -165,7 +165,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                 if (!entities.isEmpty()) {
                     EntityCreature entity = entities.get(0);
                     if (entity != this.getFollowTarget()) {
-                        if(canAttackEntity(entity)) {
+                        if(canAttackEntity(entity, false)) {
                             this.fightEntity(entity);
                         }
                     }
@@ -231,9 +231,10 @@ public abstract class BaseEntityMove extends BaseEntity {
      * 是否可以攻击目标实体 （主要为NPC配置文件规则限制）
      *
      * @param targetEntity 目标实体
+     * @param isActive 是否为主动攻击
      * @return 是否可以攻击
      */
-    protected boolean canAttackEntity(Entity targetEntity) {
+    protected boolean canAttackEntity(Entity targetEntity, boolean isActive) {
         if (this.targetOption(targetEntity, this.distance(targetEntity))) {
             return false;
         }
@@ -247,7 +248,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                 return false;
             }
         }
-        if (!this.config.isTargetPlayer() && targetEntity instanceof Player) {
+        if (!this.config.isTargetPlayer() && isActive && targetEntity instanceof Player) {
             return false;
         }
 
