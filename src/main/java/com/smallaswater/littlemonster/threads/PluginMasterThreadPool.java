@@ -37,9 +37,9 @@ public class PluginMasterThreadPool {
         }
     }
 
-//    public static void shutDownNow() {
-//        ASYNC_EXECUTOR.shutdownNow();
-//        EXECUTOR.shutdownNow();
-//    }
+    public static void shutDownNow() {
+        ASYNC_EXECUTOR.shutdownNow();
+        EXECUTOR.shutdownNow();
+    }
 
 }

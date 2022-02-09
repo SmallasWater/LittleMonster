@@ -1,6 +1,5 @@
 package com.smallaswater.littlemonster.threads.runnables;
 
-
 import com.smallaswater.littlemonster.route.RouteFinder;
 
 public class RouteFinderSearchTask implements Runnable {
@@ -25,6 +24,7 @@ public class RouteFinderSearchTask implements Runnable {
             try {
                Thread.sleep(100L);
             } catch (InterruptedException ignored) {
+               return;
             }
          }
          //this.route.interrupt();

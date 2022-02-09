@@ -122,9 +122,9 @@ public class LittleMasterListener implements Listener {
         }
     }
 
-//    @EventHandler
-//    public void onServerStop(ServerStopEvent event) {
-//        RouteFinderThreadPool.shutDownNow();
-//        PluginMasterThreadPool.shutDownNow();
-//    }
+    @EventHandler
+    public void onServerStop(ServerStopEvent event) {
+        RouteFinderThreadPool.shutDownNow();
+        PluginMasterThreadPool.shutDownNow();
+    }
 }
