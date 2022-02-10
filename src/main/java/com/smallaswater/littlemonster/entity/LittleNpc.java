@@ -395,36 +395,9 @@ public class LittleNpc extends BaseEntityMove {
                         }
                         if (!targetOption(damager, distance(damager)) && damager instanceof EntityCreature) {
                             this.getTargetWeighted((EntityCreature) damager).setReason(TargetWeighted.REASON_PASSIVE_ATTACK_ENTITY);
-                            //setFollowTarget(sure.getDamager());
                         }
                     }
                 }
-
-                //被攻击时设置权重，而不是直接切换目标
-                //下列代码不再使用
-                /*if(getFollowTarget() != null) {
-                    //如果锁定的不是玩家
-                    if(!(getFollowTarget() instanceof Player)) {
-                        if (targetOption(getFollowTarget(), distance(getFollowTarget()))) {
-                            setFollowTarget(null, false);
-                            return;
-                        }
-                        if (config.isPassiveAttackEntity()) {
-                            if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
-                                if (!targetOption(((EntityDamageByEntityEvent) sure)
-                                                .getDamager(),
-                                        distance(((EntityDamageByEntityEvent) sure).getDamager()))) {
-                                    setFollowTarget(((EntityDamageByEntityEvent) sure).getDamager());
-                                }
-
-                            } else {
-                                toDamageEntity((EntityDamageByEntityEvent) sure);
-                            }
-                        }
-                    }
-                }else{
-                    toDamageEntity((EntityDamageByEntityEvent) sure);
-                }*/
             }
         }else{
             sure.setCancelled();
@@ -434,7 +407,6 @@ public class LittleNpc extends BaseEntityMove {
     @Override
     public boolean attack(EntityDamageEvent source) {
         boolean attack = super.attack(source);
-
         //获取最终伤害
         if (!source.isCancelled() && source instanceof EntityDamageByEntityEvent) {
             EntityDamageByEntityEvent entityDamageByEntityEvent = (EntityDamageByEntityEvent) source;
