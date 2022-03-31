@@ -8,6 +8,7 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityDeathEvent;
+import cn.nukkit.event.level.ChunkUnloadEvent;
 import cn.nukkit.event.player.PlayerFormRespondedEvent;
 import cn.nukkit.event.player.PlayerMoveEvent;
 import cn.nukkit.event.server.ServerStopEvent;
@@ -118,6 +119,15 @@ public class LittleMasterListener implements Listener {
                     config.resetEntity();
                     player.sendMessage("保存完成");
                 }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onChunkUnload(ChunkUnloadEvent event) {
+        for (Entity entity : event.getChunk().getEntities().values()) {
+            if (entity instanceof LittleNpc) {
+                entity.close();
             }
         }
     }
