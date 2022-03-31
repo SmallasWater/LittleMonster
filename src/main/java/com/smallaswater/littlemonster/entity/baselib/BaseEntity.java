@@ -49,9 +49,6 @@ public abstract class BaseEntity extends EntityHuman {
     //停留
     int stayTime = 0;
 
-    //目前没有使用
-    @Deprecated
-    int moveTime = 0;
     //目标
     Vector3 target = null;
     //锁定生物
@@ -156,14 +153,12 @@ public abstract class BaseEntity extends EntityHuman {
     }
 
     //准则 不会伤害主人
-
     public EntityHuman getMasterHuman() {
         return masterHuman;
     }
 
     public void setFollowTarget(Entity target) {
         this.followTarget = target;
-        this.moveTime = 0;
         this.stayTime = 0;
         this.target = null;
     }

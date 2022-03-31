@@ -166,7 +166,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                     EntityCreature entity = entities.get(0);
                     if (entity != this.getFollowTarget()) {
                         if(canAttackEntity(entity, false)) {
-                            this.fightEntity(entity);
+                            this.setFollowTarget(entity, true);
                         }
                     }
                 }
@@ -178,7 +178,8 @@ public abstract class BaseEntityMove extends BaseEntity {
             if (this.route.isFinished() && this.route.hasArrivedNodeInaccurate(this)) {
                 this.target = this.route.next();
                 return;
-            }else if (this.followTarget != null && !this.route.isSearching()){
+            }else if (this.followTarget != null &&
+                    !this.route.isSearching() && this.route.getDestination().distance(this.followTarget) > 1){
                 this.route.setDestination(this.followTarget);
             }
         }
@@ -277,29 +278,6 @@ public abstract class BaseEntityMove extends BaseEntity {
     }
 
     /**
-     * 锁定生物
-     * */
-    private boolean fightEntity(EntityCreature entity) {
-        /*EntityCreature creature;
-        double distance;
-        creature = entity;*/
-        /*distance = this.distance(creature);
-        if (distance > seeSize || this.targetOption(creature, distance)) {
-            return false;
-        }*/
-        this.stayTime = 0;
-        this.moveTime = 0;
-        this.setFollowTarget(entity, true);
-        //this.target = entity;
-        /*this.followTarget = creature;
-        if (this.route == null && this.passengers.isEmpty()) {
-            this.target = creature;
-        }
-        canAttack = true;*/
-        return true;
-    }
-
-    /**
      * 生物移除
      * */
     abstract public void onClose();
@@ -342,7 +320,6 @@ public abstract class BaseEntityMove extends BaseEntity {
                 }
             }else if (target != null && this.distance(target) < this.destinationDeviate) {
                 this.target = null;
-                this.moveTime = 0;
             }
 
             return true;
@@ -394,7 +371,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                     this.motionX = 0.0D;
                     this.motionZ = 0.0D;
                 }
-                if ((this.passengers.isEmpty()) && (this.stayTime <= 0 /*|| Utils.rand()*/)) {
+                if (this.passengers.isEmpty() && this.stayTime <= 0) {
                     //看向移动方向
                     if (this.followTarget == null) {
                         this.yaw = Math.toDegrees(-Math.atan2(x / diff, z / diff));
@@ -431,10 +408,6 @@ public abstract class BaseEntityMove extends BaseEntity {
                 }
             }
             this.move(x, this.motionY, z);
-            Vector2 af = new Vector2(this.x, this.z);
-            if ((be.x != af.x || be.y != af.y) && !isJump) {
-                this.moveTime -= 90 * tickDiff;
-            }
         }
         if (!isJump) {
             if (this.onGround) {
@@ -454,12 +427,13 @@ public abstract class BaseEntityMove extends BaseEntity {
         return this.followTarget != null ? this.followTarget : this.target;
     }
 
+    /**
+     * 看向跟踪的目标
+     */
     protected void seeFollowTarget() {
-        Vector3 target = null;
-        if(!hasBlockInLine(this.followTarget)) {
-            if (this.followTarget != null) {
-                target = this.followTarget;
-            }
+        Vector3 target;
+        if(this.followTarget != null && !hasBlockInLine(this.followTarget)) {
+            target = this.followTarget;
         }else {
             target = this.target;
         }
