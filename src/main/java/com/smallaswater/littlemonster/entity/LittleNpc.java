@@ -82,6 +82,7 @@ public class LittleNpc extends BaseEntityMove {
         this.namedTag.putString(TAG,name);
         this.destinationDeviate = Math.max(1, config.getAttackDistance() * 0.8);
         this.route.setDestinationDeviate(this.destinationDeviate);
+
     }
 
     private Player getDamageMax(){
@@ -190,9 +191,16 @@ public class LittleNpc extends BaseEntityMove {
             }
         }
 
-        this.targetWeightedMap.clear();
-        this.skillManagers.clear();
-        this.healthList.clear();
+        //如果在类实例化时调用onClose方法 这些变量可能为null
+        if (this.targetWeightedMap != null) {
+            this.targetWeightedMap.clear();
+        }
+        if (this.skillManagers != null) {
+            this.skillManagers.clear();
+        }
+        if (this.healthList != null) {
+            this.healthList.clear();
+        }
         this.handle = null;
         this.route = null;
     }
