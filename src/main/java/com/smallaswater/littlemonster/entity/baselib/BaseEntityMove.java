@@ -178,8 +178,7 @@ public abstract class BaseEntityMove extends BaseEntity {
             if (this.route.isFinished() && this.route.hasArrivedNodeInaccurate(this)) {
                 this.target = this.route.next();
                 return;
-            }else if (this.followTarget != null && !this.route.isSearching() &&
-                    (this.route.getDestination() != null && this.route.getDestination().distance(this.followTarget) > this.distanceLine)) {
+            }else if (this.followTarget != null && !this.route.isSearching() && this.followTarget.distance(this) > this.distanceLine) {
                 this.route.setDestination(this.followTarget);
             }
         }
