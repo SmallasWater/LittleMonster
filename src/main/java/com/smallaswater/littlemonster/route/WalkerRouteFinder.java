@@ -1,6 +1,7 @@
 package com.smallaswater.littlemonster.route;
 
 import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockID;
 import cn.nukkit.block.BlockWater;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.SimpleAxisAlignedBB;
@@ -24,7 +25,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
    private final ArrayList<Node> closeList = new ArrayList<>();
 
-   private int searchLimit = 100;
+   private int searchLimit = 100; //搜索步数限制
 
    public WalkerRouteFinder(BaseEntity entity) {
       super(entity);
@@ -179,7 +180,10 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    }
 
    private boolean canWalkOn(Block block) {
-      return block.getId() != 10 && block.getId() != 11 && block.getId() != 81;
+      return block.getId() != BlockID.LAVA &&
+              block.getId() != BlockID.STILL_LAVA &&
+              block.getId() != BlockID.CACTUS &&
+              block.getId() != BlockID.FIRE;
    }
 
    private boolean isWalkable(Vector3 vector3) {

@@ -232,7 +232,7 @@ public abstract class RouteFinder {
 
    public Block getBlockFast(int x, int y, int z, boolean load) {
       if (!"Nukkit".equals(Server.getInstance().getName())) {
-         return this.level.getBlock(x, y, z);
+         return this.level.getBlock(x, y, z, load);
       }
 
       int fullState;
