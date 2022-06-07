@@ -168,13 +168,13 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       if (limit > 0) {
          for (int y = vector3.getFloorY(); y >= vector3.getFloorY() - limit; y--) {
             Block block = this.getBlockFast(vector3.getFloorX(), y, vector3.getFloorZ(), false);
-            if (this.isWalkable(block) && level.getBlock(block.add(0, 1, 0), false).getId() == Block.AIR) return block;
+            if (this.isWalkable(block) && level.getBlock(block.add(0, 1, 0), false).canPassThrough()) return block;
          }
          return null;
       }
       for (int y = vector3.getFloorY(); y >= 0; y--) {
          Block block = this.getBlockFast(vector3.getFloorX(), y, vector3.getFloorZ(), false);
-         if (this.isWalkable(block) && this.getBlockFast(block.add(0, 1, 0), false).getId() == Block.AIR) return block;
+         if (this.isWalkable(block) && this.getBlockFast(block.add(0, 1, 0), false).canPassThrough()) return block;
       }
       return null;
    }
