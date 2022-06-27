@@ -1,6 +1,6 @@
 name: LittleMonster
 main: com.smallaswater.littlemonster.LittleMonsterMainClass
-version: "1.6.9-SNAPSHOT"
+version: "1.6.9"
 authors:
   - 若水
   - LT_Name
