@@ -10,7 +10,6 @@ import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityDeathEvent;
 import cn.nukkit.event.level.ChunkUnloadEvent;
 import cn.nukkit.event.player.PlayerFormRespondedEvent;
-import cn.nukkit.event.player.PlayerInteractEvent;
 import cn.nukkit.event.player.PlayerMoveEvent;
 import cn.nukkit.event.server.ServerStopEvent;
 import cn.nukkit.form.response.FormResponseCustom;
@@ -34,11 +33,6 @@ import com.smallaswater.littlemonster.windows.LittleWindow;
  * Package com.smallaswater.littlemonster.events
  */
 public class LittleMasterListener implements Listener {
-
-    @EventHandler
-    public void on(PlayerInteractEvent event) {
-        event.getPlayer().sendMessage(event.getBlock().getId() + "");
-    }
 
     @EventHandler
     public void onDamage(EntityDamageEvent e){
