@@ -10,7 +10,6 @@ import cn.nukkit.entity.passive.EntityAnimal;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.BubbleParticle;
 import cn.nukkit.math.NukkitMath;
-import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import com.smallaswater.littlemonster.entity.LittleNpc;
@@ -394,7 +393,6 @@ public abstract class BaseEntityMove extends BaseEntity {
             this.stayTime -= tickDiff;
             this.move(0.0D, this.motionY, 0.0D);
         } else {
-            Vector2 be = new Vector2(this.x + x, this.z + z);
             if(attactMode != 3 && attactMode != 2){
                 waitTime = 0;
             }else if(followTarget == null || (this.distance(followTarget) > seeSize)){
@@ -409,6 +407,11 @@ public abstract class BaseEntityMove extends BaseEntity {
             this.move(x, this.motionY, z);
         }
         if (!isJump) {
+            //尝试解决卡到地底的问题
+            if (!this.getLevel().getBlock(this.getPosition().floor().add(0, -1, 0)).canPassThrough()) {
+                this.onGround = true;
+            }
+
             if (this.onGround) {
                 this.motionY = 0.0D;
             } else if (this.motionY > (double)(-this.getGravity() * 4.0F)) {
