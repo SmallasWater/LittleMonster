@@ -12,6 +12,7 @@ import com.smallaswater.littlemonster.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.PriorityQueue;
 
 
@@ -127,6 +128,22 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
                this.addNode(new Node(this.destination));
                if (LittleMonsterMainClass.debug) {
                   LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 找不到路径");
+               }
+               if (this.allowFuzzyResults) {
+                  LinkedList<Node> list = new LinkedList<>(this.closeList);
+                  list.sort((o1, o2) -> {
+                     if (o1.getF() < o2.getF()) {
+                        return -1;
+                     } else if (o1.getF() > o2.getF()) {
+                        return 1;
+                     } else {
+                        return 0;
+                     }
+                  });
+                  this.setDestination(list.getFirst().getVector3());
+                  if (LittleMonsterMainClass.debug) {
+                     LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 正在重试搜索最靠近的位置");
+                  }
                }
                return false;
             }

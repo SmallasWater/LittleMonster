@@ -38,6 +38,8 @@ public abstract class BaseEntityMove extends BaseEntity {
 
     public BaseEntityMove(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
+
+        this.route.setAllowFuzzyResults(true);
     }
 
     private boolean checkJump(double dx, double dz) {

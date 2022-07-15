@@ -46,6 +46,9 @@ public abstract class RouteFinder {
 
    protected boolean reachable = true;
 
+   @Setter
+   protected boolean allowFuzzyResults = false;
+
    RouteFinder(BaseEntity entity) {
       Objects.requireNonNull(entity, "RouteFinder: entity can not be null");
       this.entity = entity;
