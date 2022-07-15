@@ -10,6 +10,7 @@ import cn.nukkit.entity.projectile.EntityArrow;
 import cn.nukkit.entity.projectile.EntityProjectile;
 import cn.nukkit.event.entity.*;
 import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemID;
 import cn.nukkit.level.ParticleEffect;
 import cn.nukkit.level.Sound;
 import cn.nukkit.level.format.FullChunk;
@@ -80,7 +81,7 @@ public class LittleNpc extends BaseEntityMove {
         this.setHealth(config.getHealth());
         this.setMaxHealth(config.getHealth());
         this.namedTag.putString(TAG,name);
-        this.destinationDeviate = Math.max(1, config.getAttackDistance() * 0.8);
+        this.destinationDeviate = Math.max(1.5, config.getAttackDistance() * 0.8);
         this.route.setDestinationDeviate(this.destinationDeviate);
 
     }
@@ -478,7 +479,7 @@ public class LittleNpc extends BaseEntityMove {
                             new Vector3(-Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f,
                                     -Math.sin(Math.toRadians(pitch)) * f * f,
                                     Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f));
-                    EntityShootBowEvent ev = new EntityShootBowEvent(this, Item.get(262, 0, 1), arrow, f);
+                    EntityShootBowEvent ev = new EntityShootBowEvent(this, Item.get(ItemID.ARROW, 0, 1), arrow, f);
                     this.server.getPluginManager().callEvent(ev);
                     EntityProjectile projectile = ev.getProjectile();
                     if (ev.isCancelled()) {
@@ -490,14 +491,14 @@ public class LittleNpc extends BaseEntityMove {
                             projectile.kill();
                         } else {
                             projectile.spawnToAll();
-                            projectile.namedTag.putByte("pickup", 0);
+                            ((EntityArrow) projectile).setPickupMode(EntityArrow.PICKUP_NONE);
                             this.level.addSound(this, Sound.RANDOM_BOW);
                         }
                     }
                     EntityEventPacket pk = new EntityEventPacket();
                     pk.eid = this.getId();
-                    pk.event = 4;
-                    this.level.getPlayers().values().forEach(player1 -> player1.dataPacket(pk));
+                    pk.event = EntityEventPacket.ARM_SWING;
+                    Server.broadcastPacket(this.getViewers().values(), pk);
                     waitTime = 0;
                     return;
                 case 3: //触发EntityInteractEvent
@@ -553,8 +554,8 @@ public class LittleNpc extends BaseEntityMove {
             }
             EntityEventPacket pk = new EntityEventPacket();
             pk.eid = this.getId();
-            pk.event = 4;
-            this.level.getPlayers().values().forEach(player1 -> player1.dataPacket(pk));
+            pk.event = EntityEventPacket.ARM_SWING;
+            Server.broadcastPacket(this.getViewers().values(), pk);
         }
     }
 
