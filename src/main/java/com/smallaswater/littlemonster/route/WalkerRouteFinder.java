@@ -51,7 +51,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    }
 
    @Override
-   public boolean search() {
+   public boolean search(boolean enableOffset) {
       if (LittleMonsterMainClass.debug) {
          LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路开始");
       }
@@ -84,7 +84,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       }
 
       try {
-         if (this.destinationDeviate > 0) {
+         if (enableOffset && this.destinationDeviate > 0) {
             double x = Utils.rand(this.destinationDeviate * 0.8, this.destinationDeviate);
             double z = Utils.rand(this.destinationDeviate * 0.8, this.destinationDeviate);
             Vector3 vector3 = this.destination.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
@@ -130,6 +130,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
                   LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 找不到路径");
                }
                if (this.allowFuzzyResults) {
+                  //TODO 检查这个返回最近位置路径的方法
                   LinkedList<Node> list = new LinkedList<>(this.closeList);
                   list.sort((o1, o2) -> {
                      if (o1.getF() < o2.getF()) {
@@ -140,10 +141,20 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
                         return 0;
                      }
                   });
-                  this.setDestination(list.getFirst().getVector3());
-                  if (LittleMonsterMainClass.debug) {
-                     LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 正在重试搜索最靠近的位置");
+                  this.closeList.clear();
+                  Node node = list.getFirst();
+                  list.clear();
+                  list.add(node);
+                  while ((node = node.getParent()) != null) {
+                     list.addFirst(node);
                   }
+                  this.closeList.addAll(list);
+                  this.finished = true;
+                  this.searching = false;
+                  if (LittleMonsterMainClass.debug) {
+                     LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 返回最靠近的位置");
+                  }
+                  return true;
                }
                return false;
             }
@@ -185,7 +196,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       if (limit > 0) {
          for (int y = vector3.getFloorY(); y >= vector3.getFloorY() - limit; y--) {
             Block block = this.getBlockFast(vector3.getFloorX(), y, vector3.getFloorZ(), false);
-            if (this.isWalkable(block) && level.getBlock(block.add(0, 1, 0), false).canPassThrough()) return block;
+            if (this.isWalkable(block) && this.getBlockFast(block.add(0, 1, 0), false).canPassThrough()) return block;
          }
          return null;
       }

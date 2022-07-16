@@ -4,12 +4,14 @@ import com.smallaswater.littlemonster.route.RouteFinder;
 
 public class RouteFinderSearchTask implements Runnable {
 
-   private RouteFinder route;
+   private final RouteFinder route;
+   private final boolean enableOffset;
 
    private int retryTime = 0;
 
-   public RouteFinderSearchTask(RouteFinder route) {
+   public RouteFinderSearchTask(RouteFinder route, boolean enableOffset) {
       this.route = route;
+      this.enableOffset = enableOffset;
    }
 
    @Override
@@ -17,7 +19,7 @@ public class RouteFinderSearchTask implements Runnable {
       if (this.route != null) {
          while(this.retryTime < 50) {
             if (!this.route.isSearching()) {
-               this.route.research();
+               this.route.research(this.enableOffset);
                return;
             }
             this.retryTime += 10;
