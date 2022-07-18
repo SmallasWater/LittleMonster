@@ -3,6 +3,7 @@ package com.smallaswater.littlemonster.route;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.block.BlockWater;
+import cn.nukkit.level.ParticleEffect;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.SimpleAxisAlignedBB;
 import cn.nukkit.math.Vector3;
@@ -87,8 +88,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          if (enableOffset && this.destinationDeviate > 0) {
             double x = Utils.rand(this.destinationDeviate * 0.8, this.destinationDeviate);
             double z = Utils.rand(this.destinationDeviate * 0.8, this.destinationDeviate);
-            Vector3 vector3 = this.destination.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
-            vector3.y += 5;
+            Vector3 vector3 = this.destination.add(Utils.rand() ? x : -x, 5, Utils.rand() ? z : -z);
             for (int i=0; i<10; i++) {
                if (this.isPassable(vector3)) {
                /*if (this.level.getBlock(vector3.up()).canPassThrough() &&
@@ -141,22 +141,20 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
                         return 0;
                      }
                   });
-                  this.closeList.clear();
                   Node node = list.getFirst();
                   list.clear();
                   list.add(node);
                   while ((node = node.getParent()) != null) {
                      list.addFirst(node);
                   }
+                  this.closeList.clear();
                   this.closeList.addAll(list);
-                  this.finished = true;
-                  this.searching = false;
                   if (LittleMonsterMainClass.debug) {
                      LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 返回最靠近的位置");
                   }
-                  return true;
+               }else {
+                  return false;
                }
-               return false;
             }
 
             this.closeList.add(presentNode = this.openList.poll());
@@ -175,6 +173,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          if (LittleMonsterMainClass.debug) {
             LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路完成 路径数量" + this.getPathRoute().size());
          }
+         this.show();
          return true;
       }catch (Exception e) {
          if (!(this.entity == null || this.entity.isClosed() || this.entity.getFollowTarget() == null ||
@@ -189,6 +188,15 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
             LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败", e);
          }
          return false;
+      }
+   }
+
+   public void show() {
+      if (!LittleMonsterMainClass.debug) {
+         return;
+      }
+      for (Node node : this.getPathRoute()) {
+         this.level.addParticleEffect(node, ParticleEffect.REDSTONE_TORCH_DUST);
       }
    }
 
@@ -420,10 +428,6 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
 
    private boolean isContainsInClose(Vector3 vector2) {
       return this.getNodeInCloseByVector2(vector2) != null;
-   }
-
-   private boolean hasBarrier(Node node1, Node node2) {
-      return this.hasBarrier(node1.getVector3(), node2.getVector3());
    }
 
    private boolean hasBarrier(Vector3 pos1, Vector3 pos2) {

@@ -1,11 +1,10 @@
 package com.smallaswater.littlemonster.route;
 
 import cn.nukkit.math.Vector3;
+
 import java.util.Objects;
 
-public class Node implements Comparable<Node> {
-
-   private Vector3 vector3;
+public class Node extends Vector3 implements Comparable<Node> {
 
    private Node parent;
 
@@ -16,7 +15,7 @@ public class Node implements Comparable<Node> {
    private int F;
 
    Node(Vector3 vector3, Node parent, int G, int H) {
-      this.vector3 = vector3;
+      super(vector3.x, vector3.y, vector3.z);
       this.parent = parent;
       this.G = G;
       this.H = H;
@@ -74,14 +73,16 @@ public class Node implements Comparable<Node> {
    }
 
    public String toString() {
-      return this.vector3.toString() + "| G:" + this.G + " H:" + this.H + " F" + this.getF() + (this.parent != null ? "\tparent:" + String.valueOf(this.parent.getVector3()) : "");
+      return super.toString() + "| G:" + this.G + " H:" + this.H + " F" + this.getF() + (this.parent != null ? "\tparent:" + this.parent.getVector3() : "");
    }
 
    public Vector3 getVector3() {
-      return this.vector3;
+      return this;
    }
 
    public void setVector3(Vector3 vector3) {
-      this.vector3 = vector3;
+      this.setX(vector3.x);
+      this.setY(vector3.y);
+      this.setZ(vector3.z);
    }
 }

@@ -276,7 +276,7 @@ public abstract class BaseEntity extends EntityHuman {
                     hasBlockInLineLock.lock();
                     Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
                     if (targetBlock != null) {
-                        return targetBlock.getId() != 0;
+                        return !targetBlock.isTransparent();
                     }
                     return false;
                 }, PluginMasterThreadPool.ASYNC_EXECUTOR).thenAccept(value -> {
