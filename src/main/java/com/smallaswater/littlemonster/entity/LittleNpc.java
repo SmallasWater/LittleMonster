@@ -470,7 +470,7 @@ public class LittleNpc extends BaseEntityMove {
                     break;
                 case 2:
                     double f = 1.3D;
-                    Entity k = Entity.createEntity("Arrow", this, this);
+                    Entity k = Entity.createEntity("Arrow", this.add(0, this.getEyeHeight(), 0), this);
                     if (!(k instanceof EntityArrow)) {
                         return;
                     }
