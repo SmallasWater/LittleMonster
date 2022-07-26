@@ -49,6 +49,8 @@ public abstract class RouteFinder {
    @Setter
    protected boolean allowFuzzyResults = false;
 
+   private int lastSetDestinationTick = 0;
+
    RouteFinder(BaseEntity entity) {
       Objects.requireNonNull(entity, "RouteFinder: entity can not be null");
       this.entity = entity;
@@ -79,6 +81,11 @@ public abstract class RouteFinder {
    }
 
    public void setDestination(Vector3 destination, boolean enableOffset) {
+      int tick = Server.getInstance().getTick();
+      if (tick - this.lastSetDestinationTick < 15) {
+         return;
+      }
+      this.lastSetDestinationTick = tick;
       this.destination = destination.clone();
       if (this.isFinished()) {
          this.finished = false;
