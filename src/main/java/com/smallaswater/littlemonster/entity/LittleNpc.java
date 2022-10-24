@@ -370,7 +370,10 @@ public class LittleNpc extends BaseEntityMove {
 
     @Override
     public void onAttack(EntityDamageEvent sure) {
-        if(this.damageDelay > config.getInvincibleTime()){
+        if(this.damageDelay > config.getInvincibleTime()) {
+            if (sure.getAttackCooldown() > this.config.getInvincibleTime()) {
+                sure.setAttackCooldown(this.config.getInvincibleTime());
+            }
             if(isImmobile() && !config.isImmobile()){
                 sure.setCancelled();
             }
