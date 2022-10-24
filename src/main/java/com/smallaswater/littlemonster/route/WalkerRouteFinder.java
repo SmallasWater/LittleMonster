@@ -37,14 +37,14 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    public WalkerRouteFinder(BaseEntity entity, Vector3 start) {
       super(entity);
       this.level = entity.getLevel();
-      this.start = start;
+      this.start = start.clone();
    }
 
    public WalkerRouteFinder(BaseEntity entity, Vector3 start, Vector3 destination) {
       super(entity);
       this.level = entity.getLevel();
-      this.start = start;
-      this.destination = destination;
+      this.start = start.clone();
+      this.destination = destination.clone();
    }
 
    private int calHeuristic(Vector3 pos1, Vector3 pos2) {
@@ -81,7 +81,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
             return false;
          }
 
-         this.destination = this.entity.getTargetVector();
+         this.destination = this.entity.getTargetVector().clone();
       }
 
       try {
@@ -172,8 +172,8 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          this.searching = false;
          if (LittleMonsterMainClass.debug) {
             LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路完成 路径数量" + this.getPathRoute().size());
+            this.show();
          }
-         this.show();
          return true;
       }catch (Exception e) {
          if (!(this.entity == null || this.entity.isClosed() || this.entity.getFollowTarget() == null ||
@@ -183,7 +183,9 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          this.searching = false;
          this.finished = true;
          this.reachable = false;
-         this.addNode(new Node(this.destination));
+         if (this.destination != null) {
+            this.addNode(new Node(this.destination));
+         }
          if (LittleMonsterMainClass.debug) {
             LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败", e);
          }
@@ -523,11 +525,13 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       Node temp = this.closeList.get(this.closeList.size() - 1);
       nodes.add(temp);
 
-      while(!temp.getParent().getVector3().equals(this.start)) {
+      while(temp.getParent() != null && !temp.getParent().getVector3().equals(this.start)) {
          nodes.add(temp = temp.getParent());
       }
 
-      nodes.add(temp.getParent());
+      if (temp.getParent() != null) {
+         nodes.add(temp.getParent());
+      }
       Collections.reverse(nodes);
       return nodes;
    }

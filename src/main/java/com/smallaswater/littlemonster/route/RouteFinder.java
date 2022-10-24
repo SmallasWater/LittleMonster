@@ -54,7 +54,7 @@ public abstract class RouteFinder {
    RouteFinder(BaseEntity entity) {
       Objects.requireNonNull(entity, "RouteFinder: entity can not be null");
       this.entity = entity;
-      this.start = this.entity;
+      this.start = this.entity.clone();
       this.level = entity.getLevel();
    }
 
