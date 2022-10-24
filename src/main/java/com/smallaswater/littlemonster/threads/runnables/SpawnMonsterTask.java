@@ -20,52 +20,52 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
     public boolean scheduler() {
         //刷怪
         for (PositionConfig positionConfig : LittleMonsterMainClass.getMasterMainClass().positions.values()) {
-            if(positionConfig.getMoveSize() != -1) {
-                for(LittleNpc littleNpc: Utils.getEntitysByPos(positionConfig)){
+            if (positionConfig.getMoveSize() != -1) {
+                for (LittleNpc littleNpc : Utils.getEntitysByPos(positionConfig)) {
                     if (littleNpc.distance(positionConfig.getPos()) >= positionConfig.getMoveSize()) {
                         littleNpc.teleport(positionConfig.getPos());
                         littleNpc.setHealth(littleNpc.getMaxHealth());
                     }
                 }
             }
-            if(!positionConfig.isOpen()){
+
+            if (!positionConfig.isOpen() || !positionConfig.posCanSpawn()) {
                 continue;
             }
+
             boolean spawn = true;
             int ec = Utils.getEntityCount(positionConfig.getPos().level,
-                    positionConfig.getLittleNpc().getName(),positionConfig.getName());
-            if(ec >= positionConfig.getMaxCount()){
-
-                spawn =  false;
+                    positionConfig.getLittleNpc().getName(), positionConfig.getName());
+            if (ec >= positionConfig.getMaxCount()) {
+                spawn = false;
             }
 
             if (spawn) {
                 if (positionConfig.time > 0) {
                     positionConfig.time--;
                     if (positionConfig.time <= 0) {
-                        if(LittleMonsterMainClass.getMasterMainClass().monsters.containsKey(positionConfig.getLittleNpc().getName())){
-                            if(positionConfig.getConfig().getBoolean("公告.是否提示",true)) {
+                        if (LittleMonsterMainClass.getMasterMainClass().monsters.containsKey(positionConfig.getLittleNpc().getName())) {
+                            if (positionConfig.getConfig().getBoolean("公告.是否提示", true)) {
                                 Server.getInstance().broadcastMessage(TextFormat.colorize('&', positionConfig.getConfig()
                                         .getString("公告.复活提醒", "&e[ &bBOSS提醒 &e] &a{name} 已复活")
                                         .replace("{name}", positionConfig.getLittleNpc().getName())));
                             }
-                            for(int i = 0;i < positionConfig.getCount();i++) {
-                                LittleNpc npc = positionConfig.getLittleNpc().spawn(positionConfig.getPos(),positionConfig.getLiveTime());
+                            for (int i = 0; i < positionConfig.getCount(); i++) {
+                                LittleNpc npc = positionConfig.getLittleNpc().spawn(positionConfig.getPos(), positionConfig.getLiveTime());
                                 npc.spawnPos = positionConfig.getName();
                             }
                         }
                         positionConfig.time = positionConfig.getRound();
                     }
-                    if(positionConfig.getConfig().getBoolean("公告.是否提示",true)) {
-                        for(int i: positionConfig.getConfig().getIntegerList("公告.时间")){
-                            if(i == positionConfig.time){
+                    if (positionConfig.getConfig().getBoolean("公告.是否提示", true)) {
+                        for (int i : positionConfig.getConfig().getIntegerList("公告.时间")) {
+                            if (i == positionConfig.time) {
                                 Server.getInstance().broadcastMessage(TextFormat.colorize('&', positionConfig.getConfig()
                                         .getString("公告.信息", "&e[ &bBOSS提醒 &e] &a{name} 将在 {time} 后复活")
                                         .replace("{name}", positionConfig.getLittleNpc().getName()).replace("{time}", positionConfig.time + "")));
                             }
                         }
                     }
-
                 } else {
                     positionConfig.time = positionConfig.getRound();
                 }
@@ -73,6 +73,5 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
         }
         return true;
     }
-
 
 }

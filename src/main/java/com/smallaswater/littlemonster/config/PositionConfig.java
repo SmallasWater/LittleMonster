@@ -59,6 +59,10 @@ public class PositionConfig {
         return dispalFloat;
     }
 
+    public boolean posCanSpawn() {
+        return this.pos.isValid() && this.pos.getChunk().isLoaded() && !this.pos.getLevel().getPlayers().isEmpty();
+    }
+
     public static PositionConfig loadPosition(String name, Config config) {
         PositionConfig entity = new PositionConfig(name,config);
         MonsterConfig monsterConfig = LittleMonsterMainClass.getMasterMainClass().monsters
@@ -84,21 +88,15 @@ public class PositionConfig {
         entity.setCount(config.getInt("刷怪数量"));
         Map pos = (Map) config.get("刷怪点");
         String levelName = ((String) pos.get("level")).trim();
-        Level l = null;
-        if(!Server.getInstance().isLevelLoaded(levelName)){
-            if(Server.getInstance().loadLevel(levelName)){
-                l = Server.getInstance().getLevelByName(levelName);
-            }else{
-                Server.getInstance().getLogger().warning("加载地图 "+levelName+"失败");
-            }
-
-        }else{
-            l = Server.getInstance().getLevelByName(levelName);
-        }
-        if(l == null){
+        if(!Server.getInstance().loadLevel(levelName)) {
+            Server.getInstance().getLogger().warning("加载地图 "+levelName+"失败");
             return null;
         }
-        Position position =  new Position((double) pos.get("x"),(double) pos.get("y"),(double) pos.get("z"),l);
+        Level level = Server.getInstance().getLevelByName(levelName);
+        if(level == null){
+            return null;
+        }
+        Position position = new Position((double) pos.get("x"),(double) pos.get("y"),(double) pos.get("z"),level);
         entity.setPos(position);
         return entity;
     }
