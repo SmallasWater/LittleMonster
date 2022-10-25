@@ -37,13 +37,13 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    public WalkerRouteFinder(BaseEntity entity, Vector3 start) {
       super(entity);
       this.level = entity.getLevel();
-      this.start = start.clone();
+      this.start = start;
    }
 
    public WalkerRouteFinder(BaseEntity entity, Vector3 start, Vector3 destination) {
       super(entity);
       this.level = entity.getLevel();
-      this.start = start.clone();
+      this.start = start;
       this.destination = destination.clone();
    }
 
