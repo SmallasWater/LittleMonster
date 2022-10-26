@@ -10,12 +10,9 @@ import cn.nukkit.entity.data.Skin;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.level.format.FullChunk;
-import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
-import cn.nukkit.network.protocol.MoveEntityAbsolutePacket;
 import cn.nukkit.network.protocol.PlayerSkinPacket;
-import cn.nukkit.network.protocol.SetEntityMotionPacket;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
@@ -290,7 +287,7 @@ public abstract class BaseEntity extends EntityHuman {
         return this.isHasBlock.get();
     }
 
-    @Override
+    /*@Override
     public boolean move(double dx, double dy, double dz) {
         if (dy < -10 || dy > 10) {
             return false;
@@ -323,7 +320,7 @@ public abstract class BaseEntity extends EntityHuman {
         this.updateFallState(this.onGround);
 
         return true;
-    }
+    }*/
 
     protected float getMountedYOffset() {
         return getHeight() * 0.75F;
@@ -346,7 +343,7 @@ public abstract class BaseEntity extends EntityHuman {
         this.airTicks = ticks;
     }
 
-    @Override
+    /*@Override
     public void addMovement(double x, double y, double z, double yaw, double pitch, double headYaw) {
         MoveEntityAbsolutePacket pk = new MoveEntityAbsolutePacket();
         pk.eid = this.id;
@@ -372,7 +369,7 @@ public abstract class BaseEntity extends EntityHuman {
         for (Player p : this.hasSpawned.values()) {
             p.batchDataPacket(pk);
         }
-    }
+    }*/
 
     @Override
     protected void checkGroundState(double movX, double movY, double movZ, double dx, double dy, double dz) {

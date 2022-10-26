@@ -411,9 +411,10 @@ public abstract class BaseEntityMove extends BaseEntity {
         }
         if (!isJump) {
             //尝试解决卡到地底的问题
-            if (!this.getLevel().getBlock(this.getPosition().floor().add(0, -1, 0)).canPassThrough()) {
+            //会导致生物浮空问题
+            /*if (!this.getLevel().getBlock(this.getPosition().floor().add(0, -1, 0)).canPassThrough()) {
                 this.onGround = true;
-            }
+            }*/
 
             if (this.onGround) {
                 this.motionY = 0.0D;
