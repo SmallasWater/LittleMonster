@@ -4,6 +4,7 @@ import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockID;
 import cn.nukkit.block.BlockWater;
 import cn.nukkit.level.ParticleEffect;
+import cn.nukkit.level.Position;
 import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.SimpleAxisAlignedBB;
 import cn.nukkit.math.Vector3;
@@ -11,10 +12,7 @@ import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
 import com.smallaswater.littlemonster.utils.Utils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.PriorityQueue;
+import java.util.*;
 
 
 public class WalkerRouteFinder extends SimpleRouteFinder {
@@ -84,6 +82,12 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          this.destination = this.entity.getTargetVector().clone();
       }
 
+      //找一个可以站立的目标点
+      Position safeSpawn = this.level.getSafeSpawn(this.destination);
+      if (safeSpawn.distance(this.destination) < 10) {
+         this.destination = safeSpawn;
+      }
+
       try {
          if (enableOffset && this.destinationDeviate > 0) {
             double x = Utils.rand(this.destinationDeviate * 0.8, this.destinationDeviate);
@@ -132,15 +136,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
                if (this.allowFuzzyResults) {
                   //TODO 检查这个返回最近位置路径的方法
                   LinkedList<Node> list = new LinkedList<>(this.closeList);
-                  list.sort((o1, o2) -> {
-                     if (o1.getF() < o2.getF()) {
-                        return -1;
-                     } else if (o1.getF() > o2.getF()) {
-                        return 1;
-                     } else {
-                        return 0;
-                     }
-                  });
+                  list.sort(Comparator.comparingInt(Node::getF));
                   Node node = list.getFirst();
                   list.clear();
                   list.add(node);

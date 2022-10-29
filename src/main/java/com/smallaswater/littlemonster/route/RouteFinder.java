@@ -82,7 +82,7 @@ public abstract class RouteFinder {
 
    public void setDestination(Vector3 destination, boolean enableOffset) {
       int tick = Server.getInstance().getTick();
-      if (tick - this.lastSetDestinationTick < 15) {
+      if (tick - this.lastSetDestinationTick < 18) {
          return;
       }
       this.lastSetDestinationTick = tick;
