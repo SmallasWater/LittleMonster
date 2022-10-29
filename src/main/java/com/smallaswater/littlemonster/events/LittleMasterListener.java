@@ -38,15 +38,16 @@ public class LittleMasterListener implements Listener {
     public void onDamage(EntityDamageEvent e){
         if(e instanceof EntityDamageByEntityEvent){
             Entity entity = e.getEntity();
-            Entity d = ((EntityDamageByEntityEvent) e).getDamager();
+            //Entity d = ((EntityDamageByEntityEvent) e).getDamager();
             if(entity instanceof LittleNpc){
                 //卡墙修复
                 if(e.getCause() == EntityDamageEvent.DamageCause.FALL){
                     entity.teleport(entity.add(0,2));
                 }
-                if(d instanceof Player){
+                //迁移到 LittleNpc#onAttack() 方法
+                /*if(d instanceof Player){
                     ((LittleNpc) entity).handle.add(d.getName(),e.getDamage());
-                }
+                }*/
                 float damage = e.getDamage() - ((LittleNpc) entity).getConfig().getDelDamage();
                 if(damage < 0){
                     damage = 0;

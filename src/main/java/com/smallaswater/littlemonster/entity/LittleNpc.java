@@ -187,7 +187,7 @@ public class LittleNpc extends BaseEntityMove {
             boss = null;
         }
         if(config != null){
-            if(config.isDisplayDamage()){
+            if(config.isDisplayDamage() && this.handle != null){
                 handle.display();
             }
         }
@@ -409,6 +409,10 @@ public class LittleNpc extends BaseEntityMove {
                             this.getTargetWeighted((EntityCreature) damager).setReason(TargetWeighted.REASON_PASSIVE_ATTACK_ENTITY);
                         }
                     }
+                }
+                if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
+                    Player player = (Player) ((EntityDamageByEntityEvent) sure).getDamager();
+                    this.handle.add(player.getName(), sure.getFinalDamage());
                 }
             }
         }else{

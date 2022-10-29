@@ -191,17 +191,17 @@ public class Utils {
         return littleNpcs;
     }
 
-    public static int getEntityCount(Level level, String entityName,String pos){
-        int count = 0;
-        if(level == null){
-            return count;
+    public static int getEntityCount(Level level, String entityName, String pos) {
+        if (level == null) {
+            return 0;
         }
-        for(Entity entitys: level.getEntities()){
-            String name = getMonster(entitys);
-            if(name != null && name.equals(entityName)){
-                if(entitys instanceof LittleNpc){
-                    if(((LittleNpc) entitys).spawnPos != null){
-                        if(((LittleNpc) entitys).spawnPos.equalsIgnoreCase(pos)){
+        int count = 0;
+        for (Entity entity : level.getEntities()) {
+            String name = getMonster(entity);
+            if (name != null && name.equals(entityName)) {
+                if (entity instanceof LittleNpc && entity.isAlive()) {
+                    if (((LittleNpc) entity).spawnPos != null) {
+                        if (((LittleNpc) entity).spawnPos.equalsIgnoreCase(pos)) {
                             count++;
                         }
                     }

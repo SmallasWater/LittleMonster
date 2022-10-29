@@ -19,30 +19,35 @@ public class DamageHandle {
 
     public LinkedHashMap<String, Double> playerDamageList = new LinkedHashMap<>();
 
-    public void add(String playerName,double d){
-        if(!playerDamageList.containsKey(playerName)){
-            playerDamageList.put(playerName,d);
-        }else{
-            double d1 = playerDamageList.get(playerName) + d;
-            playerDamageList.put(playerName,d1);
+    public void add(Player player, double damage) {
+        this.add(player.getName(), damage);
+    }
+
+    public void add(String playerName, double damage) {
+        if (!playerDamageList.containsKey(playerName)) {
+            playerDamageList.put(playerName, damage);
+        } else {
+            double d1 = playerDamageList.get(playerName) + damage;
+            playerDamageList.put(playerName, d1);
         }
     }
-    private ArrayList<String> keyPlayers = new ArrayList<>();
 
-    public void display(){
+    private final ArrayList<String> keyPlayers = new ArrayList<>();
+
+    public void display() {
         keyPlayers.clear();
-        FormWindowSimple simple = new FormWindowSimple(TextFormat.colorize('&',"&l&a击杀伤害排行榜"),TextFormat.colorize('&',"&f___________________"));
+        FormWindowSimple simple = new FormWindowSimple(TextFormat.colorize('&', "&l&a击杀伤害排行榜"), TextFormat.colorize('&', "&f___________________"));
         StringBuilder builder = new StringBuilder();
         LinkedHashMap<String, Number> lists = Utils.toRankList(playerDamageList);
         int i = 1;
-        for(Map.Entry<String, Number> name: lists.entrySet()){
+        for (Map.Entry<String, Number> name : lists.entrySet()) {
             builder.append(TextFormat.colorize('&', "&aNo." + i + " &a玩家: &f" + name.getKey() + "   &e伤害: &f" + name.getValue())).append("\n");
             i++;
         }
         simple.setContent(builder.toString());
-        for(String name: playerDamageList.keySet()){
+        for (String name : playerDamageList.keySet()) {
             Player player = Server.getInstance().getPlayer(name);
-            if(!keyPlayers.contains(name)) {
+            if (!keyPlayers.contains(name)) {
                 keyPlayers.add(name);
                 if (player != null) {
                     player.showFormWindow(simple, 103);
@@ -51,9 +56,13 @@ public class DamageHandle {
         }
     }
 
-    public double get(String playerName){
-        if(!playerDamageList.containsKey(playerName)){
-            playerDamageList.put(playerName,0.0d);
+    public double get(Player player) {
+        return this.get(player.getName());
+    }
+
+    public double get(String playerName) {
+        if (!playerDamageList.containsKey(playerName)) {
+            return 0;
         }
         return playerDamageList.get(playerName);
     }
