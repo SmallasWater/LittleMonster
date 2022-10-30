@@ -12,10 +12,7 @@ import com.smallaswater.littlemonster.events.LittleMasterListener;
 import com.smallaswater.littlemonster.manager.PlayerFlotTextManager;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
-import com.smallaswater.littlemonster.threads.runnables.AutoSpawnTask;
-import com.smallaswater.littlemonster.threads.runnables.FlotTask;
-import com.smallaswater.littlemonster.threads.runnables.SpawnMonsterTask;
-import com.smallaswater.littlemonster.threads.runnables.TimmerRunnable;
+import com.smallaswater.littlemonster.threads.runnables.*;
 import com.smallaswater.littlemonster.utils.Utils;
 
 import javax.imageio.ImageIO;
@@ -86,6 +83,7 @@ public class LittleMonsterMainClass extends PluginBase {
         PluginMasterThreadPool.executeThread(new FlotTask());
         PluginMasterThreadPool.executeThread(new SpawnMonsterTask());
         PluginMasterThreadPool.executeThread(new TimmerRunnable());
+        PluginMasterThreadPool.executeThread(new BlockCacheClearTask());
     }
 
     public void init() {

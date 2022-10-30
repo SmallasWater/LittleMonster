@@ -3,7 +3,6 @@ package com.smallaswater.littlemonster.route;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.level.Level;
-import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.math.Vector3;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
 import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
@@ -249,33 +248,7 @@ public abstract class RouteFinder {
    }
 
    public Block getBlockFast(int x, int y, int z, boolean load) {
-      if (!"Nukkit".equals(Server.getInstance().getName())) {
-         return this.level.getBlock(x, y, z, load);
-      }
-
-      int fullState;
-      if (y >= 0 && y < 256) {
-         int cx = x >> 4;
-         int cz = z >> 4;
-         BaseFullChunk chunk;
-         if (load) {
-            chunk = this.getLevel().getChunk(cx, cz);
-         } else {
-            chunk = this.getLevel().getChunkIfLoaded(cx, cz);
-         }
-         if (chunk != null) {
-            fullState = chunk.getFullBlock(x & 0xF, y, z & 0xF);
-         } else {
-            fullState = 0;
-         }
-      } else {
-         fullState = 0;
-      }
-      Block block = Block.fullList[fullState & 0xFFF].clone();
-      block.x = x;
-      block.y = y;
-      block.z = z;
-      block.level = this.getLevel();
-      return block;
+      return BlockCache.get(this.level).getBlock(x, y, z, load);
    }
+
 }

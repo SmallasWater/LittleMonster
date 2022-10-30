@@ -2,6 +2,7 @@ package com.smallaswater.littlemonster.entity.baselib;
 
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
@@ -263,15 +264,25 @@ public abstract class BaseEntity extends EntityHuman {
     abstract public float getDamage();
 
     private final ReentrantLock hasBlockInLineLock = new ReentrantLock();
+    private int lastCheckBlockInLineTick = 0;
     private final AtomicBoolean isHasBlock = new AtomicBoolean();
 
+    //TODO 优化性能
     //判断中间是否有方块
-    public boolean hasBlockInLine(Vector3 target){
-        if(target != null && !this.hasBlockInLineLock.isLocked()) {
+    public boolean hasBlockInLine(Vector3 target) {
+        if (target == null) {
+            return false;
+        }
+        if(!this.hasBlockInLineLock.isLocked()) {
+            int tick = Server.getInstance().getTick();
+            if (tick - lastCheckBlockInLineTick < 30) {
+                return isHasBlock.get();
+            }
+            this.lastCheckBlockInLineTick = tick;
             try {
                 CompletableFuture.supplyAsync(() -> {
                     hasBlockInLineLock.lock();
-                    Block targetBlock = BaseEntity.this.getTargetBlock((int) BaseEntity.this.distance(target));
+                    Block targetBlock = BaseEntity.this.getTargetBlock(Math.min((int) BaseEntity.this.distance(target), 10));
                     if (targetBlock != null) {
                         return !targetBlock.isTransparent();
                     }

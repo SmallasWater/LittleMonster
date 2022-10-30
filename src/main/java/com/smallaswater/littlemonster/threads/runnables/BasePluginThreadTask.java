@@ -9,6 +9,16 @@ import com.smallaswater.littlemonster.LittleMonsterMainClass;
  */
 public abstract class BasePluginThreadTask implements Runnable {
 
+    protected long sleepMillis;
+
+    public BasePluginThreadTask() {
+        this.sleepMillis = 1000;
+    }
+
+    public BasePluginThreadTask(long sleepMillis) {
+        this.sleepMillis = sleepMillis;
+    }
+
     @Override
     public final void run() {
         while (LittleMonsterMainClass.getInstance().isEnabled()) {
@@ -16,7 +26,7 @@ public abstract class BasePluginThreadTask implements Runnable {
                 if(!scheduler()) {
                     break;
                 }
-                Thread.sleep(1000);
+                Thread.sleep(this.sleepMillis);
             } catch (Exception e) {
                 if (e instanceof InterruptedException) {
                     return;

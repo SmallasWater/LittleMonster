@@ -21,7 +21,7 @@ public class PluginMasterThreadPool {
     static {
         ASYNC_EXECUTOR = Executors.newSingleThreadExecutor();
         EXECUTOR = new ThreadPoolExecutor(
-                3,
+                4,
                 20,
                 1L,
                 TimeUnit.SECONDS,
