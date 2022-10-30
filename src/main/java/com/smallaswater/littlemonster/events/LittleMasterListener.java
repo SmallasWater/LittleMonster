@@ -90,7 +90,7 @@ public class LittleMasterListener implements Listener {
             }else{
                 FormWindow window = event.getWindow();
                 if(window instanceof FormWindowCustom){
-                    MonsterConfig config = LittleMonsterMainClass.getMasterMainClass().monsters.get(KeyHandleManager.getKey(player,"menu").toString());
+                    MonsterConfig config = LittleMonsterMainClass.getInstance().monsters.get(KeyHandleManager.getKey(player,"menu").toString());
                     String h = ((FormResponseCustom)event.getResponse()).getInputResponse(0);
                     if(h != null){
                         config.setHealth(Integer.parseInt(h));

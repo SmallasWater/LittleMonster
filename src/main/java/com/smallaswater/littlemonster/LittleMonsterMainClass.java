@@ -38,7 +38,7 @@ public class LittleMonsterMainClass extends PluginBase {
 
     public Config nbtItem;
 
-    private static LittleMonsterMainClass masterMainClass;
+    private static LittleMonsterMainClass littleMonsterMainClass;
 
     public static LinkedHashMap<String, Skin> loadSkins = new LinkedHashMap<>();
 
@@ -52,7 +52,7 @@ public class LittleMonsterMainClass extends PluginBase {
 
     @Override
     public void onEnable() {
-        masterMainClass = this;
+        littleMonsterMainClass = this;
         //检查api
 
         Entity.registerEntity("LittleNpc", LittleNpc.class);
@@ -88,7 +88,7 @@ public class LittleMonsterMainClass extends PluginBase {
         PluginMasterThreadPool.executeThread(new TimmerRunnable());
     }
 
-    public void init(){
+    public void init() {
         loadDefaultSkin();
         this.getLogger().info("开始读取皮肤");
         loadSkin();
@@ -116,8 +116,8 @@ public class LittleMonsterMainClass extends PluginBase {
         }
     }
 
-    public static LittleMonsterMainClass getMasterMainClass() {
-        return masterMainClass;
+    public static LittleMonsterMainClass getInstance() {
+        return littleMonsterMainClass;
     }
 
     private void loadDefaultSkin() {

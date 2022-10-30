@@ -233,7 +233,7 @@ public class Utils {
 
     public static String[] getDefaultFiles(String fileName) {
         List<String> names = new ArrayList<>();
-        File files = new File(LittleMonsterMainClass.getMasterMainClass().getDataFolder()+ "/"+fileName);
+        File files = new File(LittleMonsterMainClass.getInstance().getDataFolder()+ "/"+fileName);
         if(files.isDirectory()){
             File[] filesArray = files.listFiles();
             if(filesArray != null){
@@ -248,14 +248,14 @@ public class Utils {
     }
 
     public static Config getNbtItemConfig(){
-        if(LittleMonsterMainClass.getMasterMainClass().nbtItem == null){
-            LittleMonsterMainClass.getMasterMainClass().nbtItem = new Config(LittleMonsterMainClass.getMasterMainClass().getDataFolder()+"/nbtitem.yml",Config.YAML);
+        if(LittleMonsterMainClass.getInstance().nbtItem == null){
+            LittleMonsterMainClass.getInstance().nbtItem = new Config(LittleMonsterMainClass.getInstance().getDataFolder()+"/nbtitem.yml",Config.YAML);
         }
-        return LittleMonsterMainClass.getMasterMainClass().nbtItem;
+        return LittleMonsterMainClass.getInstance().nbtItem;
     }
 
     public static String getNbtItem(String string){
-        return LittleMonsterMainClass.getMasterMainClass().nbtItem.getString(string,"");
+        return LittleMonsterMainClass.getInstance().nbtItem.getString(string,"");
     }
 
     public static LinkedHashMap<String,Number> toRankList(LinkedHashMap<String, ? extends Number> map){

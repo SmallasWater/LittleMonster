@@ -26,7 +26,7 @@ public class FlotTask extends BasePluginThreadTask {
         for (Player player : Server.getInstance().getOnlinePlayers().values()) {
             if (player.isOnline()) {
                 PlayerFlotTextManager manager = PlayerFlotTextManager.getOrCreate(player);
-                for (PositionConfig positionConfig : LittleMonsterMainClass.getMasterMainClass().positions.values()) {
+                for (PositionConfig positionConfig : LittleMonsterMainClass.getInstance().positions.values()) {
                     if (!positionConfig.isDispalFloat()) {
                         if (manager.hasPosition(positionConfig.getPos())) {
                             particle = manager.get(positionConfig.getPos());
@@ -80,7 +80,7 @@ public class FlotTask extends BasePluginThreadTask {
         }
 
         //清理不在线玩家的浮空字
-        Iterator<PlayerFlotTextManager> it = LittleMonsterMainClass.getMasterMainClass().playerFlotTextManagers.iterator();
+        Iterator<PlayerFlotTextManager> it = LittleMonsterMainClass.getInstance().playerFlotTextManagers.iterator();
         while (it.hasNext()) {
             PlayerFlotTextManager manager = it.next();
             if (!manager.getPlayer().isOnline()) {

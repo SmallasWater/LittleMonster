@@ -52,13 +52,13 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    @Override
    public boolean search(boolean enableOffset) {
       if (LittleMonsterMainClass.debug) {
-         LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路开始");
+         LittleMonsterMainClass.getInstance().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路开始");
       }
       if (this.entity.getTargetVector() == null && this.destination == null) {
          this.searching = false;
          this.finished = true;
          if (LittleMonsterMainClass.debug) {
-            LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 没有目标");
+            LittleMonsterMainClass.getInstance().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 没有目标");
          }
          return false;
       }
@@ -74,7 +74,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
             this.searching = false;
             this.finished = true;
             if (LittleMonsterMainClass.debug) {
-               LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 没有目标");
+               LittleMonsterMainClass.getInstance().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 没有目标");
             }
             return false;
          }
@@ -105,7 +105,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
             }
          }
       } catch (Exception e) {
-         LittleMonsterMainClass.getMasterMainClass().getLogger().error("设置终点偏移错误", e);
+         LittleMonsterMainClass.getInstance().getLogger().error("设置终点偏移错误", e);
       }
 
       this.resetTemporary();
@@ -119,7 +119,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
                this.searching = false;
                this.finished = true;
                if (LittleMonsterMainClass.debug) {
-                  LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 被中断");
+                  LittleMonsterMainClass.getInstance().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 被中断");
                }
                return false;
             }
@@ -131,7 +131,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
                this.reachable = false;
                this.addNode(new Node(this.destination));
                if (LittleMonsterMainClass.debug) {
-                  LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 找不到路径");
+                  LittleMonsterMainClass.getInstance().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 找不到路径");
                }
                if (this.allowFuzzyResults) {
                   //TODO 检查这个返回最近位置路径的方法
@@ -146,7 +146,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
                   this.closeList.clear();
                   this.closeList.addAll(list);
                   if (LittleMonsterMainClass.debug) {
-                     LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 返回最靠近的位置");
+                     LittleMonsterMainClass.getInstance().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 返回最靠近的位置");
                   }
                }else {
                   return false;
@@ -167,14 +167,14 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          this.finished = true;
          this.searching = false;
          if (LittleMonsterMainClass.debug) {
-            LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路完成 路径数量" + this.getPathRoute().size());
+            LittleMonsterMainClass.getInstance().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路完成 路径数量" + this.getPathRoute().size());
             this.show();
          }
          return true;
       }catch (Exception e) {
          if (!(this.entity == null || this.entity.isClosed() || this.entity.getFollowTarget() == null ||
                  this.entity.getFollowTarget().isClosed())) {
-            LittleMonsterMainClass.getMasterMainClass().getLogger().error("寻路错误", e);
+            LittleMonsterMainClass.getInstance().getLogger().error("寻路错误", e);
          }
          this.searching = false;
          this.finished = true;
@@ -183,7 +183,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
             this.addNode(new Node(this.destination));
          }
          if (LittleMonsterMainClass.debug) {
-            LittleMonsterMainClass.getMasterMainClass().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败", e);
+            LittleMonsterMainClass.getInstance().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败", e);
          }
          return false;
       }

@@ -51,7 +51,7 @@ public class LittleNpcSpawnCommand extends Command {
                 if("spawn".equalsIgnoreCase(strings[0])){
                     if(sender instanceof Player) {
                         if (strings.length > 1) {
-                            if (LittleMonsterMainClass.getMasterMainClass().monsters.containsKey(strings[1])) {
+                            if (LittleMonsterMainClass.getInstance().monsters.containsKey(strings[1])) {
                                 int time = -1;
                                 if(strings.length > 5){
                                     Position position = new Position(
@@ -62,12 +62,12 @@ public class LittleNpcSpawnCommand extends Command {
                                     if(strings.length > 6){
                                         time = Integer.parseInt(strings[6]);
                                     }
-                                    LittleMonsterMainClass.getMasterMainClass().monsters.get(strings[1]).spawn(position,time);
+                                    LittleMonsterMainClass.getInstance().monsters.get(strings[1]).spawn(position,time);
                                 }else{
                                     if(strings.length > 2){
                                         time = Integer.parseInt(strings[2]);
                                     }
-                                    LittleMonsterMainClass.getMasterMainClass().monsters.get(strings[1]).spawn(((Player) sender).getPosition(),time);
+                                    LittleMonsterMainClass.getInstance().monsters.get(strings[1]).spawn(((Player) sender).getPosition(),time);
                                 }
                                 sender.sendMessage("§a怪物 " + strings[1] + "生成"+((time > 0)?" 存活 §e"+time+"§a 秒":""));
                             } else {
@@ -78,12 +78,12 @@ public class LittleNpcSpawnCommand extends Command {
                             return false;
                         }
                     }else if(strings.length > 5){
-                        if (LittleMonsterMainClass.getMasterMainClass().monsters.containsKey(strings[1])) {
+                        if (LittleMonsterMainClass.getInstance().monsters.containsKey(strings[1])) {
                             Position position = new Position(Double.parseDouble(strings[2]),
                                     Double.parseDouble(strings[3]),
                                     Double.parseDouble(strings[4]),
                                     Server.getInstance().getLevelByName(strings[5]));
-                            LittleMonsterMainClass.getMasterMainClass().monsters.get(strings[1]).spawn(position);
+                            LittleMonsterMainClass.getInstance().monsters.get(strings[1]).spawn(position);
                             sender.sendMessage("§a怪物 " + strings[1] + "在"+position+"生成");
                         } else {
                             sender.sendMessage("§c怪物 " + strings[1] + "不存在");
@@ -91,7 +91,7 @@ public class LittleNpcSpawnCommand extends Command {
                         return false;
                     }else{
                         if(strings.length > 2){
-                            if (LittleMonsterMainClass.getMasterMainClass().monsters.containsKey(strings[1])) {
+                            if (LittleMonsterMainClass.getInstance().monsters.containsKey(strings[1])) {
                                 String name = strings[2];
                                 Player p = Server.getInstance().getPlayer(name);
                                 if(p != null){
@@ -99,7 +99,7 @@ public class LittleNpcSpawnCommand extends Command {
                                     if(strings.length > 3){
                                         time = Integer.parseInt(strings[3]);
                                     }
-                                    LittleMonsterMainClass.getMasterMainClass().monsters.get(strings[1]).spawn(p.getPosition(),time);
+                                    LittleMonsterMainClass.getInstance().monsters.get(strings[1]).spawn(p.getPosition(),time);
                                     sender.sendMessage("§a怪物 " + strings[1] + "在"+p.getPosition()+"生成");
                                 }else{
                                     sender.sendMessage("§c玩家 " + name + "不在线");
@@ -160,14 +160,14 @@ public class LittleNpcSpawnCommand extends Command {
                         if (strings.length > 2) {
                             try {
                                 String name = strings[1];
-                                if (LittleMonsterMainClass.getMasterMainClass().positions.containsKey(name)) {
+                                if (LittleMonsterMainClass.getInstance().positions.containsKey(name)) {
                                     sender.sendMessage("§c此刷怪点已经存在...");
                                     return false;
                                 }
-                                if (LittleMonsterMainClass.getMasterMainClass().monsters.containsKey(strings[2])) {
+                                if (LittleMonsterMainClass.getInstance().monsters.containsKey(strings[2])) {
                                     Position pos = ((Player) sender).getPosition();
-                                    LittleMonsterMainClass.getMasterMainClass().saveResource("position.yml", "/Position/" + name + ".yml", false);
-                                    Config config = new Config(LittleMonsterMainClass.getMasterMainClass().getDataFolder() + "/Position/" + name + ".yml", Config.YAML);
+                                    LittleMonsterMainClass.getInstance().saveResource("position.yml", "/Position/" + name + ".yml", false);
+                                    Config config = new Config(LittleMonsterMainClass.getInstance().getDataFolder() + "/Position/" + name + ".yml", Config.YAML);
                                     config.set("刷怪点", new LinkedHashMap<String, Object>() {
                                         {
                                             put("x", pos.x);
@@ -180,7 +180,7 @@ public class LittleNpcSpawnCommand extends Command {
                                     config.save();
                                     PositionConfig easyEntity = PositionConfig.loadPosition(name, config);
                                     if (easyEntity != null) {
-                                        LittleMonsterMainClass.getMasterMainClass().positions.put(name, easyEntity);
+                                        LittleMonsterMainClass.getInstance().positions.put(name, easyEntity);
                                     } else {
                                         sender.sendMessage("§c创建失败...");
                                         return true;
@@ -206,16 +206,16 @@ public class LittleNpcSpawnCommand extends Command {
                     if(sender instanceof Player) {
                         try {
                             String name = strings[1];
-                            if (LittleMonsterMainClass.getMasterMainClass().monsters.containsKey(name)) {
+                            if (LittleMonsterMainClass.getInstance().monsters.containsKey(name)) {
                                 sender.sendMessage("§c此怪物已经存在...");
                                 return false;
                             }
-                            LittleMonsterMainClass.getMasterMainClass().saveResource("monster.yml", "/Monster/" + name + ".yml", false);
-                            Config config = new Config(LittleMonsterMainClass.getMasterMainClass().getDataFolder() + "/Monster/" + name + ".yml", Config.YAML);
+                            LittleMonsterMainClass.getInstance().saveResource("monster.yml", "/Monster/" + name + ".yml", false);
+                            Config config = new Config(LittleMonsterMainClass.getInstance().getDataFolder() + "/Monster/" + name + ".yml", Config.YAML);
                             config.save();
                             MonsterConfig easyEntity = MonsterConfig.loadEntity(name, config);
                             if (easyEntity != null) {
-                                LittleMonsterMainClass.getMasterMainClass().monsters.put(name, easyEntity);
+                                LittleMonsterMainClass.getInstance().monsters.put(name, easyEntity);
                             } else {
                                 sender.sendMessage("§c创建失败...");
                                 return true;
@@ -239,9 +239,9 @@ public class LittleNpcSpawnCommand extends Command {
                 if("del".equals(strings[0])){
                     if(strings.length > 1){
                         String name = strings[1];
-                        if(LittleMonsterMainClass.getMasterMainClass().monsters.containsKey(name)){
-                            LittleMonsterMainClass.getMasterMainClass().monsters.remove(name);
-                            if(!new File(LittleMonsterMainClass.getMasterMainClass().getDataFolder()+ "/Monster/"+name+".yml").delete()){
+                        if(LittleMonsterMainClass.getInstance().monsters.containsKey(name)){
+                            LittleMonsterMainClass.getInstance().monsters.remove(name);
+                            if(!new File(LittleMonsterMainClass.getInstance().getDataFolder()+ "/Monster/"+name+".yml").delete()){
                                 Server.getInstance().getLogger().error("删除 文件"+name+".yml 失败");
                             }
                             sender.sendMessage("§a怪物删除成功");
@@ -263,7 +263,7 @@ public class LittleNpcSpawnCommand extends Command {
                     }
                 }
                 if("reload".equalsIgnoreCase(strings[0])){
-                    LittleMonsterMainClass.getMasterMainClass().init();
+                    LittleMonsterMainClass.getInstance().init();
                     sender.sendMessage("§a配置文件重新读取完成");
                 }
                 if("save".equalsIgnoreCase(strings[0])){
@@ -300,9 +300,9 @@ public class LittleNpcSpawnCommand extends Command {
     }
 
     private boolean delPos(String name,CommandSender sender){
-        if(LittleMonsterMainClass.getMasterMainClass().positions.containsKey(name)){
-            LittleMonsterMainClass.getMasterMainClass().positions.remove(name);
-            if(!new File(LittleMonsterMainClass.getMasterMainClass().getDataFolder()+ "/Position/"+name+".yml").delete()){
+        if(LittleMonsterMainClass.getInstance().positions.containsKey(name)){
+            LittleMonsterMainClass.getInstance().positions.remove(name);
+            if(!new File(LittleMonsterMainClass.getInstance().getDataFolder()+ "/Position/"+name+".yml").delete()){
                 Server.getInstance().getLogger().error("删除 文件"+name+".yml 失败");
             }
             sender.sendMessage("§a刷怪点删除成功");

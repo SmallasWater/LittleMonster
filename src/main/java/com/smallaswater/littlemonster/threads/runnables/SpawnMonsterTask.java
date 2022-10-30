@@ -19,7 +19,7 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
     @Override
     public boolean scheduler() {
         //刷怪
-        for (PositionConfig positionConfig : LittleMonsterMainClass.getMasterMainClass().positions.values()) {
+        for (PositionConfig positionConfig : LittleMonsterMainClass.getInstance().positions.values()) {
             if (positionConfig.getMoveSize() != -1) {
                 for (LittleNpc littleNpc : Utils.getEntitysByPos(positionConfig)) {
                     if (littleNpc.distance(positionConfig.getPos()) >= positionConfig.getMoveSize()) {
@@ -44,7 +44,7 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
                 if (positionConfig.time > 0) {
                     positionConfig.time--;
                     if (positionConfig.time <= 0) {
-                        if (LittleMonsterMainClass.getMasterMainClass().monsters.containsKey(positionConfig.getLittleNpc().getName())) {
+                        if (LittleMonsterMainClass.getInstance().monsters.containsKey(positionConfig.getLittleNpc().getName())) {
                             if (positionConfig.getConfig().getBoolean("公告.是否提示", true)) {
                                 Server.getInstance().broadcastMessage(TextFormat.colorize('&', positionConfig.getConfig()
                                         .getString("公告.复活提醒", "&e[ &bBOSS提醒 &e] &a{name} 已复活")

@@ -65,7 +65,7 @@ public class PositionConfig {
 
     public static PositionConfig loadPosition(String name, Config config) {
         PositionConfig entity = new PositionConfig(name,config);
-        MonsterConfig monsterConfig = LittleMonsterMainClass.getMasterMainClass().monsters
+        MonsterConfig monsterConfig = LittleMonsterMainClass.getInstance().monsters
                 .getOrDefault(config.getString("刷新怪物",null),null);
         if(monsterConfig == null){
             return null;

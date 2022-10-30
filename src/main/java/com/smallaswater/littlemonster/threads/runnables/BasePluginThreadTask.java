@@ -11,7 +11,7 @@ public abstract class BasePluginThreadTask implements Runnable {
 
     @Override
     public final void run() {
-        while (LittleMonsterMainClass.getMasterMainClass().isEnabled()) {
+        while (LittleMonsterMainClass.getInstance().isEnabled()) {
             try {
                 if(!scheduler()) {
                     break;
@@ -21,7 +21,7 @@ public abstract class BasePluginThreadTask implements Runnable {
                 if (e instanceof InterruptedException) {
                     return;
                 }
-                LittleMonsterMainClass.getMasterMainClass().getLogger().error("BasePluginThreadTask Error", e);
+                LittleMonsterMainClass.getInstance().getLogger().error("BasePluginThreadTask Error", e);
             }
         }
     }

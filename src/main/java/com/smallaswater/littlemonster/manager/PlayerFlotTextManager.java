@@ -73,14 +73,14 @@ public class PlayerFlotTextManager {
 
     public static PlayerFlotTextManager getOrCreate(Player player) {
         PlayerFlotTextManager flotTextManager = new PlayerFlotTextManager(player);
-        if(!LittleMonsterMainClass.getMasterMainClass().playerFlotTextManagers.contains(flotTextManager)) {
-            LittleMonsterMainClass.getMasterMainClass().playerFlotTextManagers.add(flotTextManager);
+        if(!LittleMonsterMainClass.getInstance().playerFlotTextManagers.contains(flotTextManager)) {
+            LittleMonsterMainClass.getInstance().playerFlotTextManagers.add(flotTextManager);
         }
-        return LittleMonsterMainClass.getMasterMainClass().playerFlotTextManagers.get(LittleMonsterMainClass.getMasterMainClass().playerFlotTextManagers.indexOf(flotTextManager));
+        return LittleMonsterMainClass.getInstance().playerFlotTextManagers.get(LittleMonsterMainClass.getInstance().playerFlotTextManagers.indexOf(flotTextManager));
     }
 
     public static PlayerFlotTextManager get(Player player) {
-        for (PlayerFlotTextManager flotTextManager : LittleMonsterMainClass.getMasterMainClass().playerFlotTextManagers) {
+        for (PlayerFlotTextManager flotTextManager : LittleMonsterMainClass.getInstance().playerFlotTextManagers) {
             if (flotTextManager.player.equals(player)) {
                 return flotTextManager;
             }

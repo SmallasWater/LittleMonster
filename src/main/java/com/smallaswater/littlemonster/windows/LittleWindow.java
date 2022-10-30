@@ -28,7 +28,7 @@ public class LittleWindow {
 
     public static void sendMenu(Player player){
         FormWindowSimple simple = new FormWindowSimple("副本主页","");
-        for(String name: LittleMonsterMainClass.getMasterMainClass().monsters.keySet()){
+        for(String name: LittleMonsterMainClass.getInstance().monsters.keySet()){
             simple.addButton(new ElementButton(name,new ElementButtonImageData("path","textures/ui/bad_omen_effect")));
         }
         if(simple.getButtons().size() == 0){
@@ -42,8 +42,8 @@ public class LittleWindow {
         Object o = KeyHandleManager.getKey(player,"menu");
         if(o != null){
             MonsterConfig config;
-            if(LittleMonsterMainClass.getMasterMainClass().monsters.containsKey(o.toString())){
-                config = LittleMonsterMainClass.getMasterMainClass().monsters.get(o.toString());
+            if(LittleMonsterMainClass.getInstance().monsters.containsKey(o.toString())){
+                config = LittleMonsterMainClass.getInstance().monsters.get(o.toString());
                 FormWindowCustom custom = new FormWindowCustom("副本设置");
                 custom.addElement(new ElementInput("请输入血量","整数血量",config.getHealth()+""));
                 custom.addElement(new ElementInput("请输入攻击力","整数攻击力",config.getDamage()+""));

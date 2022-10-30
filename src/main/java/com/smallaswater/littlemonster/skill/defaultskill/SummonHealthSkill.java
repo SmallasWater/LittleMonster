@@ -30,7 +30,7 @@ public class SummonHealthSkill extends BaseSkillManager {
     @Override
     public void display(Entity... player) {
         for(String littleNpcName: littleNpcs){
-            MonsterConfig config = LittleMonsterMainClass.getMasterMainClass().monsters.get(littleNpcName);
+            MonsterConfig config = LittleMonsterMainClass.getInstance().monsters.get(littleNpcName);
             if(config != null){
                 LittleNpc littleNpc = config.spawn(getMaster().add(Utils.rand()?1:-1,0,Utils.rand()?1:-1));
                 littleNpc.isToDeath = true;

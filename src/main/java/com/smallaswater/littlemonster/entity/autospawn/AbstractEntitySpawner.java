@@ -29,7 +29,7 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
     public AbstractEntitySpawner(AutoSpawnTask spawnTask) {
         this.spawnTask = spawnTask;
         this.server = Server.getInstance();
-        List<String> disabledWorlds = LittleMonsterMainClass.getMasterMainClass().getConfig().getStringList("npcs.worlds-spawning");
+        List<String> disabledWorlds = LittleMonsterMainClass.getInstance().getConfig().getStringList("npcs.worlds-spawning");
         if (disabledWorlds != null && !disabledWorlds.isEmpty()) {
             spawnWorlds = new ArrayList<>(disabledWorlds);
         }
