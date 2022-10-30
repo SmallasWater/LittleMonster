@@ -1,0 +1,28 @@
+<config>
+    <input>
+        <jar in="LittleMonster_v1.7.0-SNAPSHOT.jar" out="LittleMonster_v1.7.0-SNAPSHOT.jar"/>
+    </input>
+	
+	<classpath basedir="../lib">
+        <jar name="*.jar"/>
+	</classpath>
+
+    <keep-names>
+        <!-- protected+ 是 protected/public的都保留名称的都保留名称 -->  
+        <class access="protected+">        
+            <field access="protected+" />  
+            <method access="protected+" />
+        </class>
+    </keep-names>
+
+    <ignore-classes>
+        <!--不混淆 引入的第三方jar包-->
+        <class template="class nukkitcoders.*"/>
+    </ignore-classes>
+
+	<!-- 保留参数名称 -->
+	<!--<property name="local-variables-naming" value="keep-parameters" />-->
+	<!-- 保持行数不变 -->
+    <property name="line-numbers" value="keep"/>
+
+</config>
