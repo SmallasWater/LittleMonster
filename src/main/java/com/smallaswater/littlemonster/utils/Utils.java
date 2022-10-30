@@ -216,9 +216,11 @@ public class Utils {
         return tag.contains(LittleNpc.TAG);
     }
 
-    public static boolean positionEqual(Position p1,Position p2){
-        return p1.getFloorX() == p2.getFloorX() && p1.getFloorY() == p2.getFloorY()
-                && p1.getFloorZ() == p2.getFloorZ() && p1.level.getFolderName().equalsIgnoreCase(p2.level.getFolderName());
+    public static boolean positionEqual(Position p1,Position p2) {
+        return p1.getFloorX() == p2.getFloorX() &&
+                p1.getFloorY() == p2.getFloorY() &&
+                p1.getFloorZ() == p2.getFloorZ() &&
+                p1.level == p2.level;
     }
 
     public static String getMonster(Entity entity) {

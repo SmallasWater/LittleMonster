@@ -28,7 +28,8 @@ public abstract class BasePluginThreadTask implements Runnable {
 
     /**
      * 循环执行
-     * @return 是否终止
+     * @return 是否继续执行
      * */
     abstract public boolean scheduler();
+
 }

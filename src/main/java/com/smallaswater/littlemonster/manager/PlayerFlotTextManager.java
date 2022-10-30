@@ -5,6 +5,7 @@ import cn.nukkit.level.Position;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.flot.FlotText;
 import com.smallaswater.littlemonster.utils.Utils;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -16,9 +17,10 @@ import java.util.Iterator;
  */
 public class PlayerFlotTextManager {
 
-    private Player player;
+    @Getter
+    private final Player player;
 
-    private ArrayList<FlotText> flotTexts = new ArrayList<>();
+    private final ArrayList<FlotText> flotTexts = new ArrayList<>();
 
     private PlayerFlotTextManager(Player player){
         this.player = player;
@@ -29,9 +31,9 @@ public class PlayerFlotTextManager {
     }
 
     public FlotText get(Position text){
-        for(FlotText t:flotTexts){
-            if(Utils.positionEqual(t.getPosition(),text)){
-                return t;
+        for (FlotText flotText : this.flotTexts) {
+            if (Utils.positionEqual(flotText.getPosition(), text)) {
+                return flotText;
             }
         }
         return null;
@@ -45,9 +47,8 @@ public class PlayerFlotTextManager {
         return flotTexts.size();
     }
 
-    public void remove(FlotText text){
-        flotTexts.remove(text);
-
+    public void remove(FlotText text) {
+        this.flotTexts.remove(text);
     }
 
     public void remove(Position text){
@@ -70,13 +71,21 @@ public class PlayerFlotTextManager {
         return false;
     }
 
-    public static PlayerFlotTextManager getInstance(Player player){
-
+    public static PlayerFlotTextManager getOrCreate(Player player) {
         PlayerFlotTextManager flotTextManager = new PlayerFlotTextManager(player);
-        if(!LittleMonsterMainClass.getMasterMainClass().texts.contains(flotTextManager)){
-            LittleMonsterMainClass.getMasterMainClass().texts.add(flotTextManager);
+        if(!LittleMonsterMainClass.getMasterMainClass().playerFlotTextManagers.contains(flotTextManager)) {
+            LittleMonsterMainClass.getMasterMainClass().playerFlotTextManagers.add(flotTextManager);
         }
-        return LittleMonsterMainClass.getMasterMainClass().texts.get(LittleMonsterMainClass.getMasterMainClass().texts.indexOf(flotTextManager));
+        return LittleMonsterMainClass.getMasterMainClass().playerFlotTextManagers.get(LittleMonsterMainClass.getMasterMainClass().playerFlotTextManagers.indexOf(flotTextManager));
+    }
+
+    public static PlayerFlotTextManager get(Player player) {
+        for (PlayerFlotTextManager flotTextManager : LittleMonsterMainClass.getMasterMainClass().playerFlotTextManagers) {
+            if (flotTextManager.player.equals(player)) {
+                return flotTextManager;
+            }
+        }
+        return null;
     }
 
     @Override

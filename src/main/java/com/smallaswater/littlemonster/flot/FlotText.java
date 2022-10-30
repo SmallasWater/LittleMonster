@@ -7,21 +7,20 @@ import cn.nukkit.level.Position;
 import cn.nukkit.level.particle.FloatingTextParticle;
 import cn.nukkit.network.protocol.RemoveEntityPacket;
 import cn.nukkit.network.protocol.SetEntityDataPacket;
-import com.smallaswater.littlemonster.manager.PlayerFlotTextManager;
 import com.smallaswater.littlemonster.utils.Utils;
 
 public class FlotText extends FloatingTextParticle {
 
-    private Position position;
+    private final Position position;
 
-    private String name;
+    private final String name;
 
-    private Player player;
+    private final Player player;
 
     public FlotText(String name, Position pos, String title, Player player) {
-        super(Location.fromObject(pos,pos.getLevel()), title);
+        super(Location.fromObject(pos, pos.getLevel()), title);
         this.player = player;
-        this.position = pos.add(-0.5,-2,-0.5);
+        this.position = pos.add(-0.5, -2, -0.5);
         this.name = name;
     }
 
@@ -33,12 +32,13 @@ public class FlotText extends FloatingTextParticle {
         return player;
     }
 
-    public void toUpData(){
-        if(level != null) {
+    public void toUpData() {
+        if (level != null) {
             SetEntityDataPacket packet = new SetEntityDataPacket();
             packet.eid = this.entityId;
             packet.metadata = this.metadata;
-            Server.getInstance().getOnlinePlayers().values().forEach(player -> player.dataPacket(packet));
+            Server.broadcastPacket(this.level.getPlayers().values(), packet);
+            //Server.getInstance().getOnlinePlayers().values().forEach(player -> player.dataPacket(packet));
         }
     }
 
@@ -51,17 +51,17 @@ public class FlotText extends FloatingTextParticle {
         return name;
     }
 
-    public void kill() {
+    public void close() {
         RemoveEntityPacket pk = new RemoveEntityPacket();
-        pk.eid = getEntityId();
-        Server.getInstance().getOnlinePlayers().values().forEach(player -> player.dataPacket(pk));
+        pk.eid = this.getEntityId();
+        Server.broadcastPacket(Server.getInstance().getOnlinePlayers().values(), pk);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof FlotText){
+        if(obj instanceof FlotText) {
             if (((FlotText) obj).getName().equalsIgnoreCase(getName())) {
-                Utils.positionEqual(((FlotText) obj).position, position);
+                return Utils.positionEqual(((FlotText) obj).position, position);
             }
         }
         return false;

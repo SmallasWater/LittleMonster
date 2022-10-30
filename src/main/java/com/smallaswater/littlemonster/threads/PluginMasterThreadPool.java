@@ -3,6 +3,7 @@ package com.smallaswater.littlemonster.threads;
 import com.smallaswater.littlemonster.threads.runnables.BasePluginThreadTask;
 
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author SmallasWater
@@ -15,6 +16,8 @@ public class PluginMasterThreadPool {
 
     public static final ThreadPoolExecutor EXECUTOR;
 
+    private static final AtomicInteger THREAD_COUNT = new AtomicInteger(0);
+
     static {
         ASYNC_EXECUTOR = Executors.newSingleThreadExecutor();
         EXECUTOR = new ThreadPoolExecutor(
@@ -23,6 +26,7 @@ public class PluginMasterThreadPool {
                 1L,
                 TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>(),
+                task -> new Thread(task, "LittleMonster Thread" + THREAD_COUNT.getAndIncrement()),
                 new ThreadPoolExecutor.AbortPolicy()
         );
     }
