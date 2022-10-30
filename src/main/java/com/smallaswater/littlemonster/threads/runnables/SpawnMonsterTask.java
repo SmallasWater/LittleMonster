@@ -51,7 +51,7 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
                                         .replace("{name}", positionConfig.getLittleNpc().getName())));
                             }
                             for (int i = 0; i < positionConfig.getCount(); i++) {
-                                LittleNpc npc = positionConfig.getLittleNpc().spawn(positionConfig.getPos(), positionConfig.getLiveTime());
+                                LittleNpc npc = positionConfig.getLittleNpc().spawn(positionConfig.getSpawnPos(), positionConfig.getLiveTime());
                                 npc.spawnPos = positionConfig.getName();
                             }
                         }

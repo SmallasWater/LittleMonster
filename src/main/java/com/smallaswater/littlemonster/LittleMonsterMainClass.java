@@ -48,17 +48,21 @@ public class LittleMonsterMainClass extends PluginBase {
     private static final String[] SKINS = {"粉蓝双瞳猫耳少女","小丸子","小埋","小黑苦力怕","尸鬼","拉姆","熊孩子","狂三","米奇","考拉","黑岩射手"};
 
     @Override
-    public void onEnable() {
+    public void onLoad() {
         littleMonsterMainClass = this;
-        //检查api
 
+        this.saveResource("README.md", true);
+        this.saveResource("LittleMonster介绍.pdf",true);
+    }
+
+    @Override
+    public void onEnable() {
         Entity.registerEntity("LittleNpc", LittleNpc.class);
         BaseSkillManager.initSkill();
         this.getServer().getPluginManager().registerEvents(new LittleMasterListener(),this);
         init();
         saveDefaultConfig();
         reloadConfig();
-        this.saveResource("LittleMonster介绍.pdf",true);
 
         if (this.getConfig().getBoolean("debug", false)) {
             debug = true;

@@ -5,6 +5,7 @@ import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import cn.nukkit.utils.Config;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
+import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Data;
 
 import java.util.Map;
@@ -18,6 +19,8 @@ import java.util.Map;
 public class PositionConfig {
 
     private Position pos;
+
+    private int posOffset = -1;
 
     private boolean open;
 
@@ -63,8 +66,19 @@ public class PositionConfig {
         return this.pos.isValid() && this.pos.getChunk().isLoaded() && !this.pos.getLevel().getPlayers().isEmpty();
     }
 
+    public Position getSpawnPos() {
+        if (this.posOffset <= 0) {
+            return this.pos;
+        }
+        Position position = this.pos.getLevel().getSafeSpawn(this.pos.add(Utils.rand(-this.posOffset, this.posOffset), 0, Utils.rand(-this.posOffset, this.posOffset)));
+        if (position.equals(this.pos.getLevel().getSpawnLocation())) {
+            return this.pos;
+        }
+        return position;
+    }
+
     public static PositionConfig loadPosition(String name, Config config) {
-        PositionConfig entity = new PositionConfig(name,config);
+        PositionConfig entity = new PositionConfig(name, config);
         MonsterConfig monsterConfig = LittleMonsterMainClass.getInstance().monsters
                 .getOrDefault(config.getString("刷新怪物",null),null);
         if(monsterConfig == null){
@@ -98,6 +112,7 @@ public class PositionConfig {
         }
         Position position = new Position((double) pos.get("x"),(double) pos.get("y"),(double) pos.get("z"),level);
         entity.setPos(position);
+        entity.setPosOffset(config.getInt("刷怪随机偏移距离"));
         return entity;
     }
 }
