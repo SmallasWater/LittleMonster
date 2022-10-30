@@ -69,17 +69,17 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          this.start = this.entity;
       }
 
-      if (this.destination == null) {
-         if (this.entity.getTargetVector() == null) {
-            this.searching = false;
-            this.finished = true;
-            if (LittleMonsterMainClass.debug) {
-               LittleMonsterMainClass.getInstance().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 没有目标");
-            }
-            return false;
-         }
-
+      if (this.destination == null && this.entity.getTargetVector() != null) {
          this.destination = this.entity.getTargetVector().clone();
+      }
+
+      if (this.destination == null) {
+         this.searching = false;
+         this.finished = true;
+         if (LittleMonsterMainClass.debug) {
+            LittleMonsterMainClass.getInstance().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 没有目标");
+         }
+         return false;
       }
 
       //找一个可以站立的目标点

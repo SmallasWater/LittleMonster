@@ -3,7 +3,7 @@
         <jar in="LittleMonster_v1.7.0-SNAPSHOT.jar" out="LittleMonster_v1.7.0-SNAPSHOT.jar"/>
     </input>
 	
-	<classpath basedir="../lib">
+	<classpath basedir="libs">
         <jar name="*.jar"/>
 	</classpath>
 
