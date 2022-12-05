@@ -2,7 +2,6 @@ package com.smallaswater.littlemonster.entity.baselib;
 
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
@@ -17,13 +16,11 @@ import cn.nukkit.network.protocol.PlayerSkinPacket;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
-import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
@@ -339,8 +336,6 @@ public abstract class BaseEntity extends EntityHuman {
         return true;
     }*/
 
-
-    @Override
     public float getMountedYOffset() {
         return getHeight() * 0.75F;
     }
