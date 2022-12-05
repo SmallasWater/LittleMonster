@@ -33,6 +33,7 @@ import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import com.smallaswater.littlemonster.skill.defaultskill.AttributeHealthSkill;
 import com.smallaswater.littlemonster.skill.defaultskill.MessageHealthSkill;
 import com.smallaswater.littlemonster.skill.defaultskill.SummonHealthSkill;
+import com.smallaswater.littlemonster.threads.runnables.RouteFinderRunnable;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Getter;
 import lombok.Setter;
@@ -65,6 +66,9 @@ public class LittleNpc extends BaseEntityMove {
 
     public DamageHandle handle = new DamageHandle();
 
+    //TODO 唯一标识
+    public UUID uuid;
+
     public LittleNpc(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
         this.close();
@@ -85,6 +89,8 @@ public class LittleNpc extends BaseEntityMove {
         if (this.route != null) {
             this.route.setDestinationDeviate(this.destinationDeviate);
         }
+        uuid = UUID.randomUUID();
+        RouteFinderRunnable.addRoute(this);
     }
 
     private Player getDamageMax(){
@@ -457,63 +463,68 @@ public class LittleNpc extends BaseEntityMove {
 
     @Override
     public void attackEntity(EntityCreature entity){
-        if (this.attackDelay > attackSleepTime &&
-                entity.distance(this) <= distanceLine) {
+        if (this.attackDelay > attackSleepTime) {
             this.attackDelay = 0;
             switch (attactMode){
                 case 1:
                     //群体
-                    LinkedList<Entity> players = Utils.getAroundPlayers(this,config.getArea(),true,true,true);
-                    for(Entity p:players){
-                        if(p instanceof Player && ((Player) p).isCreative()){
-                            continue;
+                    if(entity.distance(this) <= distanceLine) {
+                        LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, true);
+                        for (Entity p : players) {
+                            if (p instanceof Player && ((Player) p).isCreative()) {
+                                continue;
+                            }
+                            if (p instanceof LittleNpc) {
+                                continue;
+                            }
+                            p.attack(new EntityDamageByEntityEvent(this, p, EntityDamageEvent.DamageCause.ENTITY_ATTACK, getDamage(), (float) config.getKnockBack()));
                         }
-                        if(p instanceof LittleNpc){
-                            continue;
-                        }
-                        p.attack(new EntityDamageByEntityEvent(this, p, EntityDamageEvent.DamageCause.ENTITY_ATTACK, getDamage(), (float) config.getKnockBack()));
+                        entity.level.addParticle(new HugeExplodeSeedParticle(entity));
+                        entity.level.addSound(entity, Sound.RANDOM_EXPLODE);
                     }
-                    entity.level.addParticle(new HugeExplodeSeedParticle(entity));
-                    entity.level.addSound(entity, Sound.RANDOM_EXPLODE);
                     break;
                 case 2:
-                    double f = 1.3D;
-                    Entity k = Entity.createEntity("Arrow", this.add(0, this.getEyeHeight(), 0), this);
-                    if (!(k instanceof EntityArrow)) {
-                        return;
-                    }
-                    EntityArrow arrow = (EntityArrow)k;
-                    arrow.setMotion(
-                            new Vector3(-Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f,
-                                    -Math.sin(Math.toRadians(pitch)) * f * f,
-                                    Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f));
-                    EntityShootBowEvent ev = new EntityShootBowEvent(this, Item.get(ItemID.ARROW, 0, 1), arrow, f);
-                    this.server.getPluginManager().callEvent(ev);
-                    EntityProjectile projectile = ev.getProjectile();
-                    if (ev.isCancelled()) {
-                        projectile.kill();
-                    } else {
-                        ProjectileLaunchEvent launch = new ProjectileLaunchEvent(projectile);
-                        this.server.getPluginManager().callEvent(launch);
-                        if (launch.isCancelled()) {
+                    if(entity.distance(this) <= distanceLine) {
+                        double f = 1.3D;
+                        Entity k = Entity.createEntity("Arrow", this.add(0, this.getEyeHeight(), 0), this);
+                        if (!(k instanceof EntityArrow)) {
+                            return;
+                        }
+                        EntityArrow arrow = (EntityArrow) k;
+                        arrow.setMotion(
+                                new Vector3(-Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f,
+                                        -Math.sin(Math.toRadians(pitch)) * f * f,
+                                        Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f));
+                        EntityShootBowEvent ev = new EntityShootBowEvent(this, Item.get(ItemID.ARROW, 0, 1), arrow, f);
+                        this.server.getPluginManager().callEvent(ev);
+                        EntityProjectile projectile = ev.getProjectile();
+                        if (ev.isCancelled()) {
                             projectile.kill();
                         } else {
-                            projectile.spawnToAll();
-                            ((EntityArrow) projectile).setPickupMode(EntityArrow.PICKUP_NONE);
-                            this.level.addSound(this, Sound.RANDOM_BOW);
+                            ProjectileLaunchEvent launch = new ProjectileLaunchEvent(projectile);
+                            this.server.getPluginManager().callEvent(launch);
+                            if (launch.isCancelled()) {
+                                projectile.kill();
+                            } else {
+                                projectile.spawnToAll();
+                                ((EntityArrow) projectile).setPickupMode(EntityArrow.PICKUP_NONE);
+                                this.level.addSound(this, Sound.RANDOM_BOW);
+                            }
                         }
+                        EntityEventPacket pk = new EntityEventPacket();
+                        pk.eid = this.getId();
+                        pk.event = EntityEventPacket.ARM_SWING;
+                        Server.broadcastPacket(this.getViewers().values(), pk);
+                        waitTime = 0;
                     }
-                    EntityEventPacket pk = new EntityEventPacket();
-                    pk.eid = this.getId();
-                    pk.event = EntityEventPacket.ARM_SWING;
-                    Server.broadcastPacket(this.getViewers().values(), pk);
-                    waitTime = 0;
                     return;
                 case 3: //触发EntityInteractEvent
-                    if(!hasBlockInLine(entity)) {
-                        EntityInteractEvent event = new EntityInteractEvent(this, entity.getPosition().add(0.5, entity.getEyeHeight(), 0.5).getLevelBlock());
-                        Server.getInstance().getPluginManager().callEvent(event);
-                        waitTime = 0;
+                    if(entity.distance(this) <= seeSize) {
+//                        if (!hasBlockInLine(entity)) {
+                            EntityInteractEvent event = new EntityInteractEvent(this, entity.getPosition().add(0.5, entity.getEyeHeight(), 0.5).getLevelBlock());
+                            Server.getInstance().getPluginManager().callEvent(event);
+                            waitTime = 0;
+//                        }
                     }
                     break;
                 case 0:
@@ -576,6 +587,7 @@ public class LittleNpc extends BaseEntityMove {
         if (this.route != null) {
             this.route.interrupt();
         }
+        RouteFinderRunnable.routeEntitys.remove(this);
 
         this.onClose();
     }
@@ -588,4 +600,31 @@ public class LittleNpc extends BaseEntityMove {
         return (float) damage;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof LittleNpc)) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+
+        LittleNpc littleNpc = (LittleNpc) o;
+
+        if (!name.equals(littleNpc.name)) {
+            return false;
+        }
+        return uuid.equals(littleNpc.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + name.hashCode();
+        result = 31 * result + uuid.hashCode();
+        return result;
+    }
 }

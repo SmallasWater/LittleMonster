@@ -6,7 +6,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
+@Deprecated
 public class RouteFinderThreadPool {
 
    private static final ThreadPoolExecutor EXECUTOR;

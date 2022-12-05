@@ -5,8 +5,6 @@ import cn.nukkit.block.Block;
 import cn.nukkit.level.Level;
 import cn.nukkit.math.Vector3;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
-import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
-import com.smallaswater.littlemonster.threads.runnables.RouteFinderSearchTask;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -93,7 +91,7 @@ public abstract class RouteFinder {
          this.interrupt = true;
          //this.research();
       }
-      RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this, enableOffset));
+//      RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this, enableOffset));
    }
 
    public boolean isFinished() {

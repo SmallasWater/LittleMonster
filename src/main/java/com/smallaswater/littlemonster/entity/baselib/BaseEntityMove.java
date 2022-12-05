@@ -34,7 +34,8 @@ public abstract class BaseEntityMove extends BaseEntity {
     private static final double FLOW_MULTIPLIER = .1;
 
     protected double destinationDeviate = 0.8;
-    protected RouteFinder route = new WalkerRouteFinder(this);
+    //每个生物都创建一个Route 太消耗资源 ，不如存放一个列表统一管理销毁
+    public RouteFinder route = new WalkerRouteFinder(this);
 
     public BaseEntityMove(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
@@ -319,7 +320,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                         this.attackEntity((EntityCreature) target);
                     }
                 }
-            }else if (target != null && this.distance(target) < this.destinationDeviate) {
+            }else if (target != null && this.distance(target) > this.seeSize) {
                 this.target = null;
             }
 
@@ -438,7 +439,9 @@ public abstract class BaseEntityMove extends BaseEntity {
      */
     protected void seeFollowTarget() {
         Vector3 target;
-        if(this.followTarget != null && !hasBlockInLine(this.followTarget)) {
+        if(this.followTarget != null
+//                && !hasBlockInLine(this.followTarget)
+        ) {
             target = this.followTarget;
         }else {
             target = this.target;
