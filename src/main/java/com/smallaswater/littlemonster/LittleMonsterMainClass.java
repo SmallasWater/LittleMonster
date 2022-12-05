@@ -88,6 +88,7 @@ public class LittleMonsterMainClass extends PluginBase {
         PluginMasterThreadPool.executeThread(new SpawnMonsterTask());
         PluginMasterThreadPool.executeThread(new TimmerRunnable());
         PluginMasterThreadPool.executeThread(new BlockCacheClearTask());
+        this.getServer().getScheduler().scheduleRepeatingTask(this,new RouteFinderRunnable(this),10);
     }
 
     public void init() {

@@ -6,7 +6,7 @@ import cn.nukkit.math.AxisAlignedBB;
  * @author SmallasWater
  * 2022/1/31
  */
-public class Area implements AxisAlignedBB {
+public class Area extends AxisAlignedBB {
 
     private double minX;
 
@@ -26,6 +26,7 @@ public class Area implements AxisAlignedBB {
                 double maxY,
                 double minZ,
                 double maxZ){
+        super(minX,minY,minZ,maxX,maxY,maxZ);
         this.minX = minX;
         this.maxX = maxX;
         this.minY = minY;
@@ -66,12 +67,7 @@ public class Area implements AxisAlignedBB {
 
     @Override
     public AxisAlignedBB clone() {
-        try {
-            return (AxisAlignedBB) super.clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return (AxisAlignedBB) super.clone();
     }
 
 }

@@ -6,9 +6,9 @@ import cn.nukkit.block.BlockWater;
 import cn.nukkit.level.ParticleEffect;
 import cn.nukkit.level.Position;
 import cn.nukkit.math.AxisAlignedBB;
-import cn.nukkit.math.SimpleAxisAlignedBB;
 import cn.nukkit.math.Vector3;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
+import com.smallaswater.littlemonster.entity.baselib.Area;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
 import com.smallaswater.littlemonster.utils.Utils;
 
@@ -202,13 +202,17 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       if (limit > 0) {
          for (int y = vector3.getFloorY(); y >= vector3.getFloorY() - limit; y--) {
             Block block = this.getBlockFast(vector3.getFloorX(), y, vector3.getFloorZ(), false);
-            if (this.isWalkable(block) && this.getBlockFast(block.add(0, 1, 0), false).canPassThrough()) return block;
+            if (this.isWalkable(block) && this.getBlockFast(block.add(0, 1, 0), false).canPassThrough()) {
+               return block;
+            }
          }
          return null;
       }
       for (int y = vector3.getFloorY(); y >= 0; y--) {
          Block block = this.getBlockFast(vector3.getFloorX(), y, vector3.getFloorZ(), false);
-         if (this.isWalkable(block) && this.getBlockFast(block.add(0, 1, 0), false).canPassThrough()) return block;
+         if (this.isWalkable(block) && this.getBlockFast(block.add(0, 1, 0), false).canPassThrough()) {
+            return block;
+         }
       }
       return null;
    }
@@ -229,7 +233,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    private boolean isPassable(Vector3 vector3) {
       double radius = this.entity.getWidth() * this.entity.getScale() / 2.0F;
       float height = this.entity.getHeight() * this.entity.getScale();
-      AxisAlignedBB bb = new SimpleAxisAlignedBB(vector3.getX() - radius, vector3.getY(), vector3.getZ() - radius, vector3.getX() + radius, vector3.getY() + (double)height, vector3.getZ() + radius);
+      AxisAlignedBB bb = new Area(vector3.getX() - radius, vector3.getY(), vector3.getZ() - radius, vector3.getX() + radius, vector3.getY() + (double)height, vector3.getZ() + radius);
       Block[] collisionBlocks = this.level.getCollisionBlocks(bb);
       for (Block block : collisionBlocks) {
          if (!block.canPassThrough()) {
@@ -442,8 +446,9 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          ArrayList<Vector3> list = new ArrayList<>();
          for (double i = Math.ceil(loopStart); i <= Math.floor(loopEnd); i += 1.0) {
             double result;
-            if ((result = Utils.calLinearFunction(pos1, pos2, i, Utils.ACCORDING_X_OBTAIN_Y)) != Double.MAX_VALUE)
+            if ((result = Utils.calLinearFunction(pos1, pos2, i, Utils.ACCORDING_X_OBTAIN_Y)) != Double.MAX_VALUE) {
                list.add(new Vector3(i, pos1.getY(), result));
+            }
          }
          return hasBlocksAround(list);
       } else {
@@ -452,8 +457,9 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          ArrayList<Vector3> list = new ArrayList<>();
          for (double i = Math.ceil(loopStart); i <= Math.floor(loopEnd); i += 1.0) {
             double result;
-            if ((result = Utils.calLinearFunction(pos1, pos2, i, Utils.ACCORDING_Y_OBTAIN_X)) != Double.MAX_VALUE)
+            if ((result = Utils.calLinearFunction(pos1, pos2, i, Utils.ACCORDING_Y_OBTAIN_X)) != Double.MAX_VALUE) {
                list.add(new Vector3(result, pos1.getY(), i));
+            }
          }
 
          return hasBlocksAround(list);
@@ -465,7 +471,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       double radius = (this.entity.getWidth() * this.entity.getScale()) / 2 + 0.1;
       double height = this.entity.getHeight() * this.entity.getScale();
       for (Vector3 vector3 : list) {
-         AxisAlignedBB bb = new SimpleAxisAlignedBB(vector3.getX() - radius, vector3.getY(), vector3.getZ() - radius, vector3.getX() + radius, vector3.getY() + height, vector3.getZ() + radius);
+         AxisAlignedBB bb = new Area(vector3.getX() - radius, vector3.getY(), vector3.getZ() - radius, vector3.getX() + radius, vector3.getY() + height, vector3.getZ() + radius);
          if (this.level.getCollisionBlocks(bb, true).length != 0) {
             return true;
          }
@@ -476,15 +482,23 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
             if (this.getBlockFast(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
                     this.getBlockFast(new Vector3(vector3.getX() - 1, vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
                     this.getBlockFast(new Vector3(vector3.getX() - 1, vector3.getY() - 1, vector3.getZ() - 1), false).canPassThrough() ||
-                    this.getBlockFast(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ() - 1), false).canPassThrough()) return true;
+                    this.getBlockFast(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ() - 1), false).canPassThrough()) {
+               return true;
+            }
          } else if (xIsInt) {
             if (this.getBlockFast(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
-                    this.getBlockFast(new Vector3(vector3.getX() - 1, vector3.getY() - 1, vector3.getZ()), false).canPassThrough()) return true;
+                    this.getBlockFast(new Vector3(vector3.getX() - 1, vector3.getY() - 1, vector3.getZ()), false).canPassThrough()) {
+               return true;
+            }
          } else if (zIsInt) {
             if (this.getBlockFast(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough() ||
-                    this.getBlockFast(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ() - 1), false).canPassThrough()) return true;
+                    this.getBlockFast(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ() - 1), false).canPassThrough()) {
+               return true;
+            }
          } else {
-            if (this.getBlockFast(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough()) return true;
+            if (this.getBlockFast(new Vector3(vector3.getX(), vector3.getY() - 1, vector3.getZ()), false).canPassThrough()) {
+               return true;
+            }
          }
       }
       return false;

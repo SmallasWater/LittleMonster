@@ -2,6 +2,7 @@ package com.smallaswater.littlemonster.threads.runnables;
 
 import com.smallaswater.littlemonster.route.RouteFinder;
 
+@Deprecated
 public class RouteFinderSearchTask implements Runnable {
 
    private final RouteFinder route;

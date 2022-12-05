@@ -23,7 +23,6 @@ import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.manager.KeyHandleManager;
 import com.smallaswater.littlemonster.manager.TimerHandleManager;
 import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
-import com.smallaswater.littlemonster.threads.RouteFinderThreadPool;
 import com.smallaswater.littlemonster.windows.LittleWindow;
 
 
@@ -135,7 +134,7 @@ public class LittleMasterListener implements Listener {
 
     @EventHandler
     public void onServerStop(ServerStopEvent event) {
-        RouteFinderThreadPool.shutDownNow();
+//        RouteFinderThreadPool.shutDownNow();
         PluginMasterThreadPool.shutDownNow();
     }
 }

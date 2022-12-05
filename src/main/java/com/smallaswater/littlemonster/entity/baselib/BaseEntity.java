@@ -270,32 +270,38 @@ public abstract class BaseEntity extends EntityHuman {
     //TODO 优化性能
     //判断中间是否有方块
     public boolean hasBlockInLine(Vector3 target) {
-        if (target == null) {
-            return false;
-        }
-        if(!this.hasBlockInLineLock.isLocked()) {
-            int tick = Server.getInstance().getTick();
-            if (tick - lastCheckBlockInLineTick < 30) {
-                return isHasBlock.get();
-            }
-            this.lastCheckBlockInLineTick = tick;
-            try {
-                CompletableFuture.supplyAsync(() -> {
-                    hasBlockInLineLock.lock();
-                    Block targetBlock = BaseEntity.this.getTargetBlock(Math.min((int) BaseEntity.this.distance(target), 10));
+//        if (target == null) {
+//            return false;
+//        }
+//        if(!this.hasBlockInLineLock.isLocked()) {
+//            int tick = Server.getInstance().getTick();
+//            if (tick - lastCheckBlockInLineTick < 300) {
+//                return isHasBlock.get();
+//            }
+//            this.lastCheckBlockInLineTick = tick;
+//            try {
+//                hasBlockInLineLock.lock();
+//                CompletableFuture.supplyAsync(() -> {
+
+                    Block targetBlock = this.getTargetBlock(Math.min((int) this.distance(target), 10));
                     if (targetBlock != null) {
                         return !targetBlock.isTransparent();
                     }
                     return false;
-                }, PluginMasterThreadPool.ASYNC_EXECUTOR).thenAccept(value -> {
-                    this.isHasBlock.set(value);
-                    hasBlockInLineLock.unlock();
-                });
-            } catch (Exception e) {
-                this.hasBlockInLineLock.unlock();
-            }
-        }
-        return this.isHasBlock.get();
+//                    return false;
+//                }, PluginMasterThreadPool.ASYNC_EXECUTOR).thenAccept(value -> {
+//                    this.isHasBlock.set(value);
+//                    hasBlockInLineLock.unlock();
+//                });
+//            } catch (Exception ignore) {
+//
+//            }finally {
+//                if(this.hasBlockInLineLock.isLocked()) {
+//                    this.hasBlockInLineLock.unlock();
+//                }
+//            }
+//        }
+//        return this.isHasBlock.get();
     }
 
     /*@Override
@@ -333,7 +339,9 @@ public abstract class BaseEntity extends EntityHuman {
         return true;
     }*/
 
-    protected float getMountedYOffset() {
+
+    @Override
+    public float getMountedYOffset() {
         return getHeight() * 0.75F;
     }
 
