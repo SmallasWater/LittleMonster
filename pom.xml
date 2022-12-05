@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.smallaswater.littlemonster</groupId>
+    <groupId>com.smallaswater</groupId>
     <artifactId>LittleMonster</artifactId>
     <version>1.7.0-SNAPSHOT</version>
 
@@ -14,12 +14,12 @@
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
     </properties>
 
-    <!--distributionManagement>
+    <distributionManagement>
         <repository>
             <id>maven-repo</id>
             <url>file:/www/wwwroot/repo.lanink.cn</url>
         </repository>
-    </distributionManagement-->
+    </distributionManagement>
 
     <repositories>
         <repository>
