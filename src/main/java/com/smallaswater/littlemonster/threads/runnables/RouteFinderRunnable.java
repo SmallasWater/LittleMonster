@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author SmallasWater
  * @date 2022/12/5
  */
-public class RouteFinderRunnable  extends PluginTask<LittleMonsterMainClass> {
+public class RouteFinderRunnable extends PluginTask<LittleMonsterMainClass> {
     public static ConcurrentHashMap<LittleNpc, Long> routeEntitys = new ConcurrentHashMap<>();
 
     public RouteFinderRunnable(LittleMonsterMainClass littleMonsterMainClass) {

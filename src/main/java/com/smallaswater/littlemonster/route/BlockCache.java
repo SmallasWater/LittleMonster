@@ -47,7 +47,11 @@ public class BlockCache {
 
     public Block getBlock(int x, int y, int z, boolean load) {
         Long hash = Hash.hashBlock(x, y, z);
-        return this.getBlockCache().computeIfAbsent(hash, (hash1) -> this.level.getBlock(x, y, z, load));
+        ConcurrentHashMap<Long, Block> blockCache = this.getBlockCache();
+        if (!blockCache.containsKey(hash)) {
+            blockCache.put(hash, this.level.getBlock(x, y, z, load));
+        }
+        return blockCache.get(hash);
     }
 
     public ConcurrentHashMap<Long, Block> getBlockCache() {
