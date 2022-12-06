@@ -4,14 +4,14 @@ import cn.nukkit.scheduler.PluginTask;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 
-import java.util.LinkedHashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author SmallasWater
  * @date 2022/12/5
  */
 public class RouteFinderRunnable  extends PluginTask<LittleMonsterMainClass> {
-    public static LinkedHashMap<LittleNpc, Long> routeEntitys = new LinkedHashMap<>();
+    public static ConcurrentHashMap<LittleNpc, Long> routeEntitys = new ConcurrentHashMap<>();
 
     public RouteFinderRunnable(LittleMonsterMainClass littleMonsterMainClass) {
         super(littleMonsterMainClass);
