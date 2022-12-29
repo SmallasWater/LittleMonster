@@ -47,7 +47,7 @@ public class LittleMasterListener implements Listener {
                 /*if(d instanceof Player){
                     ((LittleNpc) entity).handle.add(d.getName(),e.getDamage());
                 }*/
-                float damage = e.getDamage() - ((LittleNpc) entity).getConfig().getDelDamage();
+                float damage = e.getDamage() - ((LittleNpc) entity).getConfig().getMonsterAttr("防御力");
                 if(damage < 0){
                     damage = 0;
                 }
@@ -93,7 +93,7 @@ public class LittleMasterListener implements Listener {
                     String h = ((FormResponseCustom)event.getResponse()).getInputResponse(0);
                     if(h != null){
                         config.setHealth(Integer.parseInt(h));
-                        config.set("血量",Integer.parseInt(h));
+                        config.setConfigAttr("血量", new float[]{Integer.parseInt(h),Integer.parseInt(h)});
                     }
                     String d = ((FormResponseCustom)event.getResponse()).getInputResponse(1);
                     if(d != null){

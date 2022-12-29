@@ -16,10 +16,7 @@ import com.smallaswater.littlemonster.skill.defaultskill.*;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author SmallasWater
@@ -43,6 +40,15 @@ public class MonsterConfig {
 
     private int delDamage = 0;
 
+    /** 属性结构
+     * {
+     *     "Main": {
+     *         "攻击力": [1,3]
+     *     }
+     * }
+     * */
+    Map<String, Map<String, float[]>> myAttr = new HashMap<>();
+
     private double size = 1;
 
     private Item item;
@@ -51,6 +57,7 @@ public class MonsterConfig {
 
     private int healTime;
 
+    /** 所属阵营 */
     private String campName = "光明";
 
     private boolean canAttackSameCamp = false;
@@ -65,20 +72,19 @@ public class MonsterConfig {
 
     private int heal;
 
-    /**攻击距离: 0.1
-     攻击速度: 23
-     攻击方式: 0
-     移动速度: 1.0
-     无敌时间: 3
-     */
+    /**攻击距离: 0.1*/
     private double attackDistance;
 
+    /**攻击速度: 23*/
     private int attaceSpeed;
 
+    /**攻击方式: 0*/
     private int attaceMode;
 
+    /**移动速度: 1.0*/
     private double moveSpeed;
 
+    /**无敌时间: 3*/
     private int invincibleTime;
 
     /**
@@ -130,7 +136,6 @@ public class MonsterConfig {
         MonsterConfig entity = new MonsterConfig(name);
         entity.setConfig(config);
         entity.setTag(config.getString("头部显示"));
-        entity.setDamage(config.getInt("攻击力"));
         entity.setHealth(config.getInt("血量"));
         entity.setKnockBack(config.getDouble("击退距离",0.5));
         entity.setTargetPlayer(config.getBoolean("主动锁定玩家"));
@@ -140,7 +145,12 @@ public class MonsterConfig {
         entity.setPassiveAttackEntity(config.getBoolean("是否被动回击生物",true));
         entity.setMove(config.getBoolean("是否可移动",true));
         entity.setCanAttackSameCamp(config.getBoolean("是否攻击相同阵营",false));
-        entity.setDelDamage(config.getInt("防御"));
+
+        //Map<String, Object> newAttr = new HashMap<>();
+        //newAttr.put("攻击力", config.getFloatList("攻击力"));
+        //newAttr.put("防御力", config.getFloatList("防御力"));
+        entity.setMonsterAttr("Main", config.get("属性"));
+
         entity.setDamageCamp(new ArrayList<>(config.getStringList("攻击阵营")));
         entity.setToDamageCamp(new ArrayList<>(config.getStringList("回击阵营")));
         entity.setCampName(config.getString("阵营","光明"));
@@ -203,6 +213,80 @@ public class MonsterConfig {
         return entity;
     }
 
+    public void setMonsterAttr(String id, Object newAttr) {
+        Map<String, float[]> attrMap = new HashMap<>();
+        Map<String, Object> attr = (Map<String, Object>) newAttr;
+        for (Map.Entry<String, Object> entry : attr.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (value instanceof List) {
+                List<Float> values = (List<Float>) value;
+                float[] floatValues = new float[values.size()];
+                for (int i = 0; i < values.size(); i++) {
+                    floatValues[i] = values.get(i);
+                }
+                attrMap.put(key, floatValues);
+            }
+        }
+        Map<String, float[]> mainAttrMap = myAttr.get("Main");
+        for (Map.Entry<String, float[]> entry : mainAttrMap.entrySet()) {
+            String key = entry.getKey();
+            if (attrMap.containsKey(key)) {
+                float[] mainValues = mainAttrMap.get(key);
+                float[] values = attrMap.get(key);
+                mainValues[0] -= values[0];
+                mainValues[1] -= values[1];
+                mainAttrMap.put(key, mainValues);
+            } else {
+                mainAttrMap.remove(key);
+            }
+        }
+        myAttr.put(id, attrMap);
+    }
+
+    public float getMonsterAttr(String attrName) {
+        Map<String, float[]> mainAttrMap = myAttr.get("Main");
+        float[] data;
+        if (mainAttrMap.containsKey(attrName)) {
+            data = mainAttrMap.get(attrName);
+        } else {
+            data = new float[] {0, 0};
+        }
+        return getRandomNum(data);
+    }
+
+    public Map<String, float[]> getMonsterAttrMap() {
+        return getMonsterAttrMap("Main");
+    }
+    public Map<String, float[]> getMonsterAttrMap(String type) {
+        Map<String, float[]> data;
+        if (myAttr.containsKey(type)) {
+            data = myAttr.get(type);
+        } else {
+            data = null;
+        }
+        return data;
+    }
+
+    /** 返回 [最小值, 最大值] 的随机值 */
+    public static float getRandomNum(float[] array) {
+        int length = 0;
+        if (array.length == 1 || array[0] == array[1]) {
+            return array[0];
+        }
+        for (float v : array) {
+            String last = String.valueOf(v).split("\\.")[1];
+            if (last != null && length < last.length()) {
+                length = last.length();
+            }
+        }
+        length = (int) Math.pow(10, length + 2);
+        float minNum = array[0] * length;
+        float maxNum = array[1] * length;
+        return (float) (Math.random() * (maxNum - minNum + 1) + minNum) / length;
+    }
+
+
     public boolean isImmobile(){
         return !move;
     }
@@ -210,7 +294,11 @@ public class MonsterConfig {
     public void addSkill(BaseSkillManager skillManager){
         skillManagers.add(skillManager);
     }
-
+    /** 设置配置文件中的属性项 */
+    public void setConfigAttr(String name,float[] o){
+        config.set(name, o);
+    }
+    /** 设置配置文件 */
     public void set(String name,Object o){
         config.set(name, o);
     }
@@ -245,7 +333,7 @@ public class MonsterConfig {
                 .replace("{最大血量}",littleNpc.getMaxHealth()+""));
         littleNpc.setConfig(this);
         littleNpc.speed = (float) getMoveSpeed();
-        littleNpc.damage = getDamage();
+        littleNpc.damage = getMonsterAttr("攻击力");
         littleNpc.setHealth(getHealth());
         littleNpc.setMaxHealth(getHealth());
         littleNpc.setScale((float) getSize());
