@@ -16,10 +16,7 @@ import com.smallaswater.littlemonster.skill.defaultskill.*;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author SmallasWater
@@ -159,7 +156,7 @@ public class MonsterConfig {
         entity.setMoveSpeed(config.getDouble("移动速度",1.0));
         entity.setInvincibleTime(config.getInt("无敌时间",3));
         BaseSkillManager skillManager;
-        Map skillConfig = (Map) config.get("技能");
+        Map skillConfig = config.get("技能", new HashMap<>());
         for(Object health: skillConfig.keySet()){
 
             List list = (List) skillConfig.get(health);
