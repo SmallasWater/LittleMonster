@@ -203,7 +203,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                 } else if (Utils.rand(1, 10) == 1) {
                     x = Utils.rand(5, 20);
                     z = Utils.rand(5, 20);
-                    this.stayTime = Utils.rand(60, 200);
+                    this.stayTime = Utils.rand(160+100, 200+100);
                     nextTarget = this.add(Utils.rand() ? x : -x, /*Utils.rand(-20.0, 20.0) / 10*/0, Utils.rand() ? z : -z);
                     nextTarget.y+=5;
                     for (int i=0; i<10; i++) {

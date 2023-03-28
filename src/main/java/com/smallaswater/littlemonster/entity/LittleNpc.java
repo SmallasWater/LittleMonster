@@ -462,7 +462,7 @@ public class LittleNpc extends BaseEntityMove {
     //攻击玩家~
 
     @Override
-    public void attackEntity(EntityCreature entity){
+    public void attackEntity(EntityCreature entity) {
         if (this.attackDelay > attackSleepTime) {
             this.attackDelay = 0;
             switch (attactMode){

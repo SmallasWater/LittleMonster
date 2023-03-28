@@ -149,7 +149,8 @@ public class MonsterConfig {
         //Map<String, Object> newAttr = new HashMap<>();
         //newAttr.put("攻击力", config.getFloatList("攻击力"));
         //newAttr.put("防御力", config.getFloatList("防御力"));
-        entity.setMonsterAttr("Main", config.get("属性"));
+
+        entity.setMonsterAttrConfig("Main", config.get("属性"));
 
         entity.setDamageCamp(new ArrayList<>(config.getStringList("攻击阵营")));
         entity.setToDamageCamp(new ArrayList<>(config.getStringList("回击阵营")));
@@ -169,7 +170,7 @@ public class MonsterConfig {
         entity.setMoveSpeed(config.getDouble("移动速度",1.0));
         entity.setInvincibleTime(config.getInt("无敌时间",3));
         BaseSkillManager skillManager;
-        Map skillConfig = (Map) config.get("技能");
+        Map skillConfig = config.get("技能", new HashMap<>());
         for(Object health: skillConfig.keySet()){
 
             List list = (List) skillConfig.get(health);
@@ -213,6 +214,44 @@ public class MonsterConfig {
         return entity;
     }
 
+    public void setMonsterAttrConfig(String id, Object newAttr) {
+        Map<String, float[]> attrMap = new HashMap<>();
+        Map<String, Object> attr = (Map<String, Object>) newAttr;
+        for (Map.Entry<String, Object> entry : attr.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (value instanceof List) {
+                List<?> values = (List<?>) value;
+                float[] floatValues = new float[values.size()];
+                for (int i = 0; i < values.size(); i++) {
+                    if (values.get(i) instanceof Double) {
+                        floatValues[i] = ((Double) values.get(i)).floatValue();
+                    } else if (values.get(i) instanceof Integer) {
+                        floatValues[i] = ((Integer) values.get(i)).floatValue();
+                    }
+                }
+                attrMap.put(key, floatValues);
+            }
+        }
+        if (!myAttr.containsKey("Main")) {
+            Map<String, float[]> mainAttrMap_ = new HashMap<>();
+            myAttr.put("Main", mainAttrMap_);
+        }
+        Map<String, float[]> mainAttrMap = myAttr.get("Main");
+        for (Map.Entry<String, float[]> entry : mainAttrMap.entrySet()) {
+            String key = entry.getKey();
+            if (attrMap.containsKey(key)) {
+                float[] mainValues = mainAttrMap.get(key);
+                float[] values = attrMap.get(key);
+                mainValues[0] -= values[0];
+                mainValues[1] -= values[1];
+                mainAttrMap.put(key, mainValues);
+            } else {
+                mainAttrMap.remove(key);
+            }
+        }
+        myAttr.put(id, attrMap);
+    }
     public void setMonsterAttr(String id, Object newAttr) {
         Map<String, float[]> attrMap = new HashMap<>();
         Map<String, Object> attr = (Map<String, Object>) newAttr;
