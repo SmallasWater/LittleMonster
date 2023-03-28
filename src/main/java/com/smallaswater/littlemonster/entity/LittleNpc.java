@@ -374,7 +374,6 @@ public class LittleNpc extends BaseEntityMove {
     }
 
     //受到攻击
-
     @Override
     public void onAttack(EntityDamageEvent sure) {
         if(this.damageDelay > config.getInvincibleTime()) {
@@ -460,7 +459,6 @@ public class LittleNpc extends BaseEntityMove {
     }
 
     //攻击玩家~
-
     @Override
     public void attackEntity(EntityCreature entity) {
         if (this.attackDelay > attackSleepTime) {
