@@ -29,6 +29,7 @@ public abstract class BasePluginThreadTask implements Runnable {
                 Thread.sleep(this.sleepMillis);
             } catch (Exception e) {
                 if (e instanceof InterruptedException) {
+                    LittleMonsterMainClass.getInstance().getLogger().warning("BasePluginThreadTask Interrupted", e);
                     return;
                 }
                 LittleMonsterMainClass.getInstance().getLogger().error("BasePluginThreadTask Error", e);

@@ -63,7 +63,7 @@ public class PositionConfig {
     }
 
     public boolean posCanSpawn() {
-        return this.pos.isValid() && this.pos.getChunk().isLoaded() && !this.pos.getLevel().getPlayers().isEmpty();
+        return this.pos.isValid() && /*this.pos.getChunk().isLoaded() && */!this.pos.getLevel().getPlayers().isEmpty();
     }
 
     public Position getSpawnPos() {
