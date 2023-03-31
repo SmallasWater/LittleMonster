@@ -236,11 +236,11 @@ public abstract class BaseEntity extends EntityHuman {
         } else {
             if (source instanceof EntityDamageByEntityEvent) {
                 ((EntityDamageByEntityEvent)source).setKnockBack(0.3F);
-                onAttack(source);
             }
             this.target = null;
             this.stayTime = 0;
             super.attack(source);
+            this.onAttack(source);
             return true;
         }
     }

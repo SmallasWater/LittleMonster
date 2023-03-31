@@ -62,20 +62,29 @@ public class MonsterConfig {
 
     private int heal;
 
-    /**攻击距离: 0.1
-     攻击速度: 23
-     攻击方式: 0
-     移动速度: 1.0
-     无敌时间: 3
+    /**
+     * 攻击距离
      */
     private double attackDistance;
 
+    /**
+     * 攻击速度
+     */
     private int attaceSpeed;
 
+    /**
+     * 攻击方式
+     */
     private int attaceMode;
 
+    /**
+     * 移动速度
+     */
     private double moveSpeed;
 
+    /**
+     * 无敌时间
+     */
     private int invincibleTime;
 
     /**

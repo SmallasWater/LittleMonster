@@ -429,7 +429,7 @@ public class LittleNpc extends BaseEntityMove {
     @Override
     public boolean attack(EntityDamageEvent source) {
         boolean attack = super.attack(source);
-        //获取最终伤害
+        //获取最终伤害 计算目标权重
         if (!source.isCancelled() && source instanceof EntityDamageByEntityEvent) {
             EntityDamageByEntityEvent entityDamageByEntityEvent = (EntityDamageByEntityEvent) source;
             TargetWeighted targetWeighted = this.getTargetWeighted(this);
