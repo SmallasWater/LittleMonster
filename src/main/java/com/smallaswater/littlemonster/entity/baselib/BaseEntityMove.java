@@ -144,7 +144,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                     //近战模式忽略部分会飞的实体 防止乱跑
                     //触发事件模式无法确定插件是近战还是远程 当作近战处理
                     //TODO 使用权重功能处理飞行生物，降低飞行生物目标权重
-                    if (this.attactMode == ATTACK_MODE_MELEE) {
+                    if (this.attactMode == ATTACK_MODE_MELEE || this.attactMode == ATTACK_MODE_EVENT) {
                         //忽略蝙蝠 鹦鹉
                         if (entity.getNetworkId() == EntityBat.NETWORK_ID || entity.getNetworkId() == EntityParrot.NETWORK_ID) {
                             continue;
