@@ -7,6 +7,8 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.mob.EntityMob;
 import cn.nukkit.entity.passive.EntityAnimal;
+import cn.nukkit.entity.passive.EntityBat;
+import cn.nukkit.entity.passive.EntityParrot;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.BubbleParticle;
 import cn.nukkit.math.NukkitMath;
@@ -139,9 +141,14 @@ public abstract class BaseEntityMove extends BaseEntity {
                 //获取范围内可以攻击的生物
                 ArrayList<EntityCreature> scanEntities = new ArrayList<>();
                 for (Entity entity : Utils.getAroundPlayers(this,seeSize,true,true,true)) {
-                    //忽略凋零头 盔甲架
-                    if(entity.getNetworkId() == 19 || entity.getNetworkId() == 30){
-                        continue;
+                    //近战模式忽略部分会飞的实体 防止乱跑
+                    //触发事件模式无法确定插件是近战还是远程 当作近战处理
+                    //TODO 使用权重功能处理飞行生物，降低飞行生物目标权重
+                    if (this.attactMode == ATTACK_MODE_MELEE) {
+                        //忽略蝙蝠 鹦鹉
+                        if (entity.getNetworkId() == EntityBat.NETWORK_ID || entity.getNetworkId() == EntityParrot.NETWORK_ID) {
+                            continue;
+                        }
                     }
 
                     if(entity instanceof EntityCreature && entity != this) {
@@ -242,7 +249,7 @@ public abstract class BaseEntityMove extends BaseEntity {
             return false;
         }
         if (this instanceof LittleNpc && targetEntity instanceof LittleNpc) {
-            if (!Utils.canAttackNpc((LittleNpc) this, (LittleNpc) targetEntity,false)) {
+            if (!Utils.canAttackNpc((LittleNpc) this, (LittleNpc) targetEntity, false)) {
                 return true;
             }
         }
@@ -255,24 +262,24 @@ public abstract class BaseEntityMove extends BaseEntity {
             return false;
         }
 
-        if(Server.getInstance().getPluginManager().getPlugin("MobPlugin") != null){
-            if(!config.isAttackFriendEntity()) {
-                if(targetEntity instanceof WalkingAnimal){
+        if (Server.getInstance().getPluginManager().getPlugin("MobPlugin") != null) {
+            if (!config.isAttackFriendEntity()) {
+                if (targetEntity instanceof WalkingAnimal) {
                     return false;
                 }
             }
-            if(!config.isAttackHostileEntity()) {
-                if(targetEntity instanceof Monster){
+            if (!config.isAttackHostileEntity()) {
+                if (targetEntity instanceof Monster) {
                     return false;
                 }
             }
         }
-        if(!config.isAttackFriendEntity()){
+        if (!config.isAttackFriendEntity()) {
             if (targetEntity instanceof EntityAnimal) {
                 return false;
             }
         }
-        if(!config.isAttackHostileEntity()) {
+        if (!config.isAttackHostileEntity()) {
             return !(targetEntity instanceof EntityMob);
         }
 
@@ -306,7 +313,7 @@ public abstract class BaseEntityMove extends BaseEntity {
             Vector3 target = this.updateMove(currentTick, tickDiff);
             //攻击目标实体
             if(target instanceof EntityCreature) {
-                if(this.targetOption((EntityCreature) target, this.distance(target))){
+                if (this.targetOption((EntityCreature) target, this.distance(target))) {
                     this.setFollowTarget(null,false);
                     return true;
                 }
@@ -315,12 +322,12 @@ public abstract class BaseEntityMove extends BaseEntity {
                     if (target != this.followTarget || this.canAttack) {
                         this.attackEntity(player);
                     }
-                }else {
+                } else {
                     if (this.canAttack) {
                         this.attackEntity((EntityCreature) target);
                     }
                 }
-            }else if (target != null && this.distance(target) > this.seeSize) {
+            } else if (target != null && this.distance(target) > this.seeSize) {
                 this.target = null;
             }
 
@@ -349,11 +356,11 @@ public abstract class BaseEntityMove extends BaseEntity {
         double x;
         double z;
         if (this.target != null || before != this.target) {
-            if(this.target != null) {
+            if (this.target != null) {
                 x = this.target.x - this.x;
                 z = this.target.z - this.z;
                 double diff = Math.abs(x) + Math.abs(z);
-                if(diff <= 0){
+                if (diff <= 0) {
                     diff = 0.1;
                 }
 
@@ -381,7 +388,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                     }
                 }
             }
-        }else {
+        } else {
             this.motionX = 0;
             this.motionZ = 0;
         }
@@ -397,15 +404,15 @@ public abstract class BaseEntityMove extends BaseEntity {
             this.stayTime -= tickDiff;
             this.move(0.0D, this.motionY, 0.0D);
         } else {
-            if(attactMode != 3 && attactMode != 2){
-                waitTime = 0;
-            }else if(followTarget == null || (this.distance(followTarget) > seeSize)){
-                waitTime = 0;
-            }else{
-                waitTime++;
-                if(waitTime >= 20 * 5){
-                    waitTime = 0;
-                    this.setFollowTarget(null,false);
+            if (this.attactMode != ATTACK_MODE_EVENT && this.attactMode != ATTACK_MODE_ARROW) {
+                this.waitTime = 0;
+            } else if (this.followTarget == null || (this.distance(this.followTarget) > seeSize)) {
+                this.waitTime = 0;
+            } else {
+                this.waitTime++;
+                if (this.waitTime >= 20 * 5) {
+                    this.waitTime = 0;
+                    this.setFollowTarget(null, false);
                 }
             }
             this.move(x, this.motionY, z);

@@ -464,7 +464,7 @@ public class LittleNpc extends BaseEntityMove {
         if (this.attackDelay > attackSleepTime) {
             this.attackDelay = 0;
             switch (attactMode){
-                case 1:
+                case ATTACK_MODE_RANGE:
                     //群体
                     if(entity.distance(this) <= distanceLine) {
                         LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, true);
@@ -481,7 +481,7 @@ public class LittleNpc extends BaseEntityMove {
                         entity.level.addSound(entity, Sound.RANDOM_EXPLODE);
                     }
                     break;
-                case 2:
+                case ATTACK_MODE_ARROW:
                     if(entity.distance(this) <= distanceLine) {
                         double f = 1.3D;
                         Entity k = Entity.createEntity("Arrow", this.add(0, this.getEyeHeight(), 0), this);
@@ -516,7 +516,7 @@ public class LittleNpc extends BaseEntityMove {
                         waitTime = 0;
                     }
                     return;
-                case 3: //触发EntityInteractEvent
+                case ATTACK_MODE_EVENT: //触发EntityInteractEvent
                     if(entity.distance(this) <= seeSize) {
 //                        if (!hasBlockInLine(entity)) {
                             EntityInteractEvent event = new EntityInteractEvent(this, entity.getPosition().add(0.5, entity.getEyeHeight(), 0.5).getLevelBlock());
@@ -525,7 +525,7 @@ public class LittleNpc extends BaseEntityMove {
 //                        }
                     }
                     break;
-                case 0:
+                case ATTACK_MODE_MELEE:
                 default:
                     HashMap<EntityDamageEvent.DamageModifier, Float> damage = new LinkedHashMap<>();
                     damage.put(EntityDamageEvent.DamageModifier.BASE, getDamage());
@@ -569,6 +569,7 @@ public class LittleNpc extends BaseEntityMove {
             for(Effect effect: config.getEffects()){
                 entity.addEffect(effect);
             }
+            //摆臂动作
             EntityEventPacket pk = new EntityEventPacket();
             pk.eid = this.getId();
             pk.event = EntityEventPacket.ARM_SWING;
@@ -591,7 +592,9 @@ public class LittleNpc extends BaseEntityMove {
     }
 
     @Override
-    public void saveNBT() {}
+    public void saveNBT() {
+        //不保存实体数据
+    }
 
     @Override
     public float getDamage() {

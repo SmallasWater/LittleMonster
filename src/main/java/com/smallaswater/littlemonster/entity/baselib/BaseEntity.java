@@ -63,6 +63,23 @@ public abstract class BaseEntity extends EntityHuman {
 
     protected final ConcurrentHashMap<EntityCreature, TargetWeighted> targetWeightedMap = new ConcurrentHashMap<>();
 
+    /**
+     * 攻击模式 近战
+     */
+    public static final int ATTACK_MODE_MELEE = 0;
+    /**
+     * 攻击模式 范围
+     */
+    public static final int ATTACK_MODE_RANGE = 1;
+    /**
+     * 攻击模式 远程（弓箭）
+     */
+    public static final int ATTACK_MODE_ARROW = 2;
+    /**
+     * 攻击模式 触发EntityInteractEvent事件
+     */
+    public static final int ATTACK_MODE_EVENT = 3;
+
     //开发接口
     //攻击方式
     public int attactMode = 0;
@@ -186,17 +203,17 @@ public abstract class BaseEntity extends EntityHuman {
         if (creature == null) {
             return true;
         }
+        //不能攻击自己
         if (creature == this) {
-            //不能攻击自己
             return true;
         }
-        if(masterHuman != null && creature == masterHuman){
-            //不能攻击主人
+        //不能攻击主人
+        if (masterHuman != null && creature == masterHuman) {
             return true;
         }
         if (creature instanceof Player) {
             return !this.isPlayerTarget((Player) creature);
-        }else{
+        } else {
             return creature.closed || !creature.isAlive() || creature.getLevel() != this.getLevel() || distance > seeSize;
         }
     }
@@ -343,18 +360,6 @@ public abstract class BaseEntity extends EntityHuman {
 
     public int nearbyDistanceMultiplier() {
         return 1;
-    }
-
-    private int airTicks = 0;
-
-    @Override
-    public int getAirTicks() {
-        return this.airTicks;
-    }
-
-    @Override
-    public void setAirTicks(int ticks) {
-        this.airTicks = ticks;
     }
 
     /*@Override
