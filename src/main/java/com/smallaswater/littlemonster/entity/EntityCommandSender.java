@@ -2,6 +2,7 @@ package com.smallaswater.littlemonster.entity;
 
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.lang.CommandOutputContainer;
 import cn.nukkit.lang.TextContainer;
 import cn.nukkit.permission.PermissibleBase;
 import cn.nukkit.permission.Permission;
@@ -100,6 +101,11 @@ public class EntityCommandSender implements CommandSender {
     @Override
     public void sendMessage(TextContainer message) {
         this.sendMessage(this.getServer().getLanguage().translate(message));
+    }
+
+    @Override
+    public void sendCommandOutput(CommandOutputContainer commandOutputContainer) {
+
     }
 
     @Override
