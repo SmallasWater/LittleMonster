@@ -624,8 +624,12 @@ public class LittleNpc extends BaseEntityMove {
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + name.hashCode();
-        result = 31 * result + uuid.hashCode();
+        if (name != null) {
+            result = 31 * result + name.hashCode();
+        }
+        if (uuid != null) {
+            result = 31 * result + uuid.hashCode();
+        }
         return result;
     }
 }
