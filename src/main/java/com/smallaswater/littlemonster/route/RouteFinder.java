@@ -26,6 +26,7 @@ public abstract class RouteFinder {
 
    protected Vector3 start;
 
+   protected Vector3 originalDestination;
    protected Vector3 destination;
 
    /**
@@ -47,6 +48,9 @@ public abstract class RouteFinder {
    protected boolean allowFuzzyResults = false;
 
    private int lastSetDestinationTick = 0;
+
+   @Setter
+   protected boolean enableOffset = false;
 
    RouteFinder(BaseEntity entity) {
       Objects.requireNonNull(entity, "RouteFinder: entity can not be null");
@@ -83,7 +87,9 @@ public abstract class RouteFinder {
          return;
       }
       this.lastSetDestinationTick = tick;
+      this.originalDestination = destination.clone();
       this.destination = destination.clone();
+      this.enableOffset = enableOffset;
       if (this.isFinished()) {
          this.finished = false;
       }
@@ -196,15 +202,21 @@ public abstract class RouteFinder {
       }
    }
 
-   public abstract boolean search(boolean enableOffset);
-
-   public void research() {
-      this.research(true);
+   @Deprecated
+   public boolean search(boolean enableOffset) {
+      return this.search();
    }
 
-   public void research(boolean enableOffset) {
+   public abstract boolean search();
+
+   public void research() {
       this.resetNodes();
-      this.search(enableOffset);
+      this.search();
+   }
+
+   @Deprecated
+   public void research(boolean enableOffset) {
+      this.research();
    }
 
    public boolean hasNext() {

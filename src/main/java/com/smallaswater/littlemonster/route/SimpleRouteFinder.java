@@ -10,7 +10,7 @@ public class SimpleRouteFinder extends RouteFinder {
    }
 
    @Override
-   public boolean search(boolean enableOffset) {
+   public boolean search() {
       this.resetNodes();
       this.addNode(new Node(this.destination));
       return true;

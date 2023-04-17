@@ -42,7 +42,7 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       super(entity);
       this.level = entity.getLevel();
       this.start = start;
-      this.destination = destination.clone();
+      this.originalDestination = destination.clone();
    }
 
    private int calHeuristic(Vector3 pos1, Vector3 pos2) {
@@ -50,11 +50,11 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
    }
 
    @Override
-   public boolean search(boolean enableOffset) {
+   public boolean search() {
       if (LittleMonsterMainClass.debug) {
          LittleMonsterMainClass.getInstance().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路开始");
       }
-      if (this.entity.getTargetVector() == null && this.destination == null) {
+      if (this.entity.getTargetVector() == null && this.originalDestination == null) {
          this.searching = false;
          this.finished = true;
          if (LittleMonsterMainClass.debug) {
@@ -69,11 +69,11 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          this.start = this.entity;
       }
 
-      if (this.destination == null && this.entity.getTargetVector() != null) {
-         this.destination = this.entity.getTargetVector().clone();
+      if (this.originalDestination == null && this.entity.getTargetVector() != null) {
+         this.originalDestination = this.entity.getTargetVector().clone();
       }
 
-      if (this.destination == null) {
+      if (this.originalDestination == null) {
          this.searching = false;
          this.finished = true;
          if (LittleMonsterMainClass.debug) {
@@ -83,13 +83,15 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
       }
 
       //找一个可以站立的目标点
-      Position safeSpawn = this.level.getSafeSpawn(this.destination);
-      if (safeSpawn.distance(this.destination) < 10) {
+      Position safeSpawn = this.level.getSafeSpawn(this.originalDestination);
+      if (safeSpawn.distance(this.originalDestination) < 10) {
          this.destination = safeSpawn;
+      } else {
+         this.destination = this.originalDestination;
       }
 
       try {
-         if (enableOffset && this.destinationDeviate > 0) {
+         if (this.enableOffset && this.destinationDeviate > 0) {
             double x = Utils.rand(this.destinationDeviate * 0.8, this.destinationDeviate);
             double z = Utils.rand(this.destinationDeviate * 0.8, this.destinationDeviate);
             Vector3 vector3 = this.destination.add(Utils.rand() ? x : -x, 5, Utils.rand() ? z : -z);

@@ -39,6 +39,8 @@ public abstract class BaseEntityMove extends BaseEntity {
     //每个生物都创建一个Route 太消耗资源 ，不如存放一个列表统一管理销毁
     public RouteFinder route = new WalkerRouteFinder(this);
 
+    private Vector3 randomMoveTarget = null;
+
     public BaseEntityMove(FullChunk chunk, CompoundTag nbt) {
         super(chunk, nbt);
 
@@ -184,7 +186,7 @@ public abstract class BaseEntityMove extends BaseEntity {
         }
 
         //获取寻路目标点
-        if (this.route != null){
+        if (this.route != null) {
             if (this.route.isFinished() && this.route.hasArrivedNodeInaccurate(this)) {
                 this.target = this.route.next();
                 return;
@@ -193,10 +195,10 @@ public abstract class BaseEntityMove extends BaseEntity {
             }
         }
 
-        //没有目标时
-        if(this.getTargetVector() == null) {
-            //随机移动
-            if (this.config.isCanMove()) {
+        //随机移动
+        if (this.config.isCanMove()) {
+            //没有目标时
+            if(this.getTargetVector() == null || this.randomMoveTarget == null) {
                 int x;
                 int z;
                 Vector3 nextTarget = null;
@@ -228,10 +230,19 @@ public abstract class BaseEntityMove extends BaseEntity {
                     nextTarget = this.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
                 }*/
                 if (nextTarget != null) {
+                    this.randomMoveTarget = nextTarget;
                     this.target = nextTarget;
                     if (this.route != null) {
                         this.route.setDestination(nextTarget);
                     }
+                }
+            } else {
+                //到达目标
+                if ((this.route != null &&
+                        Math.abs(this.getFloorX() - this.randomMoveTarget.getFloorX()) <= this.route.getDestinationDeviate() &&
+                        Math.abs(this.getFloorZ() - this.randomMoveTarget.getFloorZ()) <= this.route.getDestinationDeviate()) ||
+                     this.distance(this.randomMoveTarget) <= 1) {
+                    this.randomMoveTarget = null;
                 }
             }
         }

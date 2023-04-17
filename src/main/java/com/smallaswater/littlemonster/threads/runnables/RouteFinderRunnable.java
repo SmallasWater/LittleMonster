@@ -27,7 +27,7 @@ public class RouteFinderRunnable extends PluginTask<LittleMonsterMainClass> {
         for (LittleNpc lt: routeEntitys.keySet()) {
             if(System.currentTimeMillis() - routeEntitys.get(lt) > 50 * 100){
                 if (!lt.route.isSearching()) {
-                    lt.route.research(true);
+                    lt.route.research();
                     continue;
                 }
                 routeEntitys.put(lt,System.currentTimeMillis());
