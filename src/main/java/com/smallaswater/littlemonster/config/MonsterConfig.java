@@ -134,37 +134,37 @@ public class MonsterConfig {
 
     public static MonsterConfig loadEntity(String name, Config config) {
         try {
-            MonsterConfig entity = new MonsterConfig(name);
-            entity.setConfig(config);
-            entity.setTag(config.getString("头部显示"));
-            entity.setDamage(config.getInt("攻击力"));
-            entity.setHealth(config.getInt("血量"));
-            entity.setKnockBack(config.getDouble("击退距离", 0.5));
-            entity.setTargetPlayer(config.getBoolean("主动锁定玩家"));
-            entity.setAttackHostileEntity(config.getBoolean("是否攻击敌对生物", true));
-            entity.setAttackFriendEntity(config.getBoolean("是否攻击友好生物", false));
-            entity.setActiveAttackEntity(config.getBoolean("是否主动攻击生物", true));
-            entity.setPassiveAttackEntity(config.getBoolean("是否被动回击生物", true));
-            entity.setMove(config.getBoolean("是否可移动", true));
-            entity.setCanAttackSameCamp(config.getBoolean("是否攻击相同阵营", false));
-            entity.setDelDamage(config.getInt("防御"));
-            entity.setDamageCamp(new ArrayList<>(config.getStringList("攻击阵营")));
-            entity.setToDamageCamp(new ArrayList<>(config.getStringList("回击阵营")));
-            entity.setCampName(config.getString("阵营", "光明"));
-            entity.setHealTime(config.getInt("恢复间隔", 20));
-            entity.setUnFightHeal(config.getBoolean("是否仅脱战恢复"));
-            entity.setSeeLine(config.getInt("视觉距离", 15));
-            entity.setHeal(config.getInt("恢复血量", 5));
-            entity.setDisplayDamage(config.getBoolean("显示伤害榜", true));
-            entity.setArea(config.getInt("群体攻击范围", 5));
-            entity.setCanMove(config.getBoolean("未锁定时是否移动", true));
-            entity.setKnock(config.getBoolean("是否可击退", false));
-            entity.setSkin(config.getString("皮肤", "粉蓝双瞳猫耳少女"));
-            entity.setAttaceSpeed(config.getInt("攻击速度", 23));
-            entity.setAttaceMode(config.getInt("攻击方式", 0));
-            entity.setAttackDistance(config.getDouble("攻击距离", 0.1));
-            entity.setMoveSpeed(config.getDouble("移动速度", 1.0));
-            entity.setInvincibleTime(config.getInt("无敌时间", 3));
+            MonsterConfig monsterConfig = new MonsterConfig(name);
+            monsterConfig.setConfig(config);
+            monsterConfig.setTag(config.getString("头部显示"));
+            monsterConfig.setDamage(config.getInt("攻击力"));
+            monsterConfig.setHealth(config.getInt("血量"));
+            monsterConfig.setKnockBack(config.getDouble("击退距离", 0.5));
+            monsterConfig.setTargetPlayer(config.getBoolean("主动锁定玩家"));
+            monsterConfig.setAttackHostileEntity(config.getBoolean("是否攻击敌对生物", true));
+            monsterConfig.setAttackFriendEntity(config.getBoolean("是否攻击友好生物", false));
+            monsterConfig.setActiveAttackEntity(config.getBoolean("是否主动攻击生物", true));
+            monsterConfig.setPassiveAttackEntity(config.getBoolean("是否被动回击生物", true));
+            monsterConfig.setMove(config.getBoolean("是否可移动", true));
+            monsterConfig.setCanAttackSameCamp(config.getBoolean("是否攻击相同阵营", false));
+            monsterConfig.setDelDamage(config.getInt("防御"));
+            monsterConfig.setDamageCamp(new ArrayList<>(config.getStringList("攻击阵营")));
+            monsterConfig.setToDamageCamp(new ArrayList<>(config.getStringList("回击阵营")));
+            monsterConfig.setCampName(config.getString("阵营", "光明"));
+            monsterConfig.setHealTime(config.getInt("恢复间隔", 20));
+            monsterConfig.setUnFightHeal(config.getBoolean("是否仅脱战恢复"));
+            monsterConfig.setSeeLine(config.getInt("视觉距离", 15));
+            monsterConfig.setHeal(config.getInt("恢复血量", 5));
+            monsterConfig.setDisplayDamage(config.getBoolean("显示伤害榜", true));
+            monsterConfig.setArea(config.getInt("群体攻击范围", 5));
+            monsterConfig.setCanMove(config.getBoolean("未锁定时是否移动", true));
+            monsterConfig.setKnock(config.getBoolean("是否可击退", false));
+            monsterConfig.setSkin(config.getString("皮肤", "粉蓝双瞳猫耳少女"));
+            monsterConfig.setAttaceSpeed(config.getInt("攻击速度", 23));
+            monsterConfig.setAttaceMode(config.getInt("攻击方式", 0));
+            monsterConfig.setAttackDistance(config.getDouble("攻击距离", 0.1));
+            monsterConfig.setMoveSpeed(config.getDouble("移动速度", 1.0));
+            monsterConfig.setInvincibleTime(config.getInt("无敌时间", 3));
 
             BaseSkillManager skillManager;
             Map skillConfig = config.get("技能", new HashMap<>());
@@ -174,29 +174,29 @@ public class MonsterConfig {
                     if (o instanceof Map) {
                         skillManager = fromSkill(health.toString(), (Map) o);
                         if (skillManager != null) {
-                            entity.addSkill(skillManager);
+                            monsterConfig.addSkill(skillManager);
                         }
                     }
                 }
             }
 
-            entity.setSize(config.getDouble("大小"));
+            monsterConfig.setSize(config.getDouble("大小"));
             ArrayList<Item> armor = new ArrayList<>();
-            entity.setItem(Item.fromString(config.getString("装饰.手持", "267:0")));
+            monsterConfig.setItem(Item.fromString(config.getString("装饰.手持", "267:0")));
             armor.add(Item.fromString(config.getString("装饰.头盔", "0:0")));
             armor.add(Item.fromString(config.getString("装饰.胸甲", "0:0")));
             armor.add(Item.fromString(config.getString("装饰.护腿", "0:0")));
             armor.add(Item.fromString(config.getString("装饰.靴子", "0:0")));
-            entity.setArmor(armor);
-            entity.setOffhand(Item.fromString(config.getString("装饰.副手", "267:0")));
+            monsterConfig.setArmor(armor);
+            monsterConfig.setOffhand(Item.fromString(config.getString("装饰.副手", "267:0")));
             List<String> effect = config.getStringList("药水效果");
-            entity.setEffects(Utils.effectFromString(effect));
+            monsterConfig.setEffects(Utils.effectFromString(effect));
             List<Map> maps = config.getMapList("死亡掉落.cmd");
             LinkedList<DeathCommand> commands = new LinkedList<>();
             for (Map m : maps) {
                 commands.add(new DeathCommand(m));
             }
-            entity.setDeathCommand(commands);
+            monsterConfig.setDeathCommand(commands);
             List<Map> map = config.getMapList("死亡掉落.item");
             LinkedList<DropItem> items = new LinkedList<>();
             for (Map map1 : map) {
@@ -206,10 +206,10 @@ public class MonsterConfig {
 
                 }
             }
-            entity.setDeathItem(items);
-            return entity;
+            monsterConfig.setDeathItem(items);
+            return monsterConfig;
         } catch (Exception e) {
-            e.printStackTrace();
+            LittleMonsterMainClass.getInstance().getLogger().error("加载怪物" + name + "配置文件错误！", e);
             return null;
         }
     }
@@ -260,7 +260,7 @@ public class MonsterConfig {
         littleNpc.setHealth(getHealth());
         littleNpc.setMaxHealth(getHealth());
         littleNpc.setScale((float) getSize());
-        littleNpc.distanceLine = getAttackDistance();
+        littleNpc.attackDistance = getAttackDistance();
         littleNpc.seeSize = getSeeLine();
         littleNpc.attackSleepTime = getAttaceSpeed();
         littleNpc.attactMode = getAttaceMode();

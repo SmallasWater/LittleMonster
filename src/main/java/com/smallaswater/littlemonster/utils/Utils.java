@@ -237,10 +237,8 @@ public class Utils {
         if(files.isDirectory()){
             File[] filesArray = files.listFiles();
             if(filesArray != null){
-                if(filesArray.length>0){
-                    for(File file : filesArray){
-                        names.add( file.getName().substring(0, file.getName().lastIndexOf(".")));
-                    }
+                for (File file : filesArray) {
+                    names.add(file.getName().substring(0, file.getName().lastIndexOf(".")));
                 }
             }
         }

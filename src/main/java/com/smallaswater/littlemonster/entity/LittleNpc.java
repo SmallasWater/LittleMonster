@@ -461,69 +461,57 @@ public class LittleNpc extends BaseEntityMove {
     //攻击玩家~
     @Override
     public void attackEntity(EntityCreature entity) {
-        if (this.attackDelay > attackSleepTime) {
+        if (this.attackDelay > attackSleepTime && entity.distance(this) <= attackDistance) {
             this.attackDelay = 0;
+            this.waitTime = 0;
             switch (attactMode){
                 case ATTACK_MODE_RANGE:
-                    //群体
-                    if(entity.distance(this) <= distanceLine) {
-                        LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, true);
-                        for (Entity p : players) {
-                            if (p instanceof Player && ((Player) p).isCreative()) {
-                                continue;
-                            }
-                            if (p instanceof LittleNpc) {
-                                continue;
-                            }
-                            p.attack(new EntityDamageByEntityEvent(this, p, EntityDamageEvent.DamageCause.ENTITY_ATTACK, getDamage(), (float) config.getKnockBack()));
+                    LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, true);
+                    for (Entity p : players) {
+                        if (p instanceof Player && ((Player) p).isCreative()) {
+                            continue;
                         }
-                        entity.level.addParticle(new HugeExplodeSeedParticle(entity));
-                        entity.level.addSound(entity, Sound.RANDOM_EXPLODE);
+                        if (p instanceof LittleNpc) {
+                            continue;
+                        }
+                        p.attack(new EntityDamageByEntityEvent(this, p, EntityDamageEvent.DamageCause.ENTITY_ATTACK, getDamage(), (float) config.getKnockBack()));
                     }
+                    entity.level.addParticle(new HugeExplodeSeedParticle(entity));
+                    entity.level.addSound(entity, Sound.RANDOM_EXPLODE);
                     break;
                 case ATTACK_MODE_ARROW:
-                    if(entity.distance(this) <= distanceLine) {
-                        double f = 1.3D;
-                        Entity k = Entity.createEntity("Arrow", this.add(0, this.getEyeHeight(), 0), this);
-                        if (!(k instanceof EntityArrow)) {
-                            return;
-                        }
-                        EntityArrow arrow = (EntityArrow) k;
-                        arrow.setMotion(
-                                new Vector3(-Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f,
-                                        -Math.sin(Math.toRadians(pitch)) * f * f,
-                                        Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f));
-                        EntityShootBowEvent ev = new EntityShootBowEvent(this, Item.get(ItemID.ARROW, 0, 1), arrow, f);
-                        this.server.getPluginManager().callEvent(ev);
-                        EntityProjectile projectile = ev.getProjectile();
-                        if (ev.isCancelled()) {
+                    double f = 1.3D;
+                    Entity k = Entity.createEntity("Arrow", this.add(0, this.getEyeHeight(), 0), this);
+                    if (!(k instanceof EntityArrow)) {
+                        return;
+                    }
+                    EntityArrow arrow = (EntityArrow) k;
+                    arrow.setMotion(
+                            new Vector3(-Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f,
+                                    -Math.sin(Math.toRadians(pitch)) * f * f,
+                                    Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f));
+                    EntityShootBowEvent ev = new EntityShootBowEvent(this, Item.get(ItemID.ARROW, 0, 1), arrow, f);
+                    this.server.getPluginManager().callEvent(ev);
+                    EntityProjectile projectile = ev.getProjectile();
+                    if (ev.isCancelled()) {
+                        projectile.kill();
+                    } else {
+                        ProjectileLaunchEvent launch = new ProjectileLaunchEvent(projectile);
+                        this.server.getPluginManager().callEvent(launch);
+                        if (launch.isCancelled()) {
                             projectile.kill();
                         } else {
-                            ProjectileLaunchEvent launch = new ProjectileLaunchEvent(projectile);
-                            this.server.getPluginManager().callEvent(launch);
-                            if (launch.isCancelled()) {
-                                projectile.kill();
-                            } else {
-                                projectile.spawnToAll();
-                                ((EntityArrow) projectile).setPickupMode(EntityArrow.PICKUP_NONE);
-                                this.level.addSound(this, Sound.RANDOM_BOW);
-                            }
+                            projectile.spawnToAll();
+                            ((EntityArrow) projectile).setPickupMode(EntityArrow.PICKUP_NONE);
+                            this.level.addSound(this, Sound.RANDOM_BOW);
                         }
-                        EntityEventPacket pk = new EntityEventPacket();
-                        pk.eid = this.getId();
-                        pk.event = EntityEventPacket.ARM_SWING;
-                        Server.broadcastPacket(this.getViewers().values(), pk);
-                        waitTime = 0;
                     }
-                    return;
+                    break;
                 case ATTACK_MODE_EVENT: //触发EntityInteractEvent
-                    if(entity.distance(this) <= seeSize) {
-//                        if (!hasBlockInLine(entity)) {
-                            EntityInteractEvent event = new EntityInteractEvent(this, entity.getPosition().add(0.5, entity.getEyeHeight(), 0.5).getLevelBlock());
-                            Server.getInstance().getPluginManager().callEvent(event);
-                            waitTime = 0;
-//                        }
-                    }
+//                  if (!hasBlockInLine(entity)) {
+                        EntityInteractEvent event = new EntityInteractEvent(this, entity.getPosition().add(0.5, entity.getEyeHeight(), 0.5).getLevelBlock());
+                        Server.getInstance().getPluginManager().callEvent(event);
+//                  }
                     break;
                 case ATTACK_MODE_MELEE:
                 default:
@@ -555,18 +543,17 @@ public class LittleNpc extends BaseEntityMove {
                             }
                         };
                         float points = 0.0F;
-                        Item[] var5 = ((Player)entity).getInventory().getArmorContents();
-                        for (Item i : var5) {
+                        for (Item i : ((Player) entity).getInventory().getArmorContents()) {
                             points += armorValues.getOrDefault(i.getId(), 0.0F);
                         }
 
-                        damage.put(EntityDamageEvent.DamageModifier.ARMOR, (float)((double) damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0.0F) - Math.floor((double)(damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1.0F) * points) * 0.04D)));
+                        damage.put(EntityDamageEvent.DamageModifier.ARMOR, (float) ((double) damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0.0F) - Math.floor((double) (damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1.0F) * points) * 0.04D)));
                     }
 
-                    entity.attack(new EntityDamageByEntityEvent(this, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage,(float) config.getKnockBack()));
+                    entity.attack(new EntityDamageByEntityEvent(this, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage, (float) config.getKnockBack()));
                     break;
             }
-            for(Effect effect: config.getEffects()){
+            for(Effect effect : config.getEffects()) {
                 entity.addEffect(effect);
             }
             //摆臂动作
