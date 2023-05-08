@@ -4,7 +4,7 @@ npcs:
 
 # 格式
 # autospawn:
-# npc名称:
-#    maxCount: 20
-#    liveTime: 30
+#   怪物名称:
+#     maxCount: 20 #最大生产数量
+#     liveTime: 30 #存活时间 -1为永久 单位为秒
 autospawn: {}

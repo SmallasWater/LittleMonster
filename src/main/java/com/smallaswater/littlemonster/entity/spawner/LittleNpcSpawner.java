@@ -18,7 +18,7 @@ import com.smallaswater.littlemonster.threads.runnables.AutoSpawnTask;
  */
 public class LittleNpcSpawner extends AbstractEntitySpawner {
 
-    private MonsterConfig config;
+    private final MonsterConfig config;
 
     public LittleNpcSpawner(MonsterConfig config,AutoSpawnTask spawnTask) {
         super(spawnTask);

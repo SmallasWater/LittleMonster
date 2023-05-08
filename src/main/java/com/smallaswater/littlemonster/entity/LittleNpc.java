@@ -295,8 +295,7 @@ public class LittleNpc extends BaseEntityMove {
             cacheAge++;
         }
         if (liveTime != -1 && age >= liveTime) {
-            this.getLevel().addParticleEffect(this,
-                    ParticleEffect.BASIC_SMOKE);
+            this.getLevel().addParticleEffect(this, ParticleEffect.BASIC_SMOKE);
             this.close();
             return;
         }
