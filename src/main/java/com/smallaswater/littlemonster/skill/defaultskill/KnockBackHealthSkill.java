@@ -10,7 +10,7 @@ import com.smallaswater.littlemonster.skill.BaseSkillManager;
  * Create on 2021/6/29 20:11
  * Package com.smallaswater.littlemonster.skill.defaultskill
  */
-public class KnockBackHealthSkill extends BaseSkillManager  implements BaseSkillAreaManager {
+public class KnockBackHealthSkill extends BaseSkillManager implements BaseSkillAreaManager {
 
     public KnockBackHealthSkill(String name) {
         super(name);
@@ -34,13 +34,15 @@ public class KnockBackHealthSkill extends BaseSkillManager  implements BaseSkill
             entity.setMotion(motion);
         }
     }
+
     @Override
-    public void display(Entity... player) {
-        for(Entity player1: player){
-            knockBack(player1,
-                    (player1.x - getMaster().getLocation().x),
-                    (player1.z - getMaster().getLocation().z),
-                    getEffect().doubleValue());
+    protected void privateDisplay(Entity... entities) {
+        for (Entity entity : entities) {
+            this.knockBack(entity,
+                    (entity.x - getMaster().getLocation().x),
+                    (entity.z - getMaster().getLocation().z),
+                    getEffect().doubleValue()
+            );
         }
 
     }

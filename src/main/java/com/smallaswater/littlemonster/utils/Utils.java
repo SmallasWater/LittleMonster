@@ -63,6 +63,14 @@ public class Utils {
         }
     }
 
+    public static List<String> asStringList(List<?> list) {
+        ArrayList<String> strings = new ArrayList<>();
+        for (Object o : list) {
+            strings.add(o.toString());
+        }
+        return strings;
+    }
+
     public static String readFile(File file){
         String content = "";
         try{

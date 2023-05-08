@@ -2,7 +2,6 @@ package com.smallaswater.littlemonster.skill.defaultskill;
 
 import cn.nukkit.Player;
 import cn.nukkit.entity.Entity;
-import cn.nukkit.entity.EntityCreature;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
 
 /**
@@ -23,16 +22,16 @@ public class MessageHealthSkill extends BaseSkillManager {
     }
 
     @Override
-    public void display(Entity... player) {
-        for(Entity player1: player){
-            if(player1 instanceof Player) {
-                if (((Player) player1).isOnline()) {
+    protected void privateDisplay(Entity... entities) {
+        for (Entity entity : entities) {
+            if (entity instanceof Player) {
+                if (((Player) entity).isOnline()) {
                     switch (mode) {
                         case 0:
-                            ((Player) player1).sendMessage(text);
+                            ((Player) entity).sendMessage(text);
                             break;
                         case 1:
-                            ((Player) player1).sendTitle(text);
+                            ((Player) entity).sendTitle(text);
                             break;
                         default:
                             break;

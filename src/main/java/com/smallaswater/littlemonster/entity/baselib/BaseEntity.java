@@ -17,6 +17,8 @@ import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -32,7 +34,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class BaseEntity extends EntityHuman {
 
     //如果主人死了 本体是否死亡
-    public boolean isToDeath = false;
+    @Setter
+    public boolean isDeathFollowMaster = false;
 
     protected EntityHuman masterHuman = null;
 
@@ -55,6 +58,7 @@ public abstract class BaseEntity extends EntityHuman {
 
     protected int damageDelay = 0;
 
+    @Getter
     protected MonsterConfig config;
 
     boolean canAttack = true;
@@ -80,10 +84,12 @@ public abstract class BaseEntity extends EntityHuman {
 
     //开发接口
     //攻击方式
+    @Deprecated
     public int attactMode = ATTACK_MODE_MELEE;
     /**
      * 攻击距离
      */
+    @Deprecated
     public double attackDistance = 0.1;
     //攻击速度
     public int attackSleepTime = 23;

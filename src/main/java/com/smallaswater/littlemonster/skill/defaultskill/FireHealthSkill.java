@@ -16,9 +16,9 @@ public class FireHealthSkill extends BaseSkillManager implements BaseSkillAreaMa
     }
 
     @Override
-    public void display(Entity... player) {
-        for(Entity player1: player){
-            player1.setOnFire(getEffect().intValue());
+    protected void privateDisplay(Entity... entities) {
+        for (Entity entity : entities) {
+            entity.setOnFire(getEffect().intValue());
         }
     }
 
