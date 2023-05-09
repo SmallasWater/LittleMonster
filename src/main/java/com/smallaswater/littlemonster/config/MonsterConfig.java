@@ -294,7 +294,7 @@ public class MonsterConfig {
             }
 
             skillManager.setHealth(Integer.parseInt(health));
-            skillManager.setProbability(Integer.parseInt(map.get("概率").toString()));
+            skillManager.setProbability(Integer.parseInt(map.getOrDefault("概率", 100).toString()));
 
             Object effect = map.get("效果");
             if (skillManager instanceof AttributeHealthSkill) {

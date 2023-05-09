@@ -20,7 +20,7 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
 
     protected String entityName;
 
-    private AutoSpawnTask spawnTask;
+    private final AutoSpawnTask spawnTask;
 
     protected Server server;
 
