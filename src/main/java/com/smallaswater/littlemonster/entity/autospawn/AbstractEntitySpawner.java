@@ -20,7 +20,7 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
 
     protected String entityName;
 
-    private AutoSpawnTask spawnTask;
+    private final AutoSpawnTask spawnTask;
 
     protected Server server;
 
@@ -42,7 +42,7 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
             for (Player player : onlinePlayers) {
                 if (this.isWorldSpawnAllowed(player.getLevel())) {
                     SpawnResult lastSpawnResult = this.spawn(player);
-                    if (lastSpawnResult.equals(SpawnResult.MAX_SPAWN_REACHED)) {
+                    if (lastSpawnResult == SpawnResult.MAX_SPAWN_REACHED) {
                         break;
                     }
                 }
@@ -52,7 +52,7 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
     }
 
     private boolean isWorldSpawnAllowed(Level level) {
-        return spawnWorlds.contains(level.getFolderName()) && level.getGameRules().getBoolean(GameRule.DO_MOB_SPAWNING);
+        return this.spawnWorlds.contains(level.getFolderName()) && level.getGameRules().getBoolean(GameRule.DO_MOB_SPAWNING);
 
     }
 
@@ -63,7 +63,7 @@ public abstract class AbstractEntitySpawner implements IEntitySpawner {
             if (pos != null) {
                 pos.x += this.spawnTask.getRandomSafeXZCoord(50, 26, 6);
                 pos.z += this.spawnTask.getRandomSafeXZCoord(50, 26, 6);
-                pos.y = this.spawnTask.getSafeYCoord(level, pos, 3);
+                pos.y = this.spawnTask.getSafeYCoord(level, pos);
                 return this.spawn(player, pos, level);
             } else {
                 return SpawnResult.POSITION_MISMATCH;

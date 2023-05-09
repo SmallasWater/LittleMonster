@@ -78,7 +78,6 @@ public class LittleMonsterMainClass extends PluginBase {
         }
 
         this.getServer().getCommandMap().register("lt",new LittleNpcSpawnCommand());
-        this.getLogger().info("副本信息读取成功");
 
         int spawnDelay = this.getConfig().getInt("npcs.autospawn-tick", 0);
         if (spawnDelay > 0) {
@@ -89,6 +88,9 @@ public class LittleMonsterMainClass extends PluginBase {
         PluginMasterThreadPool.executeThread(new TimmerRunnable());
         PluginMasterThreadPool.executeThread(new BlockCacheClearTask());
         this.getServer().getScheduler().scheduleRepeatingTask(this,new RouteFinderRunnable(this),10, true);
+
+        this.getLogger().info("插件加载完成！");
+        this.getLogger().info("GitHub: https://github.com/SmallasWater/LittleMonster");
     }
 
     public void init() {

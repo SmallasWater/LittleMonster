@@ -17,13 +17,13 @@ import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -34,7 +34,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public abstract class BaseEntity extends EntityHuman {
 
     //如果主人死了 本体是否死亡
-    public boolean isToDeath = false;
+    @Setter
+    public boolean isDeathFollowMaster = false;
 
     protected EntityHuman masterHuman = null;
 
@@ -57,6 +58,7 @@ public abstract class BaseEntity extends EntityHuman {
 
     protected int damageDelay = 0;
 
+    @Getter
     protected MonsterConfig config;
 
     boolean canAttack = true;
@@ -82,9 +84,13 @@ public abstract class BaseEntity extends EntityHuman {
 
     //开发接口
     //攻击方式
-    public int attactMode = 0;
-    //攻击距离
-    public double distanceLine = 0.1;
+    @Deprecated
+    public int attactMode = ATTACK_MODE_MELEE;
+    /**
+     * 攻击距离
+     */
+    @Deprecated
+    public double attackDistance = 0.1;
     //攻击速度
     public int attackSleepTime = 23;
     //伤害
@@ -277,9 +283,9 @@ public abstract class BaseEntity extends EntityHuman {
      * */
     abstract public float getDamage();
 
-    private final ReentrantLock hasBlockInLineLock = new ReentrantLock();
-    private int lastCheckBlockInLineTick = 0;
-    private final AtomicBoolean isHasBlock = new AtomicBoolean();
+    //private final ReentrantLock hasBlockInLineLock = new ReentrantLock();
+    //private int lastCheckBlockInLineTick = 0;
+    //private final AtomicBoolean isHasBlock = new AtomicBoolean();
 
     //TODO 优化性能
     //判断中间是否有方块
@@ -318,41 +324,6 @@ public abstract class BaseEntity extends EntityHuman {
 //        return this.isHasBlock.get();
     }
 
-    /*@Override
-    public boolean move(double dx, double dy, double dz) {
-        if (dy < -10 || dy > 10) {
-            return false;
-        }
-
-        double movX = dx * moveMultiplier;
-        double movY = dy;
-        double movZ = dz * moveMultiplier;
-
-        AxisAlignedBB[] list = this.level.getCollisionCubes(this, this.boundingBox.addCoord(dx, dy, dz), false);
-        for (AxisAlignedBB bb : list) {
-            dx = bb.calculateXOffset(this.boundingBox, dx);
-        }
-        this.boundingBox.offset(dx, 0, 0);
-
-        for (AxisAlignedBB bb : list) {
-            dz = bb.calculateZOffset(this.boundingBox, dz);
-        }
-        this.boundingBox.offset(0, 0, dz);
-
-        for (AxisAlignedBB bb : list) {
-            dy = bb.calculateYOffset(this.boundingBox, dy);
-        }
-        this.boundingBox.offset(0, dy, 0);
-
-        this.setComponents(this.x + dx, this.y + dy, this.z + dz);
-        this.checkChunks();
-
-        this.checkGroundState(movX, movY, movZ, dx, dy, dz);
-        this.updateFallState(this.onGround);
-
-        return true;
-    }*/
-
     public float getMountedYOffset() {
         return getHeight() * 0.75F;
     }
@@ -361,34 +332,6 @@ public abstract class BaseEntity extends EntityHuman {
     public int nearbyDistanceMultiplier() {
         return 1;
     }
-
-    /*@Override
-    public void addMovement(double x, double y, double z, double yaw, double pitch, double headYaw) {
-        MoveEntityAbsolutePacket pk = new MoveEntityAbsolutePacket();
-        pk.eid = this.id;
-        pk.x = (float) x;
-        pk.y = (float) y;
-        pk.z = (float) z;
-        pk.yaw = (float) yaw;
-        pk.headYaw = (float) headYaw;
-        pk.pitch = (float) pitch;
-        pk.onGround = this.onGround;
-        for (Player p : this.hasSpawned.values()) {
-            p.batchDataPacket(pk);
-        }
-    }
-
-    @Override
-    public void addMotion(double motionX, double motionY, double motionZ) {
-        SetEntityMotionPacket pk = new SetEntityMotionPacket();
-        pk.eid = this.id;
-        pk.motionX = (float) motionX;
-        pk.motionY = (float) motionY;
-        pk.motionZ = (float) motionZ;
-        for (Player p : this.hasSpawned.values()) {
-            p.batchDataPacket(pk);
-        }
-    }*/
 
     @Override
     protected void checkGroundState(double movX, double movY, double movZ, double dx, double dy, double dz) {

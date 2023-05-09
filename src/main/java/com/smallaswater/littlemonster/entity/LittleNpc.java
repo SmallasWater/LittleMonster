@@ -74,17 +74,17 @@ public class LittleNpc extends BaseEntityMove {
         this.close();
     }
 
-    public LittleNpc(FullChunk chunk, CompoundTag nbt, @NotNull MonsterConfig config){
+    public LittleNpc(FullChunk chunk, CompoundTag nbt, @NotNull MonsterConfig config) {
         super(chunk, nbt);
         this.config = config;
         this.name = config.getName();
         this.setNameTagAlwaysVisible();
         this.setNameTagVisible();
         this.loadSkill();
-        this.setDataFlag(Entity.DATA_LEAD_HOLDER_EID,-1);
+        this.setDataFlag(Entity.DATA_LEAD_HOLDER_EID, -1);
         this.setHealth(config.getHealth());
         this.setMaxHealth(config.getHealth());
-        this.namedTag.putString(TAG,name);
+        this.namedTag.putString(TAG, name);
         this.destinationDeviate = Math.max(1.5, config.getAttackDistance() * 0.8);
         if (this.route != null) {
             this.route.setDestinationDeviate(this.destinationDeviate);
@@ -93,12 +93,12 @@ public class LittleNpc extends BaseEntityMove {
         RouteFinderRunnable.addRoute(this);
     }
 
-    private Player getDamageMax(){
+    private Player getDamageMax() {
         double max = 0;
         Player p = null;
-        for(Map.Entry<String, Double> player: handle.playerDamageList.entrySet()){
-            if(player.getValue() > max){
-                if(Server.getInstance().getPlayer(player.getKey()) != null){
+        for (Map.Entry<String, Double> player : handle.playerDamageList.entrySet()) {
+            if (player.getValue() > max) {
+                if (Server.getInstance().getPlayer(player.getKey()) != null) {
                     p = Server.getInstance().getPlayer(player.getKey());
                 }
                 max = player.getValue();
@@ -107,71 +107,71 @@ public class LittleNpc extends BaseEntityMove {
         return p;
     }
 
-    private void disCommand(String cmd){
-        disCommand(cmd,null,null);
+    private void disCommand(String cmd) {
+        disCommand(cmd, null, null);
     }
 
-    private void disCommand(String cmd,String target,String name){
-        if(target != null) {
+    private void disCommand(String cmd, String target, String name) {
+        if (target != null) {
             Server.getInstance().getCommandMap().dispatch(
                     new EntityCommandSender(getName()), cmd.replace(target, name));
-        }else{
-            Server.getInstance().getCommandMap().dispatch(new EntityCommandSender(getName()),cmd);
+        } else {
+            Server.getInstance().getCommandMap().dispatch(new EntityCommandSender(getName()), cmd);
         }
     }
 
-    public void onDeath(EntityDeathEvent event){
+    public void onDeath(EntityDeathEvent event) {
         Entity damager = null;
         EntityDamageEvent d = event.getEntity().getLastDamageCause();
-        if(d instanceof EntityDamageByEntityEvent){
+        if (d instanceof EntityDamageByEntityEvent) {
             damager = ((EntityDamageByEntityEvent) d).getDamager();
         }
         LinkedList<Item> items = new LinkedList<>();
-        for(DeathCommand command:getConfig().getDeathCommand()){
-            if(command.getRound() >= Utils.rand(1,100)){
+        for (DeathCommand command : getConfig().getDeathCommand()) {
+            if (command.getRound() <= Utils.rand(1, 100)) {
                 String cmd = command.getCmd();
-                cmd = cmd.replace("{x}",String.format("%.2f",getX()))
-                          .replace("{y}",String.format("%.2f",getY()))
-                          .replace("{z}",String.format("%.2f",getZ()))
-                          .replace("{level}",getLevel().getFolderName());
-                if(cmd.contains("@"+ BaseItem.TARGETALL)){
-                    for(Player player: getDamagePlayers()){
-                        disCommand(cmd,"@"+BaseItem.TARGETALL,player.getName());
+                cmd = cmd.replace("{x}", String.format("%.2f", getX()))
+                        .replace("{y}", String.format("%.2f", getY()))
+                        .replace("{z}", String.format("%.2f", getZ()))
+                        .replace("{level}", getLevel().getFolderName());
+                if (cmd.contains("@" + BaseItem.TARGETALL)) {
+                    for (Player player : getDamagePlayers()) {
+                        disCommand(cmd, "@" + BaseItem.TARGETALL, player.getName());
                     }
 
-                }else{
-                    if(cmd.contains("@"+BaseItem.TARGET)){
-                        if(damager instanceof  Player){
-                            cmd = cmd.replace("@"+BaseItem.TARGET,damager.getName());
+                } else {
+                    if (cmd.contains("@" + BaseItem.TARGET)) {
+                        if (damager instanceof Player) {
+                            cmd = cmd.replace("@" + BaseItem.TARGET, damager.getName());
                         }
                     }
-                    if(cmd.contains("@"+BaseItem.DAMAGE)){
+                    if (cmd.contains("@" + BaseItem.DAMAGE)) {
                         Player player = getDamageMax();
-                        if(player != null){
-                            cmd = cmd.replace("@"+BaseItem.DAMAGE,player.getName());
+                        if (player != null) {
+                            cmd = cmd.replace("@" + BaseItem.DAMAGE, player.getName());
                         }
                     }
                     disCommand(cmd);
                 }
             }
         }
-        for(DropItem key: getConfig().getDeathItem()){
-            if(key.getRound() >= Utils.rand(1,100)){
+        for (DropItem key : getConfig().getDeathItem()) {
+            if (key.getRound() <= Utils.rand(1, 100)) {
                 items.add(key.getItem());
             }
         }
         event.setDrops(items.toArray(new Item[0]));
 
-        String deathMessage = getConfig().getConfig().getString("公告.死亡.信息","&e[ &bBOSS &e] {name} 在坐标: x: {x} y: {y} z: {z} 处死亡");
-        if(getConfig().getConfig().getBoolean("公告.死亡.是否提示",true)){
-            Server.getInstance().broadcastMessage(TextFormat.colorize('&',deathMessage.replace("{name}",name)
-                    .replace("{x}",getFloorX()+"")
-                    .replace("{y}",getFloorY()+"")
-                    .replace("{z}",getFloorZ()+"")
-                    .replace("{level}",getLevel().getFolderName()+"")));
+        String deathMessage = getConfig().getConfig().getString("公告.死亡.信息", "&e[ &bBOSS &e] {name} 在坐标: x: {x} y: {y} z: {z} 处死亡");
+        if (getConfig().getConfig().getBoolean("公告.死亡.是否提示", true)) {
+            Server.getInstance().broadcastMessage(TextFormat.colorize('&', deathMessage.replace("{name}", name)
+                    .replace("{x}", getFloorX() + "")
+                    .replace("{y}", getFloorY() + "")
+                    .replace("{z}", getFloorZ() + "")
+                    .replace("{level}", getLevel().getFolderName() + "")));
         }
-        if(damager != null){
-            if(damager instanceof Player) {
+        if (damager != null) {
+            if (damager instanceof Player) {
                 String killMessage = getConfig().getConfig().getString("公告.击杀.信息", "&e[ &bBOSS提醒 &e] &d{name} 被 {player} 击杀");
                 if (getConfig().getConfig().getBoolean("公告.击杀.是否提示", true)) {
                     Server.getInstance().broadcastMessage(TextFormat.colorize('&', killMessage.replace("{name}", name)
@@ -189,12 +189,12 @@ public class LittleNpc extends BaseEntityMove {
 
     @Override
     public void onClose() {
-        if(boss != null){
+        if (boss != null) {
             BossBarManager.BossBarApi.removeBossBar(boss);
             boss = null;
         }
-        if(config != null){
-            if(config.isDisplayDamage() && this.handle != null){
+        if (config != null) {
+            if (config.isDisplayDamage() && this.handle != null) {
                 handle.display();
             }
         }
@@ -213,33 +213,33 @@ public class LittleNpc extends BaseEntityMove {
         this.route = null;
     }
 
-    private ArrayList<Player> getDamagePlayers(){
+    private ArrayList<Player> getDamagePlayers() {
         ArrayList<Player> players = new ArrayList<>();
         Player player;
-        for(String name: handle.playerDamageList.keySet()){
+        for (String name : handle.playerDamageList.keySet()) {
             player = Server.getInstance().getPlayer(name);
-            if(player != null){
+            if (player != null) {
                 players.add(player);
             }
         }
         return players;
     }
 
-    private void loadSkill(){
+    private void loadSkill() {
         BaseSkillManager baseSkillManager;
-        for(BaseSkillManager skillManager: config.getSkillManagers()){
+        for (BaseSkillManager skillManager : config.getSkillManagers()) {
             baseSkillManager = skillManager.clone();
             baseSkillManager.setMaster(this);
             skillManagers.add(baseSkillManager);
         }
     }
 
-    private ArrayList<BaseSkillManager> getHealthSkill(int health){
+    private ArrayList<BaseSkillManager> getHealthSkill(int health) {
 
         ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
-        for(BaseSkillManager skillManager:this.skillManagers){
-            if(skillManager.health >= health){
-                if(!healthList.contains(skillManager.health)) {
+        for (BaseSkillManager skillManager : this.skillManagers) {
+            if (skillManager.health >= health) {
+                if (!healthList.contains(skillManager.health)) {
                     skillManagers.add(skillManager);
                     healthList.add(skillManager.health);
                 }
@@ -250,16 +250,16 @@ public class LittleNpc extends BaseEntityMove {
 
     private Player boss = null;
 
-    private void onHealthListener(int health){
+    private void onHealthListener(int health) {
         ArrayList<BaseSkillManager> skillAreaManagers = getHealthSkill(health);
-        if(skillAreaManagers.size() > 0) {
+        if (skillAreaManagers.size() > 0) {
             for (BaseSkillManager skillManager : skillAreaManagers) {
                 if (skillManager instanceof BaseSkillAreaManager) {
                     if (this.getFollowTarget() != null) {
                         if (!targetOption(this.getFollowTarget(), distance(this.getFollowTarget()))) {
 
                             if (skillManager.mode == 1) {
-                                skillManager.display(Utils.getAroundPlayers(this, config.getArea(),true,true,true).toArray(new Entity[0]));
+                                skillManager.display(Utils.getAroundPlayers(this, config.getArea(), true, true, true).toArray(new Entity[0]));
                             } else {
                                 if (this.getFollowTarget() instanceof Player) {
                                     skillManager.display(this.getFollowTarget());
@@ -271,7 +271,7 @@ public class LittleNpc extends BaseEntityMove {
                     if (skillManager instanceof AttributeHealthSkill) {
                         skillManager.display((Player) null);
                     }
-                    if(skillManager instanceof SummonHealthSkill){
+                    if (skillManager instanceof SummonHealthSkill) {
                         skillManager.display(this);
                     }
                     if (skillManager instanceof MessageHealthSkill) {
@@ -288,51 +288,50 @@ public class LittleNpc extends BaseEntityMove {
 
     @Override
     public void onUpdata() {
-        if(cacheAge >= 20){
+        if (cacheAge >= 20) {
             age++;
             cacheAge = 0;
-        }else{
+        } else {
             cacheAge++;
         }
-        if(liveTime != -1 && age >= liveTime){
-            this.getLevel().addParticleEffect(this,
-                    ParticleEffect.BASIC_SMOKE);
+        if (liveTime != -1 && age >= liveTime) {
+            this.getLevel().addParticleEffect(this, ParticleEffect.BASIC_SMOKE);
             this.close();
             return;
         }
         // 技能召唤的
-        if(isToDeath && masterHuman != null){
-            if(masterHuman.isClosed()){
+        if (this.isDeathFollowMaster && masterHuman != null) {
+            if (masterHuman.isClosed()) {
                 this.close();
                 return;
             }
         }
-        if(config == null){
+        if (config == null) {
             this.close();
             return;
         }
         this.setNameTag(config.getTag()
-                .replace("{名称}",name)
-                .replace("{血量}",getHealth()+"")
-                .replace("{最大血量}",getMaxHealth()+""));
+                .replace("{名称}", name)
+                .replace("{血量}", getHealth() + "")
+                .replace("{最大血量}", getMaxHealth() + ""));
         onHealthListener((int) Math.floor(getHealth()));
-        if(this.getFollowTarget() != null && this.getFollowTarget() instanceof Player){
-            if(healTime >= healSettingTime &&
+        if (this.getFollowTarget() != null && this.getFollowTarget() instanceof Player) {
+            if (healTime >= healSettingTime &&
                     heal > 0 &&
-                    !config.isUnFightHeal()){
+                    !config.isUnFightHeal()) {
                 healTime = 0;
                 this.heal(heal);
             }
-            if(targetOption(this.getFollowTarget(), this.distance(this.getFollowTarget()))) {
-                if(boss != null){
+            if (targetOption(this.getFollowTarget(), this.distance(this.getFollowTarget()))) {
+                if (boss != null) {
                     BossBarManager.BossBarApi.removeBossBar(boss);
                     boss = null;
                 }
                 return;
             }
-            if(this.getFollowTarget() instanceof Player){
+            if (this.getFollowTarget() instanceof Player) {
                 boss = (Player) this.getFollowTarget();
-                if(!BossBarManager.BossBarApi.hasCreate((Player) this.getFollowTarget(),getId())) {
+                if (!BossBarManager.BossBarApi.hasCreate((Player) this.getFollowTarget(), getId())) {
                     BossBarManager.BossBarApi.createBossBar((Player) this.getFollowTarget(), getId());
                 }
                 BossBarManager.BossBarApi.showBoss((Player) getFollowTarget(),
@@ -340,14 +339,14 @@ public class LittleNpc extends BaseEntityMove {
                         getHealth(),
                         getMaxHealth());
             }
-        }else{
-            if(getFollowTarget() == null || !config.isUnFightHeal()){
-                if(healTime >= healSettingTime && heal > 0){
+        } else {
+            if (getFollowTarget() == null || !config.isUnFightHeal()) {
+                if (healTime >= healSettingTime && heal > 0) {
                     healTime = 0;
                     this.heal(heal);
                 }
             }
-            if(boss != null){
+            if (boss != null) {
                 BossBarManager.BossBarApi.removeBossBar(boss);
                 boss = null;
             }
@@ -365,10 +364,10 @@ public class LittleNpc extends BaseEntityMove {
         this.heal(new EntityRegainHealthEvent(this, amount, 0));
     }
 
-    public void reset(){
+    public void reset() {
         handle = new DamageHandle();
         healthList = new ArrayList<>();
-        if(config != null) {
+        if (config != null) {
             config.npcSetting(this);
         }
     }
@@ -376,21 +375,21 @@ public class LittleNpc extends BaseEntityMove {
     //受到攻击
     @Override
     public void onAttack(EntityDamageEvent sure) {
-        if(this.damageDelay > config.getInvincibleTime()) {
+        if (this.damageDelay > config.getInvincibleTime()) {
             if (sure.getAttackCooldown() > this.config.getInvincibleTime()) {
                 sure.setAttackCooldown(this.config.getInvincibleTime());
             }
-            if(isImmobile() && !config.isImmobile()){
+            if (isImmobile() && !config.isImmobile()) {
                 sure.setCancelled();
             }
-            if(!config.isKnock()){
-                if(sure instanceof EntityDamageByEntityEvent){
+            if (!config.isKnock()) {
+                if (sure instanceof EntityDamageByEntityEvent) {
                     ((EntityDamageByEntityEvent) sure).setKnockBack(0);
                 }
             }
             this.damageDelay = 0;
-            this.level.addParticle(new DestroyBlockParticle(this,new BlockRedstone()));
-            if(sure instanceof EntityDamageByEntityEvent){
+            this.level.addParticle(new DestroyBlockParticle(this, new BlockRedstone()));
+            if (sure instanceof EntityDamageByEntityEvent) {
                 if (config.isPassiveAttackEntity()) {
                     if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
                         Player player = (Player) ((EntityDamageByEntityEvent) sure).getDamager();
@@ -407,7 +406,7 @@ public class LittleNpc extends BaseEntityMove {
                             }
                         }
                         if (damager instanceof LittleNpc) {
-                            if (!Utils.canAttackNpc(this, (LittleNpc) damager,true)) {
+                            if (!Utils.canAttackNpc(this, (LittleNpc) damager, true)) {
                                 return;
                             }
                         }
@@ -421,7 +420,7 @@ public class LittleNpc extends BaseEntityMove {
                     this.handle.add(player.getName(), sure.getFinalDamage());
                 }
             }
-        }else{
+        } else {
             sure.setCancelled();
         }
     }
@@ -447,7 +446,7 @@ public class LittleNpc extends BaseEntityMove {
                 }
             }
             if (sure.getDamager() instanceof LittleNpc) {
-                if (!Utils.canAttackNpc(this, (LittleNpc) sure.getDamager(),true)) {
+                if (!Utils.canAttackNpc(this, (LittleNpc) sure.getDamager(), true)) {
                     return;
                 }
             }
@@ -461,69 +460,57 @@ public class LittleNpc extends BaseEntityMove {
     //攻击玩家~
     @Override
     public void attackEntity(EntityCreature entity) {
-        if (this.attackDelay > attackSleepTime) {
+        if (this.attackDelay > attackSleepTime && entity.distance(this) <= this.getConfig().getAttackDistance()) {
             this.attackDelay = 0;
-            switch (attactMode){
+            this.waitTime = 0;
+            switch (this.getConfig().getAttaceMode()) {
                 case ATTACK_MODE_RANGE:
-                    //群体
-                    if(entity.distance(this) <= distanceLine) {
-                        LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, true);
-                        for (Entity p : players) {
-                            if (p instanceof Player && ((Player) p).isCreative()) {
-                                continue;
-                            }
-                            if (p instanceof LittleNpc) {
-                                continue;
-                            }
-                            p.attack(new EntityDamageByEntityEvent(this, p, EntityDamageEvent.DamageCause.ENTITY_ATTACK, getDamage(), (float) config.getKnockBack()));
+                    LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, true);
+                    for (Entity p : players) {
+                        if (p instanceof Player && ((Player) p).isCreative()) {
+                            continue;
                         }
-                        entity.level.addParticle(new HugeExplodeSeedParticle(entity));
-                        entity.level.addSound(entity, Sound.RANDOM_EXPLODE);
+                        if (p instanceof LittleNpc) {
+                            continue;
+                        }
+                        p.attack(new EntityDamageByEntityEvent(this, p, EntityDamageEvent.DamageCause.ENTITY_ATTACK, getDamage(), (float) config.getKnockBack()));
                     }
+                    entity.level.addParticle(new HugeExplodeSeedParticle(entity));
+                    entity.level.addSound(entity, Sound.RANDOM_EXPLODE);
                     break;
                 case ATTACK_MODE_ARROW:
-                    if(entity.distance(this) <= distanceLine) {
-                        double f = 1.3D;
-                        Entity k = Entity.createEntity("Arrow", this.add(0, this.getEyeHeight(), 0), this);
-                        if (!(k instanceof EntityArrow)) {
-                            return;
-                        }
-                        EntityArrow arrow = (EntityArrow) k;
-                        arrow.setMotion(
-                                new Vector3(-Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f,
-                                        -Math.sin(Math.toRadians(pitch)) * f * f,
-                                        Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f));
-                        EntityShootBowEvent ev = new EntityShootBowEvent(this, Item.get(ItemID.ARROW, 0, 1), arrow, f);
-                        this.server.getPluginManager().callEvent(ev);
-                        EntityProjectile projectile = ev.getProjectile();
-                        if (ev.isCancelled()) {
+                    double f = 1.3D;
+                    Entity k = Entity.createEntity("Arrow", this.add(0, this.getEyeHeight(), 0), this);
+                    if (!(k instanceof EntityArrow)) {
+                        return;
+                    }
+                    EntityArrow arrow = (EntityArrow) k;
+                    arrow.setMotion(
+                            new Vector3(-Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f,
+                                    -Math.sin(Math.toRadians(pitch)) * f * f,
+                                    Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f));
+                    EntityShootBowEvent ev = new EntityShootBowEvent(this, Item.get(ItemID.ARROW, 0, 1), arrow, f);
+                    this.server.getPluginManager().callEvent(ev);
+                    EntityProjectile projectile = ev.getProjectile();
+                    if (ev.isCancelled()) {
+                        projectile.kill();
+                    } else {
+                        ProjectileLaunchEvent launch = new ProjectileLaunchEvent(projectile);
+                        this.server.getPluginManager().callEvent(launch);
+                        if (launch.isCancelled()) {
                             projectile.kill();
                         } else {
-                            ProjectileLaunchEvent launch = new ProjectileLaunchEvent(projectile);
-                            this.server.getPluginManager().callEvent(launch);
-                            if (launch.isCancelled()) {
-                                projectile.kill();
-                            } else {
-                                projectile.spawnToAll();
-                                ((EntityArrow) projectile).setPickupMode(EntityArrow.PICKUP_NONE);
-                                this.level.addSound(this, Sound.RANDOM_BOW);
-                            }
+                            projectile.spawnToAll();
+                            ((EntityArrow) projectile).setPickupMode(EntityArrow.PICKUP_NONE);
+                            this.level.addSound(this, Sound.RANDOM_BOW);
                         }
-                        EntityEventPacket pk = new EntityEventPacket();
-                        pk.eid = this.getId();
-                        pk.event = EntityEventPacket.ARM_SWING;
-                        Server.broadcastPacket(this.getViewers().values(), pk);
-                        waitTime = 0;
                     }
-                    return;
+                    break;
                 case ATTACK_MODE_EVENT: //触发EntityInteractEvent
-                    if(entity.distance(this) <= seeSize) {
-//                        if (!hasBlockInLine(entity)) {
-                            EntityInteractEvent event = new EntityInteractEvent(this, entity.getPosition().add(0.5, entity.getEyeHeight(), 0.5).getLevelBlock());
-                            Server.getInstance().getPluginManager().callEvent(event);
-                            waitTime = 0;
-//                        }
-                    }
+//                  if (!hasBlockInLine(entity)) {
+                    EntityInteractEvent event = new EntityInteractEvent(this, entity.getPosition().add(0.5, entity.getEyeHeight(), 0.5).getLevelBlock());
+                    Server.getInstance().getPluginManager().callEvent(event);
+//                  }
                     break;
                 case ATTACK_MODE_MELEE:
                 default:
@@ -555,18 +542,17 @@ public class LittleNpc extends BaseEntityMove {
                             }
                         };
                         float points = 0.0F;
-                        Item[] var5 = ((Player)entity).getInventory().getArmorContents();
-                        for (Item i : var5) {
+                        for (Item i : ((Player) entity).getInventory().getArmorContents()) {
                             points += armorValues.getOrDefault(i.getId(), 0.0F);
                         }
 
-                        damage.put(EntityDamageEvent.DamageModifier.ARMOR, (float)((double) damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0.0F) - Math.floor((double)(damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1.0F) * points) * 0.04D)));
+                        damage.put(EntityDamageEvent.DamageModifier.ARMOR, (float) ((double) damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0.0F) - Math.floor((double) (damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1.0F) * points) * 0.04D)));
                     }
 
-                    entity.attack(new EntityDamageByEntityEvent(this, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage,(float) config.getKnockBack()));
+                    entity.attack(new EntityDamageByEntityEvent(this, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage, (float) config.getKnockBack()));
                     break;
             }
-            for(Effect effect: config.getEffects()){
+            for (Effect effect : config.getEffects()) {
                 entity.addEffect(effect);
             }
             //摆臂动作
@@ -579,7 +565,7 @@ public class LittleNpc extends BaseEntityMove {
 
     @Override
     public void close() {
-        if(inventory != null && inventory.getViewers() != null){
+        if (inventory != null && inventory.getViewers() != null) {
             inventory.getViewers().clear();
         }
         super.close();

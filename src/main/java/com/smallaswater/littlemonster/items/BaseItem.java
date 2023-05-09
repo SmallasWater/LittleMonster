@@ -4,9 +4,11 @@ import cn.nukkit.item.Item;
 import cn.nukkit.nbt.tag.CompoundTag;
 import com.smallaswater.littlemonster.utils.Utils;
 
-
 public abstract class BaseItem {
 
+    /**
+     * 触发概率
+     */
     private int round;
 
     protected static final String SPLIT_1 = "@";

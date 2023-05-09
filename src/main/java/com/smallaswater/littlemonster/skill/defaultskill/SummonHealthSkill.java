@@ -28,13 +28,16 @@ public class SummonHealthSkill extends BaseSkillManager {
     }
 
     @Override
-    public void display(Entity... player) {
-        for(String littleNpcName: littleNpcs){
+    protected void privateDisplay(Entity... entities) {
+        if (entities.length == 0 || !(entities[0] instanceof LittleNpc)) {
+            return;
+        }
+        for (String littleNpcName : littleNpcs) {
             MonsterConfig config = LittleMonsterMainClass.getInstance().monsters.get(littleNpcName);
-            if(config != null){
-                LittleNpc littleNpc = config.spawn(getMaster().add(Utils.rand()?1:-1,0,Utils.rand()?1:-1));
-                littleNpc.isToDeath = true;
-                littleNpc.setMasterHuman((EntityHuman) player[0]);
+            if (config != null) {
+                LittleNpc littleNpc = config.spawn(getMaster().add(Utils.rand() ? 1 : -1, 0, Utils.rand() ? 1 : -1));
+                littleNpc.setDeathFollowMaster(true);
+                littleNpc.setMasterHuman((EntityHuman) entities[0]);
             }
 
         }

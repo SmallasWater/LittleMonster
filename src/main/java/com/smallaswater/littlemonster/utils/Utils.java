@@ -63,6 +63,14 @@ public class Utils {
         }
     }
 
+    public static List<String> asStringList(List<?> list) {
+        ArrayList<String> strings = new ArrayList<>();
+        for (Object o : list) {
+            strings.add(o.toString());
+        }
+        return strings;
+    }
+
     public static String readFile(File file){
         String content = "";
         try{
@@ -237,10 +245,8 @@ public class Utils {
         if(files.isDirectory()){
             File[] filesArray = files.listFiles();
             if(filesArray != null){
-                if(filesArray.length>0){
-                    for(File file : filesArray){
-                        names.add( file.getName().substring(0, file.getName().lastIndexOf(".")));
-                    }
+                for (File file : filesArray) {
+                    names.add(file.getName().substring(0, file.getName().lastIndexOf(".")));
                 }
             }
         }
