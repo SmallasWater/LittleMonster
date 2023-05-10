@@ -128,7 +128,7 @@ public class LittleNpc extends BaseEntityMove {
         }
         LinkedList<Item> items = new LinkedList<>();
         for (DeathCommand command : getConfig().getDeathCommand()) {
-            if (command.getRound() <= Utils.rand(1, 100)) {
+            if (command.getRound() >= Utils.rand(1, 100)) {
                 String cmd = command.getCmd();
                 cmd = cmd.replace("{x}", String.format("%.2f", getX()))
                         .replace("{y}", String.format("%.2f", getY()))
@@ -156,7 +156,7 @@ public class LittleNpc extends BaseEntityMove {
             }
         }
         for (DropItem key : getConfig().getDeathItem()) {
-            if (key.getRound() <= Utils.rand(1, 100)) {
+            if (key.getRound() >= Utils.rand(1, 100)) {
                 items.add(key.getItem());
             }
         }
@@ -210,6 +210,7 @@ public class LittleNpc extends BaseEntityMove {
             this.healthList.clear();
         }
         this.handle = null;
+        RouteFinderRunnable.removeRoute(this);
         this.route = null;
     }
 

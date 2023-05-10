@@ -77,7 +77,7 @@ public abstract class BaseSkillManager implements Cloneable {
     }
 
     public void display(Entity... player) {
-        if (this.probability <= Utils.rand(1, 100)) {
+        if (this.probability >= Utils.rand(1, 100)) {
             this.privateDisplay(player);
         }
     }
