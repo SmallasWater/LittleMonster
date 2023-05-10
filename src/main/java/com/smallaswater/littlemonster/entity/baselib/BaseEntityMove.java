@@ -233,7 +233,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                     nextTarget = this.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
                 }*/
                 if (nextTarget != null) {
-                    this.randomMoveTarget = nextTarget;
+                    this.randomMoveTarget = nextTarget.clone();
                     this.target = nextTarget;
                     if (this.route != null) {
                         this.route.setDestination(nextTarget);
