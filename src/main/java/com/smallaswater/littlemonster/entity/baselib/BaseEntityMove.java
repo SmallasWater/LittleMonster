@@ -50,12 +50,10 @@ public abstract class BaseEntityMove extends BaseEntity {
 
     private boolean checkJump(double dx, double dz) {
         if (this.motionY == this.getGravity() * 2) {
-            int b = level.getBlockIdAt(NukkitMath.floorDouble(this.x), (int) this.y, NukkitMath.floorDouble(this.z));
-            return b == BlockID.WATER || b == BlockID.STILL_WATER;
-        } else  {
-            int b = level.getBlockIdAt(NukkitMath.floorDouble(this.x), (int) (this.y + 0.8), NukkitMath.floorDouble(this.z));
-            if (b == BlockID.WATER || b == BlockID.STILL_WATER) {
-                if (this.target == null) {
+            return this.canSwimIn(level.getBlockIdAt(NukkitMath.floorDouble(this.x), (int) this.y, NukkitMath.floorDouble(this.z)));
+        } else {
+            if (this.canSwimIn(level.getBlockIdAt(NukkitMath.floorDouble(this.x), (int) (this.y + 0.8), NukkitMath.floorDouble(this.z)))) {
+                if (this.target == null || this.target.getFloorY() > this.getFloorY() + 0.5) {
                     this.motionY = this.getGravity() * 2;
                 }
                 return true;
@@ -89,6 +87,10 @@ public abstract class BaseEntityMove extends BaseEntity {
             return true;
         }
         return false;
+    }
+
+    protected boolean canSwimIn(int block) {
+        return block == BlockID.WATER || block == BlockID.STILL_WATER;
     }
 
     @Override
