@@ -59,8 +59,6 @@ public class LittleMonsterMainClass extends PluginBase {
     public void onEnable() {
         Entity.registerEntity("LittleNpc", LittleNpc.class);
         BaseSkillManager.initSkill();
-        this.getServer().getPluginManager().registerEvents(new LittleMasterListener(),this);
-        init();
         saveDefaultConfig();
         reloadConfig();
 
@@ -76,6 +74,10 @@ public class LittleMonsterMainClass extends PluginBase {
 
             }
         }
+
+        this.init();
+
+        this.getServer().getPluginManager().registerEvents(new LittleMasterListener(),this);
 
         this.getServer().getCommandMap().register("lt",new LittleNpcSpawnCommand());
 

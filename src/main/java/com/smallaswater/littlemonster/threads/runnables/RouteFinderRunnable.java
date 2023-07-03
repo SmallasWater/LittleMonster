@@ -17,22 +17,28 @@ public class RouteFinderRunnable extends PluginTask<LittleMonsterMainClass> {
         super(littleMonsterMainClass);
     }
 
-    public static void addRoute(LittleNpc e){
-        routeEntitys.put(e,System.currentTimeMillis());
+    public static void addRoute(LittleNpc e) {
+        routeEntitys.put(e, System.currentTimeMillis());
     }
 
+    public static void removeRoute(LittleNpc e) {
+        routeEntitys.remove(e);
+    }
 
     @Override
     public void onRun(int i) {
-        for (LittleNpc lt: routeEntitys.keySet()) {
-            if(System.currentTimeMillis() - routeEntitys.get(lt) > 50 * 100){
+        for (LittleNpc lt : routeEntitys.keySet()) {
+            if (lt.route == null) {
+                routeEntitys.remove(lt);
+                continue;
+            }
+            if (System.currentTimeMillis() - routeEntitys.get(lt) > 50 * 100) {
                 if (!lt.route.isSearching()) {
                     lt.route.research();
                     continue;
                 }
-                routeEntitys.put(lt,System.currentTimeMillis());
+                routeEntitys.put(lt, System.currentTimeMillis());
             }
-
         }
     }
 }

@@ -14,6 +14,7 @@ import cn.nukkit.level.particle.BubbleParticle;
 import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.route.RouteFinder;
 import com.smallaswater.littlemonster.route.WalkerRouteFinder;
@@ -50,12 +51,10 @@ public abstract class BaseEntityMove extends BaseEntity {
 
     private boolean checkJump(double dx, double dz) {
         if (this.motionY == this.getGravity() * 2) {
-            int b = level.getBlockIdAt(NukkitMath.floorDouble(this.x), (int) this.y, NukkitMath.floorDouble(this.z));
-            return b == BlockID.WATER || b == BlockID.STILL_WATER;
-        } else  {
-            int b = level.getBlockIdAt(NukkitMath.floorDouble(this.x), (int) (this.y + 0.8), NukkitMath.floorDouble(this.z));
-            if (b == BlockID.WATER || b == BlockID.STILL_WATER) {
-                if (this.target == null) {
+            return this.canSwimIn(level.getBlockIdAt(NukkitMath.floorDouble(this.x), (int) this.y, NukkitMath.floorDouble(this.z)));
+        } else {
+            if (this.canSwimIn(level.getBlockIdAt(NukkitMath.floorDouble(this.x), (int) (this.y + 0.8), NukkitMath.floorDouble(this.z)))) {
+                if (this.target == null || this.target.getFloorY() > this.getFloorY() + 0.5) {
                     this.motionY = this.getGravity() * 2;
                 }
                 return true;
@@ -69,7 +68,7 @@ public abstract class BaseEntityMove extends BaseEntity {
         Block that = this.getLevel().getBlock(new Vector3(NukkitMath.floorDouble(this.x + dx), (int) this.y, NukkitMath.floorDouble(this.z + dz)));
         Block block = that.getSide(this.getHorizontalFacing());
         Block down = block.down();
-        if (!down.isSolid() && !block.isSolid() && !down.down().isSolid()) {
+        if (!down.isSolid() && !block.isSolid() && !down.down().isSolid() && !this.canSwimIn(down.down().getId())) {
             this.stayTime = 10;
         } else if (!block.canPassThrough() && block.up().canPassThrough() && that.up(2).canPassThrough()) {
             if (block instanceof BlockSnowLayer) {
@@ -89,6 +88,10 @@ public abstract class BaseEntityMove extends BaseEntity {
             return true;
         }
         return false;
+    }
+
+    protected boolean canSwimIn(int block) {
+        return block == BlockID.WATER || block == BlockID.STILL_WATER;
     }
 
     @Override
@@ -230,7 +233,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                     nextTarget = this.add(Utils.rand() ? x : -x, 0, Utils.rand() ? z : -z);
                 }*/
                 if (nextTarget != null) {
-                    this.randomMoveTarget = nextTarget;
+                    this.randomMoveTarget = nextTarget.clone();
                     this.target = nextTarget;
                     if (this.route != null) {
                         this.route.setDestination(nextTarget);
@@ -414,6 +417,9 @@ public abstract class BaseEntityMove extends BaseEntity {
         if (this.stayTime > 0) {
             this.stayTime -= tickDiff;
             this.move(0.0D, this.motionY, 0.0D);
+            if (LittleMonsterMainClass.debug) {
+                LittleMonsterMainClass.getInstance().getLogger().info("stayTime: " + this.stayTime);
+            }
         } else {
             if (this.getConfig().getAttaceMode() != ATTACK_MODE_EVENT && this.getConfig().getAttaceMode() != ATTACK_MODE_ARROW) {
                 this.waitTime = 0;
