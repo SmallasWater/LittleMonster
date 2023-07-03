@@ -1,5 +1,6 @@
 package com.smallaswater.littlemonster.threads.runnables;
 
+import cn.nukkit.Server;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
 
 /**
@@ -29,7 +30,9 @@ public abstract class BasePluginThreadTask implements Runnable {
                 Thread.sleep(this.sleepMillis);
             } catch (Exception e) {
                 if (e instanceof InterruptedException) {
-                    LittleMonsterMainClass.getInstance().getLogger().warning("BasePluginThreadTask Interrupted", e);
+                    if (Server.getInstance().isRunning()) {
+                        LittleMonsterMainClass.getInstance().getLogger().warning("BasePluginThreadTask Interrupted");
+                    }
                     return;
                 }
                 LittleMonsterMainClass.getInstance().getLogger().error("BasePluginThreadTask Error", e);

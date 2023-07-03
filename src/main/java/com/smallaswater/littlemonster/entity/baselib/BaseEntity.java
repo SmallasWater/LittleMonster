@@ -250,22 +250,32 @@ public abstract class BaseEntity extends EntityHuman {
 
     @Override
     public boolean attack(EntityDamageEvent source) {
-        if (this.isKnockback() && source instanceof EntityDamageByEntityEvent && ((EntityDamageByEntityEvent)source).getDamager() instanceof Player) {
-            return false;
-        } else if (this.fireProof && (source.getCause()
-                == EntityDamageEvent.DamageCause.FIRE || source.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK
-                || source.getCause() == EntityDamageEvent.DamageCause.LAVA)) {
-            return false;
-        } else {
-            if (source instanceof EntityDamageByEntityEvent) {
-                ((EntityDamageByEntityEvent)source).setKnockBack(0.3F);
+        if (this.damageDelay > config.getInvincibleTime()) {
+            if (source.getAttackCooldown() > this.config.getInvincibleTime()) {
+                source.setAttackCooldown(this.config.getInvincibleTime());
             }
-            this.target = null;
-            this.stayTime = 0;
-            super.attack(source);
-            this.onAttack(source);
-            return true;
+            this.damageDelay = 0;
+            if (this.isKnockback() && source instanceof EntityDamageByEntityEvent && ((EntityDamageByEntityEvent) source).getDamager() instanceof Player) {
+                return false;
+            } else if (this.fireProof && (source.getCause()
+                    == EntityDamageEvent.DamageCause.FIRE || source.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK
+                    || source.getCause() == EntityDamageEvent.DamageCause.LAVA)) {
+                return false;
+            } else {
+                if (source instanceof EntityDamageByEntityEvent) {
+                    ((EntityDamageByEntityEvent) source).setKnockBack(config.isKnock() ? 0.3F : 0);
+                }
+                this.target = null;
+                this.stayTime = 0;
+                if (super.attack(source)) {
+                    this.onAttack(source);
+                    return true;
+                }
+            }
+        } else {
+            source.setCancelled();
         }
+        return false;
     }
 
     public void setConfig(@NotNull MonsterConfig config) {

@@ -376,53 +376,39 @@ public class LittleNpc extends BaseEntityMove {
     //受到攻击
     @Override
     public void onAttack(EntityDamageEvent sure) {
-        if (this.damageDelay > config.getInvincibleTime()) {
-            if (sure.getAttackCooldown() > this.config.getInvincibleTime()) {
-                sure.setAttackCooldown(this.config.getInvincibleTime());
-            }
-            if (isImmobile() && !config.isImmobile()) {
-                sure.setCancelled();
-            }
-            if (!config.isKnock()) {
-                if (sure instanceof EntityDamageByEntityEvent) {
-                    ((EntityDamageByEntityEvent) sure).setKnockBack(0);
-                }
-            }
-            this.damageDelay = 0;
-            this.level.addParticle(new DestroyBlockParticle(this, new BlockRedstone()));
-            if (sure instanceof EntityDamageByEntityEvent) {
-                if (config.isPassiveAttackEntity()) {
-                    if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
-                        Player player = (Player) ((EntityDamageByEntityEvent) sure).getDamager();
-                        if (!targetOption(player, this.distance(player))) {
-                            this.getTargetWeighted(player).setReason(TargetWeighted.REASON_PASSIVE_ATTACK_ENTITY);
-                            //setFollowTarget(player);
-                        }
-
-                    } else {
-                        Entity damager = ((EntityDamageByEntityEvent) sure).getDamager();
-                        if (!config.isAttackHostileEntity()) {
-                            if (damager instanceof EntityMob) {
-                                return;
-                            }
-                        }
-                        if (damager instanceof LittleNpc) {
-                            if (!Utils.canAttackNpc(this, (LittleNpc) damager, true)) {
-                                return;
-                            }
-                        }
-                        if (!targetOption(damager, distance(damager)) && damager instanceof EntityCreature) {
-                            this.getTargetWeighted((EntityCreature) damager).setReason(TargetWeighted.REASON_PASSIVE_ATTACK_ENTITY);
-                        }
-                    }
-                }
+        if (isImmobile() && !config.isImmobile()) {
+            sure.setCancelled();
+        }
+        this.level.addParticle(new DestroyBlockParticle(this, new BlockRedstone()));
+        if (sure instanceof EntityDamageByEntityEvent) {
+            if (config.isPassiveAttackEntity()) {
                 if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
                     Player player = (Player) ((EntityDamageByEntityEvent) sure).getDamager();
-                    this.handle.add(player.getName(), sure.getFinalDamage());
+                    if (!targetOption(player, this.distance(player))) {
+                        this.getTargetWeighted(player).setReason(TargetWeighted.REASON_PASSIVE_ATTACK_ENTITY);
+                    }
+
+                } else {
+                    Entity damager = ((EntityDamageByEntityEvent) sure).getDamager();
+                    if (!config.isAttackHostileEntity()) {
+                        if (damager instanceof EntityMob) {
+                            return;
+                        }
+                    }
+                    if (damager instanceof LittleNpc) {
+                        if (!Utils.canAttackNpc(this, (LittleNpc) damager, true)) {
+                            return;
+                        }
+                    }
+                    if (!targetOption(damager, distance(damager)) && damager instanceof EntityCreature) {
+                        this.getTargetWeighted((EntityCreature) damager).setReason(TargetWeighted.REASON_PASSIVE_ATTACK_ENTITY);
+                    }
                 }
             }
-        } else {
-            sure.setCancelled();
+            if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
+                Player player = (Player) ((EntityDamageByEntityEvent) sure).getDamager();
+                this.handle.add(player.getName(), sure.getFinalDamage());
+            }
         }
     }
 
