@@ -4,6 +4,7 @@ import cn.nukkit.scheduler.PluginTask;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -27,17 +28,17 @@ public class RouteFinderRunnable extends PluginTask<LittleMonsterMainClass> {
 
     @Override
     public void onRun(int i) {
-        for (LittleNpc lt : routeEntitys.keySet()) {
-            if (lt.route == null) {
-                routeEntitys.remove(lt);
+        for (Map.Entry<LittleNpc, Long> entry : routeEntitys.entrySet()) {
+            if (entry.getKey().route == null) {
+                routeEntitys.remove(entry.getKey());
                 continue;
             }
-            if (System.currentTimeMillis() - routeEntitys.get(lt) > 50 * 100) {
-                if (!lt.route.isSearching()) {
-                    lt.route.research();
+            if (System.currentTimeMillis() - entry.getValue() > 50 * 100) {
+                if (!entry.getKey().route.isSearching()) {
+                    entry.getKey().route.research();
                     continue;
                 }
-                routeEntitys.put(lt, System.currentTimeMillis());
+                routeEntitys.put(entry.getKey(), System.currentTimeMillis());
             }
         }
     }
