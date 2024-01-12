@@ -250,8 +250,8 @@ public abstract class BaseEntity extends EntityHuman {
 
     @Override
     public boolean attack(EntityDamageEvent source) {
-        if (this.damageDelay > config.getInvincibleTime()) {
-            if (source.getAttackCooldown() > this.config.getInvincibleTime()) {
+        if (this.damageDelay >= config.getInvincibleTime()) {
+            if (source.getAttackCooldown() >= this.config.getInvincibleTime()) {
                 source.setAttackCooldown(this.config.getInvincibleTime());
             }
             this.damageDelay = 0;

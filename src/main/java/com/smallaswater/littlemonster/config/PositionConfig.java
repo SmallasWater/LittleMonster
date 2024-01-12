@@ -1,10 +1,12 @@
 package com.smallaswater.littlemonster.config;
 
 import cn.nukkit.Server;
+import cn.nukkit.block.Block;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
 import cn.nukkit.utils.Config;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
+import com.smallaswater.littlemonster.route.BlockCache;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Data;
 
@@ -70,9 +72,14 @@ public class PositionConfig {
         if (this.posOffset <= 0) {
             return this.pos;
         }
-        Position position = this.pos.getLevel().getSafeSpawn(this.pos.add(Utils.rand(-this.posOffset, this.posOffset), 0, Utils.rand(-this.posOffset, this.posOffset)));
-        if (position.equals(this.pos.getLevel().getSpawnLocation())) {
-            return this.pos;
+        Position position = this.pos.add(Utils.rand(-this.posOffset, this.posOffset), 0, Utils.rand(-this.posOffset, this.posOffset));
+        for (int y=-3; y<=3; y++) {
+            Block block = BlockCache.get(position.getLevel()).getBlock((int) position.x, (int) position.y + y, (int) position.z);
+            Block up;
+            if (!block.canPassThrough() && (up = block.up()).canPassThrough() && up.up().canPassThrough()) {
+                position.setY(position.getY() + y + 1);
+                break;
+            }
         }
         return position;
     }
