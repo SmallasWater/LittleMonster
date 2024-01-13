@@ -31,9 +31,9 @@ public class LittleNpcSpawner extends AbstractEntitySpawner {
         SpawnResult result = SpawnResult.OK;
         int blockId = level.getBlockIdAt((int)pos.x, (int)pos.y, (int)pos.z);
         int biomeId = level.getBiomeId((int)pos.x, (int)pos.z);
-        if (Block.transparent[blockId]) {
+        if (Block.transparent[blockId] && blockId != Block.SNOW_LAYER) {
             result = SpawnResult.WRONG_BLOCK;
-        } else if (biomeId == 8) {
+        } else if (biomeId == 8) { //不生成在地狱群系
             result = SpawnResult.WRONG_BIOME;
         } else if (pos.y <= 255.0D && (!"nether".equals(level.getName()) || pos.y <= 127.0D) && pos.y >= 1.0D && blockId != 0) {
             config.spawn(pos, LittleMonsterMainClass.getInstance().getConfig().getInt("autospawn."+getEntityName()+".liveTime",30));
