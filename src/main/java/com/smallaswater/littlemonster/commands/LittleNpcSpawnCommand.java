@@ -4,6 +4,8 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.data.CommandParamType;
+import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
@@ -28,6 +30,55 @@ public class LittleNpcSpawnCommand extends Command {
 
     public LittleNpcSpawnCommand() {
         super("刷怪","生成命令","/lt help",new String[]{"lt"});
+
+        this.commandParameters.clear();
+        this.commandParameters.put("help", new CommandParameter[]{
+                CommandParameter.newEnum("help", new String[]{"help"})
+        });
+        this.commandParameters.put("clear", new CommandParameter[]{
+                CommandParameter.newEnum("clear", new String[]{"clear"})
+        });
+        this.commandParameters.put("create", new CommandParameter[]{
+                CommandParameter.newEnum("create", new String[]{"create"}),
+                CommandParameter.newType("name", CommandParamType.TEXT)
+        });
+        this.commandParameters.put("del", new CommandParameter[]{
+                CommandParameter.newEnum("del", new String[]{"del"}),
+                CommandParameter.newType("name", CommandParamType.TEXT)
+        });
+        this.commandParameters.put("pos", new CommandParameter[]{
+                CommandParameter.newEnum("pos", new String[]{"pos"}),
+                CommandParameter.newType("name", CommandParamType.TEXT),
+                CommandParameter.newType("monster", CommandParamType.TEXT)
+        });
+        this.commandParameters.put("dp", new CommandParameter[]{
+                CommandParameter.newEnum("dp", new String[]{"dp"}),
+                CommandParameter.newType("name", CommandParamType.TEXT)
+        });
+        this.commandParameters.put("send", new CommandParameter[]{
+                CommandParameter.newEnum("send", new String[]{"send"}),
+                CommandParameter.newType("player", CommandParamType.TARGET),
+                CommandParameter.newType("message", CommandParamType.TEXT)
+        });
+        this.commandParameters.put("spawn", new CommandParameter[]{
+                CommandParameter.newEnum("spawn", new String[]{"spawn"}),
+                CommandParameter.newType("name", CommandParamType.TEXT),
+                CommandParameter.newType("x", CommandParamType.FLOAT),
+                CommandParameter.newType("y", CommandParamType.FLOAT),
+                CommandParameter.newType("z", CommandParamType.FLOAT),
+                CommandParameter.newType("level", CommandParamType.TEXT),
+                CommandParameter.newType("time", CommandParamType.TEXT)
+        });
+        this.commandParameters.put("set", new CommandParameter[]{
+                CommandParameter.newEnum("set", new String[]{"set"})
+        });
+        this.commandParameters.put("reload", new CommandParameter[]{
+                CommandParameter.newEnum("reload", new String[]{"reload"})
+        });
+        this.commandParameters.put("save", new CommandParameter[]{
+                CommandParameter.newEnum("save", new String[]{"save"}),
+                CommandParameter.newType("name", CommandParamType.TEXT)
+        });
     }
 
     @Override
@@ -42,7 +93,7 @@ public class LittleNpcSpawnCommand extends Command {
                     sender.sendMessage("§b/lt §7pos §6<名字> <怪物>  §a创建怪物点");
                     sender.sendMessage("§b/lt §7dp §6<名字> §a删除怪物点");
                     sender.sendMessage("§b/lt §7send §6<玩家> <消息> §a给玩家发送消息");
-                    sender.sendMessage("§b/lt §7spawn §6<名字> <x> <y> <z> <level> <time(存活时间(秒))>§a生成一个怪物");
+                    sender.sendMessage("§b/lt §7spawn §6<名字> <x> <y> <z> <level> <time(存活时间(秒))> §a生成一个怪物");
                     sender.sendMessage("§b/lt §7set §a修改怪物数据");
                     sender.sendMessage("§b/lt §7reload §a重新加载配置文件");
                     sender.sendMessage("§b/lt §7save §6<名字> §a将手持物品保存在 nbtitem.yml");
