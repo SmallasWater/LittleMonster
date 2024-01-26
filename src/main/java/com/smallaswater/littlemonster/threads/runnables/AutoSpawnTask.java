@@ -9,7 +9,7 @@ import cn.nukkit.utils.Config;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.entity.autospawn.AbstractEntitySpawner;
 import com.smallaswater.littlemonster.entity.spawner.LittleNpcSpawner;
-import nukkitcoders.mobplugin.utils.Utils;
+import com.smallaswater.littlemonster.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,7 +63,7 @@ public class AutoSpawnTask extends Thread {
 
     @Override
     public void run() {
-        if (this.plugin.getServer().getOnlinePlayers().size() > 0 && this.entitySpawners.size() > 0) {
+        if (!this.plugin.getServer().getOnlinePlayers().isEmpty() && !this.entitySpawners.isEmpty()) {
             for (AbstractEntitySpawner spawner : this.entitySpawners) {
                 spawner.spawn(this.plugin.getServer().getOnlinePlayers().values());
             }
@@ -84,11 +84,11 @@ public class AutoSpawnTask extends Thread {
 
 
     public int getRandomSafeXZCoord(int degree, int safeDegree, int correctionDegree) {
-        int addX = nukkitcoders.mobplugin.utils.Utils.rand((degree >> 1) * -1, degree >> 1);
+        int addX = Utils.rand((degree >> 1) * -1, degree >> 1);
         if (addX >= 0) {
             if (degree < safeDegree) {
                 addX = safeDegree;
-                addX += nukkitcoders.mobplugin.utils.Utils.rand((correctionDegree >> 1) * -1, correctionDegree >> 1);
+                addX += Utils.rand((correctionDegree >> 1) * -1, correctionDegree >> 1);
             }
         } else {
             if (degree > safeDegree) {
