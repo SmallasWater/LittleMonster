@@ -1,5 +1,6 @@
 package com.smallaswater.littlemonster;
 
+import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.data.Skin;
 import cn.nukkit.plugin.PluginBase;
@@ -13,6 +14,7 @@ import com.smallaswater.littlemonster.manager.PlayerFlotTextManager;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
 import com.smallaswater.littlemonster.threads.runnables.*;
+import com.smallaswater.littlemonster.utils.GameCoreDownload;
 import com.smallaswater.littlemonster.utils.Utils;
 
 import javax.imageio.ImageIO;
@@ -57,6 +59,17 @@ public class LittleMonsterMainClass extends PluginBase {
 
     @Override
     public void onEnable() {
+        switch (GameCoreDownload.checkAndDownload()) {
+            case 1:
+                Server.getInstance().getPluginManager().disablePlugin(this);
+                return;
+            case 2:
+                this.getServer().getScheduler().scheduleTask(this, () ->
+                        this.getLogger().warning("MemoriesOfTime-GameCore依赖下载完成！强烈建议重启服务器以保证正确加载！")
+                );
+                break;
+        }
+
         Entity.registerEntity("LittleNpc", LittleNpc.class);
         BaseSkillManager.initSkill();
         saveDefaultConfig();

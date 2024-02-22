@@ -1,6 +1,6 @@
 ## LittleMonster
 
-**版本: v1.7.0**
+**版本: v1.7.1**
 
 感谢您使用LittleMonster副本插件 使用本插件时请阅读如下规则
 1. 本插件作者为若水, LT_Name
@@ -22,6 +22,10 @@
 ```yaml
 头部显示:  "§e{名称} §c❤§7[§a{血量}§e/§b{最大血量}§7]"
 皮肤: "粉蓝双瞳猫耳少女"
+CustomEntity:
+  enable: false
+  identifier: "LittleMonsterCustomEntity"
+  skinId: 0
 是否可移动: true
 攻击力: 1
 血量: 50
