@@ -1,6 +1,10 @@
 # 怪物配置文件
 头部显示:  "§e{名称} §c❤§7[§a{血量}§e/§b{最大血量}§7]"
 皮肤: "粉蓝双瞳猫耳少女"
+CustomEntity:
+  enable: false
+  identifier: "LittleMonsterCustomEntity"
+  skinId: 0
 是否可移动: true
 攻击力: 1
 血量: 50

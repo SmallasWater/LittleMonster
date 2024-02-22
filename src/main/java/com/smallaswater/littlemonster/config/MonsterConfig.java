@@ -1,6 +1,9 @@
 package com.smallaswater.littlemonster.config;
 
+import cn.lanink.gamecore.utils.NukkitTypeUtils;
 import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.custom.EntityDefinition;
+import cn.nukkit.entity.custom.EntityManager;
 import cn.nukkit.entity.data.Skin;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Position;
@@ -9,6 +12,7 @@ import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.entity.LittleNpc;
+import com.smallaswater.littlemonster.entity.LittleNpcCustomEntity;
 import com.smallaswater.littlemonster.items.DeathCommand;
 import com.smallaswater.littlemonster.items.DropItem;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
@@ -128,6 +132,16 @@ public class MonsterConfig {
 
     private ArrayList<String> toDamageCamp = new ArrayList<>();
 
+    // 自定义实体相关设置
+    private boolean enableCustomEntity;
+    private EntityDefinition customEntityDefinition;
+    private int customEntitySkinId;
+
+    /**
+     * 自动实体定义缓存
+     */
+    public static final HashMap<String, EntityDefinition> CUSTOM_ENTITY_DEFINITIONS = new HashMap<>();
+
     private MonsterConfig(String name) {
         this.name = name;
     }
@@ -165,6 +179,28 @@ public class MonsterConfig {
             monsterConfig.setAttackDistance(config.getDouble("攻击距离", 0.1));
             monsterConfig.setMoveSpeed(config.getDouble("移动速度", 1.0));
             monsterConfig.setInvincibleTime(config.getInt("无敌时间", 3));
+
+            if (config.getBoolean("CustomEntity.enable")) {
+                if (NukkitTypeUtils.getNukkitType() == NukkitTypeUtils.NukkitType.MOT) {
+                    monsterConfig.setEnableCustomEntity(true);
+                    String identifier = config.getString("CustomEntity.identifier");
+                    if (!CUSTOM_ENTITY_DEFINITIONS.containsKey(identifier)) {
+                        EntityDefinition entityDefinition = EntityDefinition.builder()
+                                .identifier(identifier)
+                                .spawnEgg(false)
+                                .implementation(LittleNpcCustomEntity.class)
+                                .build();
+                        EntityManager.get().registerDefinition(entityDefinition);
+                        CUSTOM_ENTITY_DEFINITIONS.put(identifier, entityDefinition);
+                    }
+                    monsterConfig.setCustomEntityDefinition(CUSTOM_ENTITY_DEFINITIONS.get(identifier));
+                    monsterConfig.setCustomEntitySkinId(config.getInt("CustomEntity.skinId"));
+                } else {
+                    LittleMonsterMainClass.getInstance().getLogger().warning(
+                            "实体 " + name + " 启用自定义实体失败！当前版本仅支持 " + NukkitTypeUtils.NukkitType.MOT.getShowName() + " 核心！"
+                    );
+                }
+            }
 
             BaseSkillManager skillManager;
             Map skillConfig = config.get("技能", new HashMap<>());
@@ -229,16 +265,19 @@ public class MonsterConfig {
     }
 
     public LittleNpc spawn(Position spawn, int time) {
-        Skin skin = new Skin();
-        if (LittleMonsterMainClass.loadSkins.containsKey(getSkin())) {
-            skin = LittleMonsterMainClass.loadSkins.get(getSkin());
-        }
+        Skin skin = LittleMonsterMainClass.loadSkins.getOrDefault(getSkin(), new Skin());
 
-        LittleNpc littleNpc = new LittleNpc(spawn.getChunk(),
-                Entity.getDefaultNBT(spawn).
-                        putCompound("Skin", new CompoundTag()
-                                .putByteArray("Data", skin.getSkinData().data)
-                                .putString("ModelId", skin.getSkinId())), this);
+        CompoundTag nbt = Entity.getDefaultNBT(spawn).
+                putCompound("Skin", new CompoundTag()
+                        .putByteArray("Data", skin.getSkinData().data)
+                        .putString("ModelId", skin.getSkinId()));
+
+        LittleNpc littleNpc;
+        if (this.enableCustomEntity) {
+            littleNpc = new LittleNpcCustomEntity(spawn.getChunk(), nbt, this);
+        } else {
+            littleNpc = new LittleNpc(spawn.getChunk(), nbt, this);
+        }
         this.npcSetting(littleNpc);
         if (time > 0) {
             littleNpc.setLiveTime(time);
