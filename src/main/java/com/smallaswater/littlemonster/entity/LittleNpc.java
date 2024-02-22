@@ -168,7 +168,7 @@ public class LittleNpc extends BaseEntityMove {
                     .replace("{x}", getFloorX() + "")
                     .replace("{y}", getFloorY() + "")
                     .replace("{z}", getFloorZ() + "")
-                    .replace("{level}", getLevel().getFolderName() + "")));
+                    .replace("{level}", getLevel().getFolderName())));
         }
         if (damager != null) {
             if (damager instanceof Player) {
@@ -176,7 +176,7 @@ public class LittleNpc extends BaseEntityMove {
                 if (getConfig().getConfig().getBoolean("公告.击杀.是否提示", true)) {
                     Server.getInstance().broadcastMessage(TextFormat.colorize('&', killMessage.replace("{name}", name)
 
-                            .replace("{player}", damager.getName() + "")));
+                            .replace("{player}", damager.getName())));
                 }
             }
         }
@@ -200,6 +200,7 @@ public class LittleNpc extends BaseEntityMove {
         }
 
         //如果在类实例化时调用onClose方法 这些变量可能为null
+        //noinspection ConstantConditions
         if (this.targetWeightedMap != null) {
             this.targetWeightedMap.clear();
         }
@@ -253,7 +254,7 @@ public class LittleNpc extends BaseEntityMove {
 
     private void onHealthListener(int health) {
         ArrayList<BaseSkillManager> skillAreaManagers = getHealthSkill(health);
-        if (skillAreaManagers.size() > 0) {
+        if (!skillAreaManagers.isEmpty()) {
             for (BaseSkillManager skillManager : skillAreaManagers) {
                 if (skillManager instanceof BaseSkillAreaManager) {
                     if (this.getFollowTarget() != null) {

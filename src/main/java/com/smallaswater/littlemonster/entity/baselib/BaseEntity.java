@@ -384,7 +384,7 @@ public abstract class BaseEntity extends EntityHuman {
         super.setSkin(skin);
     }
 
-
+    @NotNull
     public TargetWeighted getTargetWeighted(EntityCreature entity) {
         if (!this.targetWeightedMap.containsKey(entity)) {
             this.targetWeightedMap.put(entity, new TargetWeighted());

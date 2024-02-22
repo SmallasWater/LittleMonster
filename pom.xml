@@ -120,11 +120,16 @@
                             <includes>
                                 <!--<include>${project.basedir}/lib/allatori/allatori.xml</include>-->
                                 <include>${project.basedir}/src/main/resources/plugin.yml</include>
+                                <include>${project.basedir}/src/main/java/com/smallaswater/littlemonster/utils/GameCoreDownload.java</include>
                             </includes>
                             <replacements>
                                 <replacement>
                                     <token>version: ".*"</token>
                                     <value>version: "${project.version}"</value>
+                                </replacement>
+                                <replacement>
+                                    <token>MINIMUM_GAME_CORE_VERSION = ".*"</token>
+                                    <value>MINIMUM_GAME_CORE_VERSION = "${lib.GameCore.version}"</value>
                                 </replacement>
                                 <!--<replacement>
                                     <token>in=".*" out=".*"</token>
