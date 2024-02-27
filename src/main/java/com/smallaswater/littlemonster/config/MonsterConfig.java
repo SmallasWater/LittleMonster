@@ -132,6 +132,9 @@ public class MonsterConfig {
 
     private ArrayList<String> toDamageCamp = new ArrayList<>();
 
+    // 定义网络ID
+    private int networkId;
+
     // 自定义实体相关设置
     private boolean enableCustomEntity;
     private EntityDefinition customEntityDefinition;
@@ -179,6 +182,8 @@ public class MonsterConfig {
             monsterConfig.setAttackDistance(config.getDouble("攻击距离", 0.1));
             monsterConfig.setMoveSpeed(config.getDouble("移动速度", 1.0));
             monsterConfig.setInvincibleTime(config.getInt("无敌时间", 3));
+
+            monsterConfig.setNetworkId(config.getInt("实体NetworkId", -1));
 
             if (config.getBoolean("CustomEntity.enable")) {
                 if (NukkitTypeUtils.getNukkitType() == NukkitTypeUtils.NukkitType.MOT) {

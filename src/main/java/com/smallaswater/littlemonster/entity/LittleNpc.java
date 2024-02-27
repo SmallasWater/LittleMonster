@@ -21,6 +21,7 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.EntityEventPacket;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.TextFormat;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntityMove;
 import com.smallaswater.littlemonster.handle.DamageHandle;
@@ -70,13 +71,12 @@ public class LittleNpc extends BaseEntityMove {
     public UUID uuid;
 
     public LittleNpc(FullChunk chunk, CompoundTag nbt) {
-        super(chunk, nbt);
+        super(chunk, nbt, null);
         this.close();
     }
 
     public LittleNpc(FullChunk chunk, CompoundTag nbt, @NotNull MonsterConfig config) {
-        super(chunk, nbt);
-        this.config = config;
+        super(chunk, nbt, config);
         this.name = config.getName();
         this.setNameTagAlwaysVisible();
         this.setNameTagVisible();
