@@ -49,6 +49,10 @@ public class LittleMonsterMainClass extends PluginBase {
 
     private static final String[] SKINS = {"粉蓝双瞳猫耳少女","小丸子","小埋","小黑苦力怕","尸鬼","拉姆","熊孩子","狂三","米奇","考拉","黑岩射手"};
 
+
+    public static boolean hasRcRPG;
+    public static boolean hasMagicItem;
+
     @Override
     public void onLoad() {
         littleMonsterMainClass = this;
@@ -103,6 +107,9 @@ public class LittleMonsterMainClass extends PluginBase {
         PluginMasterThreadPool.executeThread(new TimmerRunnable());
         PluginMasterThreadPool.executeThread(new BlockCacheClearTask());
         this.getServer().getScheduler().scheduleRepeatingTask(this,new RouteFinderRunnable(this),10, true);
+
+        hasRcRPG = Server.getInstance().getPluginManager().getPlugin("RcRPG") != null;
+        hasMagicItem = Server.getInstance().getPluginManager().getPlugin("MagicItem") != null;
 
         this.getLogger().info("插件加载完成！");
         this.getLogger().info("GitHub: https://github.com/SmallasWater/LittleMonster");

@@ -1,6 +1,6 @@
 package com.smallaswater.littlemonster.entity;
 
-import RcRPG.AttrManager.PlayerAttr;
+import cn.lanink.gamecore.utils.NukkitTypeUtils;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.BlockRedstone;
@@ -22,9 +22,9 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.EntityEventPacket;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.TextFormat;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntityMove;
-import com.smallaswater.littlemonster.events.LittleMasterListener;
 import com.smallaswater.littlemonster.handle.DamageHandle;
 import com.smallaswater.littlemonster.items.BaseItem;
 import com.smallaswater.littlemonster.items.DeathCommand;
@@ -41,9 +41,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Method;
 import java.util.*;
-
-import static com.smallaswater.littlemonster.events.LittleMasterListener.hasRcRPG;
 
 /**
  * @author SmallasWater
@@ -187,10 +186,16 @@ public class LittleNpc extends BaseEntityMove {
 
                 int dropExp = runDeathDropExp();
                 int addition = 0;
-                if (hasRcRPG) {// 经验加成
-                    PlayerAttr manager = PlayerAttr.getPlayerAttr((Player) damager);
-                    if (manager.experienceGainMultiplier > 0) {
-                        addition = (int)((manager.experienceGainMultiplier) * dropExp);
+                if (LittleMonsterMainClass.hasRcRPG) {// 经验加成
+                    try {
+                        Method getPlayerAttr = Class.forName("RcRPG.AttrManager.PlayerAttr").getMethod("getPlayerAttr", Player.class);
+                        Object manager = getPlayerAttr.invoke(null, damager);
+                        float experienceGainMultiplier = manager.getClass().getField("experienceGainMultiplier").getFloat(manager);
+                        if (experienceGainMultiplier > 0) {
+                            addition = (int) (experienceGainMultiplier * dropExp);
+                        }
+                    } catch (Exception e) {
+                        LittleMonsterMainClass.getInstance().getLogger().error("RcRPG经验加成获取失败", e);
                     }
                 }
                 String tipText = "经验 +"+dropExp;
@@ -406,7 +411,7 @@ public class LittleNpc extends BaseEntityMove {
     //受到攻击
     @Override
     public void onAttack(EntityDamageEvent sure) {
-        if (isImmobile() && !config.isImmobile() && !hasRcRPG) {
+        if (isImmobile() && !config.isImmobile() && !LittleMonsterMainClass.hasRcRPG) {
             sure.setCancelled();
         }
         if (sure instanceof EntityDamageByEntityEvent) {
@@ -434,7 +439,9 @@ public class LittleNpc extends BaseEntityMove {
                     }
                 }
             }
-            if (hasRcRPG) return;// 有 RcRPG 时无需处理攻击事件
+            if (LittleMonsterMainClass.hasRcRPG) {
+                return;// 有 RcRPG 时无需处理攻击事件
+            }
             if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
                 Player player = (Player) ((EntityDamageByEntityEvent) sure).getDamager();
                 this.handle.add(player.getName(), sure.getFinalDamage());
@@ -518,7 +525,9 @@ public class LittleNpc extends BaseEntityMove {
                         if (launch.isCancelled()) {
                             projectile.kill();
                         } else {
-                            projectile.setCanBeSavedWithChunk(false);
+                            if (NukkitTypeUtils.getNukkitType() == NukkitTypeUtils.NukkitType.MOT) {
+                                projectile.setCanBeSavedWithChunk(false);
+                            }
                             projectile.spawnToAll();
                             ((EntityArrow) projectile).setPickupMode(EntityArrow.PICKUP_NONE);
                             this.level.addSound(this, Sound.RANDOM_BOW);

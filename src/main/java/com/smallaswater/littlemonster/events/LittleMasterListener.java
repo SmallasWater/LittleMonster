@@ -2,7 +2,6 @@ package com.smallaswater.littlemonster.events;
 
 
 import cn.nukkit.Player;
-import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
@@ -33,8 +32,7 @@ import com.smallaswater.littlemonster.windows.LittleWindow;
  * Package com.smallaswater.littlemonster.events
  */
 public class LittleMasterListener implements Listener {
-    public static final boolean hasMagicItem = Server.getInstance().getPluginManager().getPlugin("MagicItem") != null;
-    public static final boolean hasRcRPG = Server.getInstance().getPluginManager().getPlugin("RcRPG") != null;
+
     @EventHandler
     public void onDamage(EntityDamageEvent e) {
         if(e instanceof EntityDamageByEntityEvent){
@@ -49,7 +47,7 @@ public class LittleMasterListener implements Listener {
                 /*if(d instanceof Player){
                     ((LittleNpc) entity).handle.add(d.getName(),e.getDamage());
                 }*/
-                if (hasRcRPG) return;// 有 RcRPG 时无需处理伤害事件
+                if (LittleMonsterMainClass.hasRcRPG) return;// 有 RcRPG 时无需处理伤害事件
                 float damage = e.getDamage() - ((LittleNpc) entity).getConfig().getDelDamage();
                 if(damage < 0){
                     damage = 0;

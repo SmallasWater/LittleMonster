@@ -22,6 +22,8 @@
 ```yaml
 头部显示:  "§e{名称} §c❤§7[§a{血量}§e/§b{最大血量}§7]"
 皮肤: "粉蓝双瞳猫耳少女"
+BOSS血条: false
+实体NetworkId: -1
 CustomEntity:
   enable: false
   identifier: "LittleMonsterCustomEntity"
@@ -59,6 +61,8 @@ CustomEntity:
   护腿: "0:0"
   靴子: "0:0"
 
+掉落经验:
+  - 1
 药水效果:
   - "20:1:5"
 
@@ -91,6 +95,8 @@ CustomEntity:
   item:
     - id: "264:0:1@item"
       round: 20 #掉落几率 20%
+    - id: "1:铜钱@mi"
+      round: 80 #掉落几率 80%
   cmd:
     - cmd: ''
       round: 0 #命令执行概率 0%

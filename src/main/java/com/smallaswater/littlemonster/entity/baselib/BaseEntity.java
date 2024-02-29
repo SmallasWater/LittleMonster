@@ -9,16 +9,13 @@ import cn.nukkit.entity.EntityHuman;
 import cn.nukkit.entity.data.Skin;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
-import cn.nukkit.item.Item;
 import cn.nukkit.level.Level;
-import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.PlayerSkinPacket;
 import cn.nukkit.network.protocol.RemoveEntityPacket;
 import cn.nukkit.network.protocol.SetEntityLinkPacket;
-import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
@@ -470,6 +467,20 @@ public abstract class BaseEntity extends EntityHuman {
         super.setSkin(skin);
     }
 
+    /**
+     * 获取死亡掉落经验值
+     *
+     * @return 经验值
+     */
+    public int runDeathDropExp() {
+        if (config.getDropExp().size() > 1) {
+            return Utils.rand(config.getDropExp().get(0), config.getDropExp().get(1));
+        } else if (!config.getDropExp().isEmpty()) {
+            return config.getDropExp().get(0);
+        }
+        return 0;
+    }
+
     @NotNull
     public TargetWeighted getTargetWeighted(EntityCreature entity) {
         if (!this.targetWeightedMap.containsKey(entity)) {
@@ -510,18 +521,6 @@ public abstract class BaseEntity extends EntityHuman {
             return this.base + this.reason + (this.causeDamage * 1.2) - (this.distance * 0.5);
         }
 
-    }
-
-    /*
-    获取死亡掉落经验值
-     */
-    public int runDeathDropExp() {
-        if (config.getDropExp().size() > 1) {
-            return Utils.rand(config.getDropExp().get(0), config.getDropExp().get(1));
-        } else if (!config.getDropExp().isEmpty()) {
-            return config.getDropExp().get(0);
-        }
-        return 0;
     }
 
 }

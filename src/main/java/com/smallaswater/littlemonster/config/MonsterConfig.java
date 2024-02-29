@@ -20,7 +20,6 @@ import com.smallaswater.littlemonster.skill.defaultskill.*;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Data;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -296,7 +295,9 @@ public class MonsterConfig {
         if (time > 0) {
             littleNpc.setLiveTime(time);
         }
-        littleNpc.setCanBeSavedWithChunk(false);
+        if (NukkitTypeUtils.getNukkitType() == NukkitTypeUtils.NukkitType.MOT) {
+            littleNpc.setCanBeSavedWithChunk(false);
+        }
         littleNpc.spawnToAll();
         return littleNpc;
     }

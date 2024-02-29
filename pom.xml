@@ -91,20 +91,20 @@
             <scope>system</scope>
             <systemPath>${pom.basedir}/lib/MobPlugin-1.21.4.jar</systemPath>
         </dependency>
-        <dependency>
+        <!--<dependency>
             <groupId>cn.ankele.plugin.MagicItem</groupId>
             <artifactId>MagicItem</artifactId>
             <version>1.1.0</version>
             <scope>system</scope>
             <systemPath>${pom.basedir}/lib/MagicItem-1.1.0.jar</systemPath>
-        </dependency>
-        <dependency>
+        </dependency>-->
+        <!--<dependency>
             <groupId>RcRPG.Main</groupId>
             <artifactId>RcRPG</artifactId>
             <version>1.0.4-MOT</version>
             <scope>system</scope>
             <systemPath>${pom.basedir}/lib/RcRPG-1.0.4-MOT.jar</systemPath>
-        </dependency>
+        </dependency>-->
     </dependencies>
 
     <build>
