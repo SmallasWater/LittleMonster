@@ -18,6 +18,7 @@ public abstract class BaseItem {
     protected static final String SPLIT_2 = ":";
 
     protected static final String NBT = "nbt";
+    protected static final String MI = "mi";
 
     protected static final String NOT = "not";
 

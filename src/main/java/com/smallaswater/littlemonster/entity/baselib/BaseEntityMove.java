@@ -15,12 +15,14 @@ import cn.nukkit.math.NukkitMath;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
+import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.route.RouteFinder;
 import com.smallaswater.littlemonster.route.WalkerRouteFinder;
 import com.smallaswater.littlemonster.utils.Utils;
 import nukkitcoders.mobplugin.entities.animal.WalkingAnimal;
 import nukkitcoders.mobplugin.entities.monster.Monster;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
@@ -42,8 +44,8 @@ public abstract class BaseEntityMove extends BaseEntity {
 
     private Vector3 randomMoveTarget = null;
 
-    public BaseEntityMove(FullChunk chunk, CompoundTag nbt) {
-        super(chunk, nbt);
+    public BaseEntityMove(FullChunk chunk, CompoundTag nbt, @NotNull MonsterConfig config) {
+        super(chunk, nbt, config);
 
         //TODO 这太消耗性能，等优化好再启用
         //this.route.setAllowFuzzyResults(true);

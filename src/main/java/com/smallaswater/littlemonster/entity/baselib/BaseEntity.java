@@ -9,13 +9,20 @@ import cn.nukkit.entity.EntityHuman;
 import cn.nukkit.entity.data.Skin;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.item.Item;
+import cn.nukkit.level.Level;
+import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.PlayerSkinPacket;
+import cn.nukkit.network.protocol.RemoveEntityPacket;
+import cn.nukkit.network.protocol.SetEntityLinkPacket;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
+import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,6 +44,9 @@ public abstract class BaseEntity extends EntityHuman {
     @Setter
     public boolean isDeathFollowMaster = false;
 
+    //准则 不会伤害主人
+    @Setter
+    @Getter
     protected EntityHuman masterHuman = null;
 
     protected float moveMultiplier = 1.0f;
@@ -46,10 +56,14 @@ public abstract class BaseEntity extends EntityHuman {
     int stayTime = 0;
 
     //目标
+    @Setter
+    @Getter
     Vector3 target = null;
     //锁定生物
     Entity followTarget = null;
 
+    @Setter
+    @Getter
     private boolean movement = true;
 
     protected ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
@@ -92,6 +106,7 @@ public abstract class BaseEntity extends EntityHuman {
     @Deprecated
     public double attackDistance = 0.1;
     //攻击速度
+    @Getter
     public int attackSleepTime = 23;
     //伤害
     public double damage = 2;
@@ -100,8 +115,24 @@ public abstract class BaseEntity extends EntityHuman {
 
     public int seeSize = 20;
 
-    BaseEntity(FullChunk chunk, CompoundTag nbt) {
+    public float width_ = -1;
+    public float height_ = -1;
+    public float length_ = -1;
+
+    BaseEntity(FullChunk chunk, CompoundTag nbt, @NotNull MonsterConfig config) {
         super(chunk, nbt);
+        this.setConfig(config);
+        if (config.getNetworkId() != -1) {
+            Entity temp = Entity.createEntity(String.valueOf(config.getNetworkId()), chunk, nbt);
+            if (temp != null) {
+                width_ = temp.getWidth();
+                height_ = temp.getHeight();
+                length_ = temp.getLength();
+                temp.close();
+            }
+            this.dataProperties.putFloat(DATA_BOUNDING_BOX_HEIGHT, getHeight());
+            this.dataProperties.putFloat(DATA_BOUNDING_BOX_WIDTH, getWidth());
+        }
     }
 
     @Override
@@ -116,44 +147,20 @@ public abstract class BaseEntity extends EntityHuman {
         }
     }
 
-    public boolean hasNoTarget(){
-        return getFollowTarget() == null  || (getFollowTarget() != null && targetOption(getFollowTarget(),distance(getFollowTarget())));
-    }
-
-    public MonsterConfig getConfig() {
-        return config;
-    }
-
-    public int getAttackSleepTime() {
-        return attackSleepTime;
-    }
-
-    public boolean isMovement() {
-        return this.movement;
+    public boolean hasNoTarget() {
+        return getFollowTarget() == null || (getFollowTarget() != null && targetOption(getFollowTarget(), distance(getFollowTarget())));
     }
 
     public boolean isKnockback() {
         return this.attackTime > 0;
     }
 
-    public void setMovement(boolean value) {
-        this.movement = value;
-    }
-
     public double getSpeed() {
         return speed;
     }
 
-    public Vector3 getTarget() {
-        return this.target;
-    }
-
-    public void setTarget(Vector3 vec) {
-        this.target = vec;
-    }
-
     public Entity getFollowTarget() {
-        return this.followTarget != null ? this.followTarget : (this.target instanceof EntityCreature ? (EntityCreature)this.target : null);
+        return this.followTarget != null ? this.followTarget : (this.target instanceof EntityCreature ? (EntityCreature) this.target : null);
     }
 
     public Vector3 getTargetVector() {
@@ -164,15 +171,6 @@ public abstract class BaseEntity extends EntityHuman {
         } else {
             return null;
         }
-    }
-
-    public void setMasterHuman(EntityHuman masterHuman) {
-        this.masterHuman = masterHuman;
-    }
-
-    //准则 不会伤害主人
-    public EntityHuman getMasterHuman() {
-        return masterHuman;
     }
 
     public void setFollowTarget(Entity target) {
@@ -187,7 +185,7 @@ public abstract class BaseEntity extends EntityHuman {
      * @param player 玩家
      * @return 是否满足继续跟踪的条件
      */
-    protected boolean isPlayerTarget(Player player){
+    protected boolean isPlayerTarget(Player player) {
         return player.isOnline() && !player.closed && player.isAlive() &&
                 (player.isSurvival() || player.isAdventure()) &&
                 player.getLevel() == this.getLevel() &&
@@ -225,6 +223,67 @@ public abstract class BaseEntity extends EntityHuman {
     }
 
     @Override
+    public int getNetworkId() {
+        if (this.config == null) {
+            return super.getNetworkId();
+        }
+        return this.config.getNetworkId();
+    }
+
+    @Override
+    protected float getBaseOffset() {
+        if (this.config.getNetworkId() == -1) {
+            return super.getBaseOffset();
+        }
+        return 0.0F;
+    }
+
+    @Override
+    public void addMovement(double x, double y, double z, double yaw, double pitch, double headYaw) {
+        if (this.config.getNetworkId() == -1) {
+            this.level.addPlayerMovement(this, x, y, z, yaw, pitch, headYaw);
+        } else {
+            this.level.addEntityMovement(this, x, y, z, yaw, pitch, headYaw);
+        }
+    }
+
+    @Override
+    public void spawnTo(Player player) {
+        if (this.config.getNetworkId() == -1) {
+            super.spawnTo(player);
+            this.sendData(player);
+        }
+        if (!this.hasSpawned.containsKey(player.getLoaderId()) && this.chunk != null && player.usedChunks.containsKey(Level.chunkHash(this.chunk.getX(), this.chunk.getZ()))) {
+            this.hasSpawned.put(player.getLoaderId(), player);
+            player.dataPacket(this.createAddEntityPacket());
+            this.sendData(player);
+        }
+        if (this.riding != null) {
+            this.riding.spawnTo(player);
+            SetEntityLinkPacket pkk = new SetEntityLinkPacket();
+            pkk.vehicleUniqueId = this.riding.getId();
+            pkk.riderUniqueId = this.getId();
+            pkk.type = 1;
+            pkk.immediate = 1;
+            player.dataPacket(pkk);
+        }
+    }
+
+    @Override
+    public void despawnFrom(Player player) {
+        if (this.getNetworkId() == -1) {
+            super.despawnFrom(player);
+        }
+
+        if (this.hasSpawned.containsKey(player.getLoaderId())) {
+            RemoveEntityPacket pk = new RemoveEntityPacket();
+            pk.eid = this.getId();
+            player.dataPacket(pk);
+            this.hasSpawned.remove(player.getLoaderId());
+        }
+    }
+
+    @Override
     public boolean entityBaseTick(int tickDiff) {
         super.entityBaseTick(tickDiff);
         if (!this.isAlive()) {
@@ -242,6 +301,30 @@ public abstract class BaseEntity extends EntityHuman {
         }
         onUpdata();
         return true;
+    }
+
+    @Override
+    public float getWidth() {
+        if (this.width_ == -1) {
+            return super.getWidth();
+        }
+        return width_;
+    }
+
+    @Override
+    public float getHeight() {
+        if (this.height_ == -1) {
+            return super.getHeight();
+        }
+        return height_;
+    }
+
+    @Override
+    public float getLength() {
+        if (this.length_ == -1) {
+            return super.getLength();
+        }
+        return length_;
     }
 
     public abstract void onUpdata();
@@ -282,15 +365,18 @@ public abstract class BaseEntity extends EntityHuman {
         this.config = Objects.requireNonNull(config);
     }
 
-    /**攻击生物
+    /**
+     * 攻击生物
+     *
      * @param player 生物
-     * */
+     */
     abstract public void attackEntity(EntityCreature player);
 
     /**
      * 生物伤害
+     *
      * @return 伤害值
-     * */
+     */
     abstract public float getDamage();
 
     //private final ReentrantLock hasBlockInLineLock = new ReentrantLock();
@@ -313,11 +399,11 @@ public abstract class BaseEntity extends EntityHuman {
 //                hasBlockInLineLock.lock();
 //                CompletableFuture.supplyAsync(() -> {
 
-                    Block targetBlock = this.getTargetBlock(Math.min((int) this.distance(target), 10));
-                    if (targetBlock != null) {
-                        return !targetBlock.isTransparent();
-                    }
-                    return false;
+        Block targetBlock = this.getTargetBlock(Math.min((int) this.distance(target), 10));
+        if (targetBlock != null) {
+            return !targetBlock.isTransparent();
+        }
+        return false;
 //                    return false;
 //                }, PluginMasterThreadPool.ASYNC_EXECUTOR).thenAccept(value -> {
 //                    this.isHasBlock.set(value);
@@ -424,6 +510,18 @@ public abstract class BaseEntity extends EntityHuman {
             return this.base + this.reason + (this.causeDamage * 1.2) - (this.distance * 0.5);
         }
 
+    }
+
+    /*
+    获取死亡掉落经验值
+     */
+    public int runDeathDropExp() {
+        if (config.getDropExp().size() > 1) {
+            return Utils.rand(config.getDropExp().get(0), config.getDropExp().get(1));
+        } else if (!config.getDropExp().isEmpty()) {
+            return config.getDropExp().get(0);
+        }
+        return 0;
     }
 
 }

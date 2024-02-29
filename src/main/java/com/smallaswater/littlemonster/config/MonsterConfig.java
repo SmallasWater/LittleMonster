@@ -20,6 +20,7 @@ import com.smallaswater.littlemonster.skill.defaultskill.*;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Data;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -132,6 +133,14 @@ public class MonsterConfig {
 
     private ArrayList<String> toDamageCamp = new ArrayList<>();
 
+    // 掉落经验
+    private ArrayList<Integer> dropExp = new ArrayList<>();
+
+    // 显示boss血条
+    private boolean showBossBar = false;
+    // 定义网络ID
+    private int networkId;
+
     // 自定义实体相关设置
     private boolean enableCustomEntity;
     private EntityDefinition customEntityDefinition;
@@ -179,6 +188,10 @@ public class MonsterConfig {
             monsterConfig.setAttackDistance(config.getDouble("攻击距离", 0.1));
             monsterConfig.setMoveSpeed(config.getDouble("移动速度", 1.0));
             monsterConfig.setInvincibleTime(config.getInt("无敌时间", 3));
+
+            monsterConfig.setDropExp(new ArrayList<>(config.getIntegerList("掉落经验")));
+            monsterConfig.setNetworkId(config.getInt("实体NetworkId", -1));
+            monsterConfig.setShowBossBar(config.getBoolean("BOSS血条", false));
 
             if (config.getBoolean("CustomEntity.enable")) {
                 if (NukkitTypeUtils.getNukkitType() == NukkitTypeUtils.NukkitType.MOT) {
@@ -278,10 +291,12 @@ public class MonsterConfig {
         } else {
             littleNpc = new LittleNpc(spawn.getChunk(), nbt, this);
         }
+
         this.npcSetting(littleNpc);
         if (time > 0) {
             littleNpc.setLiveTime(time);
         }
+        littleNpc.setCanBeSavedWithChunk(false);
         littleNpc.spawnToAll();
         return littleNpc;
     }

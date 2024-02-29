@@ -1,5 +1,6 @@
 package com.smallaswater.littlemonster.entity;
 
+import RcRPG.AttrManager.PlayerAttr;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.BlockRedstone;
@@ -23,6 +24,7 @@ import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.TextFormat;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntityMove;
+import com.smallaswater.littlemonster.events.LittleMasterListener;
 import com.smallaswater.littlemonster.handle.DamageHandle;
 import com.smallaswater.littlemonster.items.BaseItem;
 import com.smallaswater.littlemonster.items.DeathCommand;
@@ -40,6 +42,8 @@ import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+
+import static com.smallaswater.littlemonster.events.LittleMasterListener.hasRcRPG;
 
 /**
  * @author SmallasWater
@@ -70,13 +74,12 @@ public class LittleNpc extends BaseEntityMove {
     public UUID uuid;
 
     public LittleNpc(FullChunk chunk, CompoundTag nbt) {
-        super(chunk, nbt);
+        super(chunk, nbt, null);
         this.close();
     }
 
     public LittleNpc(FullChunk chunk, CompoundTag nbt, @NotNull MonsterConfig config) {
-        super(chunk, nbt);
-        this.config = config;
+        super(chunk, nbt, config);
         this.name = config.getName();
         this.setNameTagAlwaysVisible();
         this.setNameTagVisible();
@@ -127,6 +130,7 @@ public class LittleNpc extends BaseEntityMove {
             damager = ((EntityDamageByEntityEvent) d).getDamager();
         }
         LinkedList<Item> items = new LinkedList<>();
+        // 死亡执行命令
         for (DeathCommand command : getConfig().getDeathCommand()) {
             if (command.getRound() >= Utils.rand(1, 100)) {
                 String cmd = command.getCmd();
@@ -155,6 +159,8 @@ public class LittleNpc extends BaseEntityMove {
                 }
             }
         }
+
+        // 死亡掉落物品
         for (DropItem key : getConfig().getDeathItem()) {
             if (key.getRound() >= Utils.rand(1, 100)) {
                 items.add(key.getItem());
@@ -178,8 +184,27 @@ public class LittleNpc extends BaseEntityMove {
 
                             .replace("{player}", damager.getName())));
                 }
+
+                int dropExp = runDeathDropExp();
+                int addition = 0;
+                if (hasRcRPG) {// 经验加成
+                    PlayerAttr manager = PlayerAttr.getPlayerAttr((Player) damager);
+                    if (manager.experienceGainMultiplier > 0) {
+                        addition = (int)((manager.experienceGainMultiplier) * dropExp);
+                    }
+                }
+                String tipText = "经验 +"+dropExp;
+                if (addition > 0) {
+                    tipText = "经验 +"+dropExp+"§a("+addition+")";
+                    dropExp += addition;
+                }
+                if (dropExp > 0) {
+                    ((Player) damager).addExperience(dropExp);// TODO:升级音效
+                    ((Player) damager).sendActionBar(tipText);
+                }
             }
         }
+
     }
 
     @Override
@@ -324,22 +349,24 @@ public class LittleNpc extends BaseEntityMove {
                 healTime = 0;
                 this.heal(heal);
             }
-            if (targetOption(this.getFollowTarget(), this.distance(this.getFollowTarget()))) {
-                if (boss != null) {
-                    BossBarManager.BossBarApi.removeBossBar(boss);
-                    boss = null;
+            if (config.isShowBossBar()) {
+                if (targetOption(this.getFollowTarget(), this.distance(this.getFollowTarget()))) {
+                    if (boss != null) {
+                        BossBarManager.BossBarApi.removeBossBar(boss);
+                        boss = null;
+                    }
+                    return;
                 }
-                return;
-            }
-            if (this.getFollowTarget() instanceof Player) {
-                boss = (Player) this.getFollowTarget();
-                if (!BossBarManager.BossBarApi.hasCreate((Player) this.getFollowTarget(), getId())) {
-                    BossBarManager.BossBarApi.createBossBar((Player) this.getFollowTarget(), getId());
+                if (this.getFollowTarget() instanceof Player) {
+                    boss = (Player) this.getFollowTarget();
+                    if (!BossBarManager.BossBarApi.hasCreate((Player) this.getFollowTarget(), getId())) {
+                        BossBarManager.BossBarApi.createBossBar((Player) this.getFollowTarget(), getId());
+                    }
+                    BossBarManager.BossBarApi.showBoss((Player) getFollowTarget(),
+                            getNameTag(),
+                            getHealth(),
+                            getMaxHealth());
                 }
-                BossBarManager.BossBarApi.showBoss((Player) getFollowTarget(),
-                        getNameTag(),
-                        getHealth(),
-                        getMaxHealth());
             }
         } else {
             if (getFollowTarget() == null || !config.isUnFightHeal()) {
@@ -348,9 +375,11 @@ public class LittleNpc extends BaseEntityMove {
                     this.heal(heal);
                 }
             }
-            if (boss != null) {
-                BossBarManager.BossBarApi.removeBossBar(boss);
-                boss = null;
+            if (config.isShowBossBar()) {
+                if (boss != null) {
+                    BossBarManager.BossBarApi.removeBossBar(boss);
+                    boss = null;
+                }
             }
         }
     }
@@ -377,10 +406,9 @@ public class LittleNpc extends BaseEntityMove {
     //受到攻击
     @Override
     public void onAttack(EntityDamageEvent sure) {
-        if (isImmobile() && !config.isImmobile()) {
+        if (isImmobile() && !config.isImmobile() && !hasRcRPG) {
             sure.setCancelled();
         }
-        this.level.addParticle(new DestroyBlockParticle(this, new BlockRedstone()));
         if (sure instanceof EntityDamageByEntityEvent) {
             if (config.isPassiveAttackEntity()) {
                 if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
@@ -406,11 +434,13 @@ public class LittleNpc extends BaseEntityMove {
                     }
                 }
             }
+            if (hasRcRPG) return;// 有 RcRPG 时无需处理攻击事件
             if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
                 Player player = (Player) ((EntityDamageByEntityEvent) sure).getDamager();
                 this.handle.add(player.getName(), sure.getFinalDamage());
             }
         }
+        this.level.addParticle(new DestroyBlockParticle(this, new BlockRedstone()));
     }
 
     @Override
@@ -488,6 +518,7 @@ public class LittleNpc extends BaseEntityMove {
                         if (launch.isCancelled()) {
                             projectile.kill();
                         } else {
+                            projectile.setCanBeSavedWithChunk(false);
                             projectile.spawnToAll();
                             ((EntityArrow) projectile).setPickupMode(EntityArrow.PICKUP_NONE);
                             this.level.addSound(this, Sound.RANDOM_BOW);
