@@ -12,11 +12,11 @@ import static java.lang.Integer.parseInt;
 /**
  * @author 若水
  */
-public class DropItem extends BaseItem{
+public class DropItem extends BaseItem {
 
     private Item item;
 
-    public DropItem(Item item, int round){
+    public DropItem(Item item, int round) {
         super(round);
         this.item = item;
     }
@@ -25,17 +25,17 @@ public class DropItem extends BaseItem{
         return item;
     }
 
-    public static DropItem toItem(String s,int round){
-        if(s.split(SPLIT_1).length > 1){
-            if(NBT.equalsIgnoreCase(s.split(SPLIT_1)[1])){
-                String id  = s.split(SPLIT_1)[0];
+    public static DropItem toItem(String s, int round) {
+        if (s.split(SPLIT_1).length > 1) {
+            if (NBT.equalsIgnoreCase(s.split(SPLIT_1)[1])) {
+                String id = s.split(SPLIT_1)[0];
                 int count = 1;
-                if(id.split(SPLIT_2).length > 1){
+                if (id.split(SPLIT_2).length > 1) {
                     count = Integer.parseInt(id.split(SPLIT_2)[1]);
                     id = id.split(SPLIT_2)[0];
                 }
                 Item item = toItem(id);
-                if(item != null) {
+                if (item != null) {
                     item.setCount(count);
                     return new DropItem(item, round);
                 }
@@ -48,11 +48,9 @@ public class DropItem extends BaseItem{
                         Map<String, Object> otherItems = (Map<String, Object>) aClass.getMethod("getOthers").invoke(null);
                         String[] args = original.split(SPLIT_2);
                         if (items.containsKey(args[1])) {
-                            Object item = items.get(args[1]);
-                            Class<?> itemBeanClass = Class.forName("cn.ankele.plugin.bean.ItemBean");
                             Item back = (Item) Class.forName("cn.ankele.plugin.utils.BaseCommand")
-                                    .getMethod("createItem", itemBeanClass)
-                                    .invoke(null, item);
+                                    .getMethod("createItem", Class.forName("cn.ankele.plugin.bean.ItemBean"))
+                                    .invoke(null, items.get(args[1]));
                             back.setCount(parseInt(args[0]));
                             return new DropItem(back, round);
                         } else if (otherItems.containsKey(args[1])) {
@@ -62,14 +60,16 @@ public class DropItem extends BaseItem{
                             item.setCompoundTag(Utils.hexStringToBytes(otherItemArr[3]));
                             return new DropItem(item, round);
                         } else {
-                            LittleMonsterMainClass.getInstance().getLogger().warning("MagicItem物品不存在：" + args[1]);
+                            LittleMonsterMainClass.getInstance().getLogger().warning("MagicItem物品不存在：" + original);
                         }
                     } catch (Exception e) {
                         LittleMonsterMainClass.getInstance().getLogger().error("MagicItem物品解析错误：", e);
                     }
+                } else {
+                    LittleMonsterMainClass.getInstance().getLogger().warning("MagicItem 前置不存在，无法解析物品：" + s);
                 }
-            } else{
-                return new DropItem(toStringItem(s.split(SPLIT_1)[0]),round);
+            } else {
+                return new DropItem(toStringItem(s.split(SPLIT_1)[0]), round);
             }
         }
         return null;
@@ -77,8 +77,8 @@ public class DropItem extends BaseItem{
 
     @Override
     public String toString() {
-        return item.hasCompoundTag()?
-                item.getId()+":"+item.getDamage()+":"+item.getCount()+"@nbt":
-                item.getId()+":"+item.getDamage()+":"+item.getCount()+"@item";
+        return item.hasCompoundTag() ?
+                item.getId() + ":" + item.getDamage() + ":" + item.getCount() + "@nbt" :
+                item.getId() + ":" + item.getDamage() + ":" + item.getCount() + "@item";
     }
 }
