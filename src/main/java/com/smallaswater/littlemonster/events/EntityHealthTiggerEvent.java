@@ -8,5 +8,6 @@ import cn.nukkit.event.Event;
  * Package com.smallaswater.littlemonster.events
  * 保留
  */
+@Deprecated
 public class EntityHealthTiggerEvent extends Event {
 }

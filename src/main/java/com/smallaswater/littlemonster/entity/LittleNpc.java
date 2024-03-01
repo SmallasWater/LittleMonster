@@ -25,6 +25,7 @@ import cn.nukkit.utils.TextFormat;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntityMove;
+import com.smallaswater.littlemonster.events.entity.LittleMonsterEntityDeathDropExpEvent;
 import com.smallaswater.littlemonster.handle.DamageHandle;
 import com.smallaswater.littlemonster.items.BaseItem;
 import com.smallaswater.littlemonster.items.DeathCommand;
@@ -179,33 +180,39 @@ public class LittleNpc extends BaseEntityMove {
             if (damager instanceof Player) {
                 String killMessage = getConfig().getConfig().getString("公告.击杀.信息", "&e[ &bBOSS提醒 &e] &d{name} 被 {player} 击杀");
                 if (getConfig().getConfig().getBoolean("公告.击杀.是否提示", true)) {
-                    Server.getInstance().broadcastMessage(TextFormat.colorize('&', killMessage.replace("{name}", name)
-
-                            .replace("{player}", damager.getName())));
+                    Server.getInstance().broadcastMessage(TextFormat.colorize('&', killMessage
+                            .replace("{name}", name)
+                            .replace("{player}", damager.getName()))
+                    );
                 }
 
-                int dropExp = runDeathDropExp();
-                int addition = 0;
-                if (LittleMonsterMainClass.hasRcRPG) {// 经验加成
-                    try {
-                        Method getPlayerAttr = Class.forName("RcRPG.AttrManager.PlayerAttr").getMethod("getPlayerAttr", Player.class);
-                        Object manager = getPlayerAttr.invoke(null, damager);
-                        float experienceGainMultiplier = manager.getClass().getField("experienceGainMultiplier").getFloat(manager);
-                        if (experienceGainMultiplier > 0) {
-                            addition = (int) (experienceGainMultiplier * dropExp);
+                LittleMonsterEntityDeathDropExpEvent expEvent = new LittleMonsterEntityDeathDropExpEvent(this, this.runDeathDropExp());
+                Server.getInstance().getPluginManager().callEvent(expEvent);
+                if (!expEvent.isCancelled()) {
+                    int dropExp = expEvent.getDropExp();
+                    int addition = 0;
+                    // TODO 事件完成后移除这个兼容
+                    if (LittleMonsterMainClass.hasRcRPG) {// 经验加成
+                        try {
+                            Method getPlayerAttr = Class.forName("RcRPG.AttrManager.PlayerAttr").getMethod("getPlayerAttr", Player.class);
+                            Object manager = getPlayerAttr.invoke(null, damager);
+                            float experienceGainMultiplier = manager.getClass().getField("experienceGainMultiplier").getFloat(manager);
+                            if (experienceGainMultiplier > 0) {
+                                addition = (int) (experienceGainMultiplier * dropExp);
+                            }
+                        } catch (Exception e) {
+                            LittleMonsterMainClass.getInstance().getLogger().error("RcRPG经验加成获取失败", e);
                         }
-                    } catch (Exception e) {
-                        LittleMonsterMainClass.getInstance().getLogger().error("RcRPG经验加成获取失败", e);
                     }
-                }
-                String tipText = "经验 +"+dropExp;
-                if (addition > 0) {
-                    tipText = "经验 +"+dropExp+"§a("+addition+")";
-                    dropExp += addition;
-                }
-                if (dropExp > 0) {
-                    ((Player) damager).addExperience(dropExp);// TODO:升级音效
-                    ((Player) damager).sendActionBar(tipText);
+                    String tipText = "经验 +" + dropExp;
+                    if (addition > 0) {
+                        tipText = "经验 +" + dropExp + "§a(" + addition + ")";
+                        dropExp += addition;
+                    }
+                    if (dropExp > 0) {
+                        ((Player) damager).addExperience(dropExp);// TODO:升级音效
+                        ((Player) damager).sendActionBar(tipText);
+                    }
                 }
             }
         }

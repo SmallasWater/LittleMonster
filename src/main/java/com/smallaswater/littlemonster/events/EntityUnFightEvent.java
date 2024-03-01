@@ -7,5 +7,6 @@ import cn.nukkit.event.Event;
  * Create on 2021/7/6 14:50
  * Package com.smallaswater.littlemonster.events
  */
+@Deprecated
 public class EntityUnFightEvent extends Event {
 }
