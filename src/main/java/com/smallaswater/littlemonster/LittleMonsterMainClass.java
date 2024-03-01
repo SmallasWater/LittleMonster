@@ -74,6 +74,9 @@ public class LittleMonsterMainClass extends PluginBase {
                 break;
         }
 
+        hasRcRPG = Server.getInstance().getPluginManager().getPlugin("RcRPG") != null;
+        hasMagicItem = Server.getInstance().getPluginManager().getPlugin("MagicItem") != null;
+
         Entity.registerEntity("LittleNpc", LittleNpc.class);
         BaseSkillManager.initSkill();
         saveDefaultConfig();
@@ -107,9 +110,6 @@ public class LittleMonsterMainClass extends PluginBase {
         PluginMasterThreadPool.executeThread(new TimmerRunnable());
         PluginMasterThreadPool.executeThread(new BlockCacheClearTask());
         this.getServer().getScheduler().scheduleRepeatingTask(this,new RouteFinderRunnable(this),10, true);
-
-        hasRcRPG = Server.getInstance().getPluginManager().getPlugin("RcRPG") != null;
-        hasMagicItem = Server.getInstance().getPluginManager().getPlugin("MagicItem") != null;
 
         this.getLogger().info("插件加载完成！");
         this.getLogger().info("GitHub: https://github.com/SmallasWater/LittleMonster");
