@@ -206,41 +206,36 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         //处理骑乘
         this.updatePassengers();
 
-        if (currentTick % 5 == 0) {
-            if (currentTick % 30 == 0) {
-                this.getLevel().addParticle(new HappyVillagerParticle(this.getPosition().add(0, getHeight())));
-            }
-            checkTarget(currentTick);
+        if (currentTick % 10 == 0) {
+            this.getLevel().addParticle(new HappyVillagerParticle(this.getPosition().add(0, getHeight())));
+        }
+        checkTarget(currentTick);
 
-            if (this.getFollowTarget() != null) {
-                findAndMove(this.getFollowTarget().getPosition());// 移动处理
-                if (this.getFollowTarget().distance(this.getPosition()) < 3) {
-                    canAttackEntity(this.getFollowTarget(), true);
+        if (this.getFollowTarget() != null) {
+            findAndMove(this.getFollowTarget().getPosition());// 移动处理
+            if (this.getFollowTarget().distance(this.getPosition()) < 3) {
+                canAttackEntity(this.getFollowTarget(), true);
+            }
+        }
+
+        //攻击目标实体
+        if(this.getFollowTarget() instanceof EntityCreature) {
+            if (this.targetOption(this.getFollowTarget(), this.distance(this.getFollowTarget()))) {
+                this.setFollowTarget(null,false);
+                return true;
+            }
+            if(this.getFollowTarget() instanceof Player) {
+                Player player = (Player) this.getFollowTarget();
+                if (this.getFollowTarget() != this.followTarget || this.canAttack) {
+                    this.attackEntity(player);
+                }
+            } else {
+                if (this.canAttack) {
+                    this.attackEntity((EntityCreature) this.getFollowTarget());
                 }
             }
-
-            //攻击目标实体
-            if (this.getFollowTarget() instanceof EntityCreature) {
-                if (this.targetOption(this.getFollowTarget(), this.distance(this.getFollowTarget()))) {
-                    this.setFollowTarget(null, false);
-                    return true;
-                }
-                if (this.getFollowTarget() instanceof Player) {
-                    Player player = (Player) this.getFollowTarget();
-                    if (this.getFollowTarget() != this.followTarget || this.canAttack) {
-                        this.stopMove();
-                        this.attackEntity(player);
-                    }
-                } else {
-                    if (this.canAttack) {
-                        this.stopMove();
-                        this.attackEntity((EntityCreature) this.getFollowTarget());
-                    }
-                }
-            } else if (this.getFollowTarget() != null && this.distance(this.getFollowTarget()) > this.seeSize) {
-                this.setFollowTarget(null);
-            }
-
+        } else if (this.getFollowTarget() != null && this.distance(this.getFollowTarget()) > this.seeSize) {
+            this.setFollowTarget(null);
         }
         //调用nk预设函数
         return super.onUpdate(currentTick);
