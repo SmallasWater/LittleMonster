@@ -19,6 +19,7 @@ import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.form.window.FormWindowSimple;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
+import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.manager.KeyHandleManager;
 import com.smallaswater.littlemonster.manager.TimerHandleManager;
@@ -71,8 +72,8 @@ public class LittleMasterListener implements Listener {
     @EventHandler
     public void onDie(EntityDeathEvent e){
         Entity entity = e.getEntity();
-        if(entity instanceof LittleNpc){
-            ((LittleNpc) entity).onDeath(e);
+        if (entity instanceof IEntity) {
+            ((IEntity) entity).onDeath(e);
         }
     }
 

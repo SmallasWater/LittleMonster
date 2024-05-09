@@ -13,6 +13,7 @@ import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.PositionConfig;
+import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.entity.baselib.Area;
 
@@ -98,7 +99,7 @@ public class Utils {
      *
      * @return 是否可以攻击
      * */
-    public static boolean canAttackNpc(LittleNpc damager,LittleNpc entity,boolean isBack){
+    public static boolean canAttackNpc(LittleNpc damager, LittleNpc entity, boolean isBack){
         if(damager.getConfig() == null || entity.getConfig() == null){
             return false;
 //            l1.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(l1.getName()));
@@ -207,9 +208,9 @@ public class Utils {
         for (Entity entity : level.getEntities()) {
             String name = getMonster(entity);
             if (name != null && name.equals(entityName)) {
-                if (entity instanceof LittleNpc && entity.isAlive()) {
-                    if (((LittleNpc) entity).spawnPos != null) {
-                        if (((LittleNpc) entity).spawnPos.equalsIgnoreCase(pos)) {
+                if (entity instanceof IEntity && entity.isAlive()) {
+                    if (((IEntity) entity).getSpawnPos() != null) {
+                        if (((IEntity) entity).getSpawnPos().equalsIgnoreCase(pos)) {
                             count++;
                         }
                     }
@@ -232,8 +233,8 @@ public class Utils {
     }
 
     public static String getMonster(Entity entity) {
-        if(entity instanceof LittleNpc){
-            return entity.getName();
+        if(entity instanceof IEntity){
+            return ((IEntity) entity).getConfig().getName();
         }
         return null;
     }

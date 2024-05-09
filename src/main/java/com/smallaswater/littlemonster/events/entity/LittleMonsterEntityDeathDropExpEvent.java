@@ -2,6 +2,7 @@ package com.smallaswater.littlemonster.events.entity;
 
 import cn.nukkit.event.Cancellable;
 import cn.nukkit.event.HandlerList;
+import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
 
 /**
@@ -17,7 +18,7 @@ public class LittleMonsterEntityDeathDropExpEvent extends LittleMonsterEntityEve
 
     protected int dropExp;
 
-    public LittleMonsterEntityDeathDropExpEvent(BaseEntity entity, int dropExp) {
+    public LittleMonsterEntityDeathDropExpEvent(IEntity entity, int dropExp) {
         super(entity);
         this.dropExp = dropExp;
     }

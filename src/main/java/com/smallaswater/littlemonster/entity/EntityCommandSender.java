@@ -23,7 +23,7 @@ public class EntityCommandSender implements CommandSender {
 
     private String name;
 
-    EntityCommandSender(String name) {
+    public EntityCommandSender(String name) {
         this.name = name;
     }
 

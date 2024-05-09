@@ -314,41 +314,42 @@ public abstract class BaseEntityMove extends BaseEntity {
         }
         if (this.closed) {
             return false;
-        } else if (!this.isAlive()) {
+        }
+        if (!this.isAlive()) {
             if (++this.deadTicks >= 23) {
                 this.close();
                 return false;
             } else {
                 return true;
             }
-        } else {
-            int tickDiff = currentTick - this.lastUpdate;
-            this.lastUpdate = currentTick;
-            this.entityBaseTick(tickDiff);
-
-            Vector3 target = this.updateMove(currentTick, tickDiff);
-            //攻击目标实体
-            if(target instanceof EntityCreature) {
-                if (this.targetOption((EntityCreature) target, this.distance(target))) {
-                    this.setFollowTarget(null,false);
-                    return true;
-                }
-                if(target instanceof Player) {
-                    Player player = (Player) target;
-                    if (target != this.followTarget || this.canAttack) {
-                        this.attackEntity(player);
-                    }
-                } else {
-                    if (this.canAttack) {
-                        this.attackEntity((EntityCreature) target);
-                    }
-                }
-            } else if (target != null && this.distance(target) > this.seeSize) {
-                this.target = null;
-            }
-
-            return true;
         }
+
+        int tickDiff = currentTick - this.lastUpdate;
+        this.lastUpdate = currentTick;
+        this.entityBaseTick(tickDiff);
+
+        Vector3 target = this.updateMove(currentTick, tickDiff);
+        //攻击目标实体
+        if(target instanceof EntityCreature) {
+            if (this.targetOption((EntityCreature) target, this.distance(target))) {
+                this.setFollowTarget(null,false);
+                return true;
+            }
+            if(target instanceof Player) {
+                Player player = (Player) target;
+                if (target != this.followTarget || this.canAttack) {
+                    this.attackEntity(player);
+                }
+            } else {
+                if (this.canAttack) {
+                    this.attackEntity((EntityCreature) target);
+                }
+            }
+        } else if (target != null && this.distance(target) > this.seeSize) {
+            this.target = null;
+        }
+
+        return true;
     }
 
     private Vector3 updateMove(int currentTick, int tickDiff) {

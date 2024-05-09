@@ -1,6 +1,8 @@
 package com.smallaswater.littlemonster.events.entity;
 
+import cn.nukkit.entity.Entity;
 import cn.nukkit.event.entity.EntityEvent;
+import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
 
 /**
@@ -8,12 +10,13 @@ import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
  */
 public abstract class LittleMonsterEntityEvent extends EntityEvent {
 
-    protected LittleMonsterEntityEvent(BaseEntity entity) {
-        this.entity = entity;
+    IEntity ientity;
+    protected LittleMonsterEntityEvent(IEntity entity) {
+        ientity = entity;
     }
 
     @Override
-    public BaseEntity getEntity() {
-        return (BaseEntity) super.getEntity();
+    public Entity getEntity() {
+        return ientity.getEntity();
     }
 }

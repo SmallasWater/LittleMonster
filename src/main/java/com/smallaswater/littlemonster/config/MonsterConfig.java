@@ -11,8 +11,10 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
+import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.entity.LittleNpcCustomEntity;
+import com.smallaswater.littlemonster.entity.vanilla.VanillaNPC;
 import com.smallaswater.littlemonster.items.DeathCommand;
 import com.smallaswater.littlemonster.items.DropItem;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
@@ -276,7 +278,7 @@ public class MonsterConfig {
         config.set(name, o);
     }
 
-    public LittleNpc spawn(Position spawn, int time) {
+    public IEntity spawn(Position spawn, int time) {
         Skin skin = LittleMonsterMainClass.loadSkins.getOrDefault(getSkin(), new Skin());
 
         CompoundTag nbt = Entity.getDefaultNBT(spawn).
@@ -284,14 +286,18 @@ public class MonsterConfig {
                         .putByteArray("Data", skin.getSkinData().data)
                         .putString("ModelId", skin.getSkinId()));
 
-        LittleNpc littleNpc;
+        IEntity littleNpc;
         if (this.enableCustomEntity) {
             littleNpc = new LittleNpcCustomEntity(spawn.getChunk(), nbt, this);
+            this.npcSetting((LittleNpc) littleNpc);
+        } else if (this.networkId != -1) {
+            littleNpc = new VanillaNPC(spawn.getChunk(), nbt, this);
+            this.vanillaSetting((VanillaNPC) littleNpc);
         } else {
             littleNpc = new LittleNpc(spawn.getChunk(), nbt, this);
+            this.npcSetting((LittleNpc) littleNpc);
         }
 
-        this.npcSetting(littleNpc);
         if (time > 0) {
             littleNpc.setLiveTime(time);
         }
@@ -302,13 +308,33 @@ public class MonsterConfig {
         return littleNpc;
     }
 
-    public LittleNpc spawn(Position spawn) {
+    public IEntity spawn(Position spawn) {
         return this.spawn(spawn, -1);
     }
 
+    public void vanillaSetting(VanillaNPC vanillaNpc) {
+        vanillaNpc.setNameTag(getTag()
+                .replace("{名称}", vanillaNpc.getName())
+                .replace("{血量}", vanillaNpc.getHealth() + "")
+                .replace("{最大血量}", vanillaNpc.getMaxHealth() + ""));
+        vanillaNpc.setConfig(this);
+        vanillaNpc.speed = (float) getMoveSpeed() * 10;
+        vanillaNpc.damage = getDamage();
+        vanillaNpc.setHealth(getHealth());
+        vanillaNpc.setMaxHealth(getHealth());
+        vanillaNpc.setScale((float) getSize());
+        vanillaNpc.routeMax = getSeeLine();
+        vanillaNpc.attackSleepTime = getAttaceSpeed();
+        //vanillaNpc.heal = getHeal();
+        //vanillaNpc.healSettingTime = getHealTime();
+        vanillaNpc.setImmobile(isImmobile());
+        //vanillaNpc.getInventory().setItemInHand(item);
+        //vanillaNpc.getInventory().setArmorContents(armor.toArray(new Item[0]));
+        //vanillaNpc.getOffhandInventory().setItem(0, offhand);
+    }
     public void npcSetting(LittleNpc littleNpc) {
         littleNpc.setNameTag(getTag()
-                .replace("{名称}", littleNpc.name)
+                .replace("{名称}", littleNpc.getName())
                 .replace("{血量}", littleNpc.getHealth() + "")
                 .replace("{最大血量}", littleNpc.getMaxHealth() + ""));
         littleNpc.setConfig(this);

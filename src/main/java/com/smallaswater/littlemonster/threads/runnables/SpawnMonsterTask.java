@@ -5,6 +5,7 @@ import cn.nukkit.Server;
 import cn.nukkit.utils.TextFormat;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.PositionConfig;
+import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.utils.Utils;
 
@@ -51,8 +52,8 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
                                         .replace("{name}", positionConfig.getLittleNpc().getName())));
                             }
                             for (int i = 0; i < positionConfig.getCount(); i++) {
-                                LittleNpc npc = positionConfig.getLittleNpc().spawn(positionConfig.getSpawnPos(), positionConfig.getLiveTime());
-                                npc.spawnPos = positionConfig.getName();
+                                IEntity npc = positionConfig.getLittleNpc().spawn(positionConfig.getSpawnPos(), positionConfig.getLiveTime());
+                                npc.setSpawnPos(positionConfig.getName());
                             }
                         }
                         positionConfig.time = positionConfig.getRound();

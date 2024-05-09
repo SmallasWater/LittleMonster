@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author LT_Name
  */
-public class LittleNpcCustomEntity extends LittleNpc implements CustomEntity {
+public class LittleNpcCustomEntity extends LittleNpc implements CustomEntity, IEntity {
 
     private static final EntityDefinition DEFAULT_DEFINITION = EntityDefinition.builder()
             .identifier("LittleNpcCustomEntity")
@@ -123,4 +123,8 @@ public class LittleNpcCustomEntity extends LittleNpc implements CustomEntity {
         this.skin = skin;
     }
 
+    @Override
+    public boolean isVanillaEntity() {
+        return false;
+    }
 }

@@ -25,6 +25,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,7 +40,7 @@ public abstract class BaseEntity extends EntityHuman {
 
     //如果主人死了 本体是否死亡
     @Setter
-    public boolean isDeathFollowMaster = false;
+    public boolean deathFollowMaster = false;
 
     //准则 不会伤害主人
     @Setter
@@ -52,9 +53,9 @@ public abstract class BaseEntity extends EntityHuman {
     //停留
     int stayTime = 0;
 
-    //目标
     @Setter
     @Getter
+    //目标
     Vector3 target = null;
     //锁定生物
     Entity followTarget = null;
@@ -69,6 +70,7 @@ public abstract class BaseEntity extends EntityHuman {
 
     protected int damageDelay = 0;
 
+    @Setter
     @Getter
     protected MonsterConfig config;
 
@@ -112,24 +114,9 @@ public abstract class BaseEntity extends EntityHuman {
 
     public int seeSize = 20;
 
-    public float width_ = -1;
-    public float height_ = -1;
-    public float length_ = -1;
-
     BaseEntity(FullChunk chunk, CompoundTag nbt, @NotNull MonsterConfig config) {
         super(chunk, nbt);
         this.setConfig(config);
-        if (config.getNetworkId() != -1) {
-            Entity temp = Entity.createEntity(String.valueOf(config.getNetworkId()), chunk, nbt);
-            if (temp != null) {
-                width_ = temp.getWidth();
-                height_ = temp.getHeight();
-                length_ = temp.getLength();
-                temp.close();
-            }
-            this.dataProperties.putFloat(DATA_BOUNDING_BOX_HEIGHT, getHeight());
-            this.dataProperties.putFloat(DATA_BOUNDING_BOX_WIDTH, getWidth());
-        }
     }
 
     @Override
@@ -221,35 +208,23 @@ public abstract class BaseEntity extends EntityHuman {
 
     @Override
     public int getNetworkId() {
-        if (this.config == null) {
-            return super.getNetworkId();
-        }
-        return this.config.getNetworkId();
+        return super.getNetworkId();
     }
 
     @Override
     protected float getBaseOffset() {
-        if (this.config.getNetworkId() == -1) {
-            return super.getBaseOffset();
-        }
-        return 0.0F;
+        return super.getBaseOffset();
     }
 
     @Override
     public void addMovement(double x, double y, double z, double yaw, double pitch, double headYaw) {
-        if (this.config.getNetworkId() == -1) {
-            this.level.addPlayerMovement(this, x, y, z, yaw, pitch, headYaw);
-        } else {
-            this.level.addEntityMovement(this, x, y, z, yaw, pitch, headYaw);
-        }
+        this.level.addPlayerMovement(this, x, y, z, yaw, pitch, headYaw);
     }
 
     @Override
     public void spawnTo(Player player) {
-        if (this.config.getNetworkId() == -1) {
-            super.spawnTo(player);
-            this.sendData(player);
-        }
+        super.spawnTo(player);
+        this.sendData(player);
         if (!this.hasSpawned.containsKey(player.getLoaderId()) && this.chunk != null && player.usedChunks.containsKey(Level.chunkHash(this.chunk.getX(), this.chunk.getZ()))) {
             this.hasSpawned.put(player.getLoaderId(), player);
             player.dataPacket(this.createAddEntityPacket());
@@ -268,9 +243,7 @@ public abstract class BaseEntity extends EntityHuman {
 
     @Override
     public void despawnFrom(Player player) {
-        if (this.getNetworkId() == -1) {
-            super.despawnFrom(player);
-        }
+        super.despawnFrom(player);
 
         if (this.hasSpawned.containsKey(player.getLoaderId())) {
             RemoveEntityPacket pk = new RemoveEntityPacket();
@@ -298,30 +271,6 @@ public abstract class BaseEntity extends EntityHuman {
         }
         onUpdata();
         return true;
-    }
-
-    @Override
-    public float getWidth() {
-        if (this.width_ == -1) {
-            return super.getWidth();
-        }
-        return width_;
-    }
-
-    @Override
-    public float getHeight() {
-        if (this.height_ == -1) {
-            return super.getHeight();
-        }
-        return height_;
-    }
-
-    @Override
-    public float getLength() {
-        if (this.length_ == -1) {
-            return super.getLength();
-        }
-        return length_;
     }
 
     public abstract void onUpdata();
@@ -356,10 +305,6 @@ public abstract class BaseEntity extends EntityHuman {
             source.setCancelled();
         }
         return false;
-    }
-
-    public void setConfig(@NotNull MonsterConfig config) {
-        this.config = Objects.requireNonNull(config);
     }
 
     /**

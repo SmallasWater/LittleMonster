@@ -50,7 +50,7 @@ import java.util.*;
  * Create on 2021/6/28 8:36
  * Package com.smallaswater.littlemonster.entity
  */
-public class LittleNpc extends BaseEntityMove {
+public class LittleNpc extends BaseEntityMove implements IEntity {
 
     public static final String TAG = "LittleMonster";
 
@@ -339,7 +339,7 @@ public class LittleNpc extends BaseEntityMove {
             return;
         }
         // 技能召唤的
-        if (this.isDeathFollowMaster && masterHuman != null) {
+        if (this.deathFollowMaster && masterHuman != null) {
             if (masterHuman.isClosed()) {
                 this.close();
                 return;
@@ -652,5 +652,25 @@ public class LittleNpc extends BaseEntityMove {
             result = 31 * result + uuid.hashCode();
         }
         return result;
+    }
+
+    @Override
+    public String getSpawnPos() {
+        return spawnPos;
+    }
+
+    @Override
+    public void setSpawnPos(String name) {
+        spawnPos = name;
+    }
+
+    @Override
+    public boolean isVanillaEntity() {
+        return false;
+    }
+
+    @Override
+    public Entity getEntity() {
+        return this;
     }
 }
