@@ -234,8 +234,11 @@ public class Utils {
 
     public static String getMonster(Entity entity) {
         if(entity instanceof IEntity) {
-            if (((IEntity) entity).getEntity().closed) return null;
-            return ((IEntity) entity).getConfig().getName();
+            try {
+                return ((IEntity) entity).getConfig().getName();
+            } catch (NullPointerException e) {
+                //ignore
+            }
         }
         return null;
     }
