@@ -213,6 +213,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
             player.dataPacket(pk2);
         }
     }
+
     @Override
     public boolean onUpdate(int currentTick) {
         // 技能召唤的
@@ -258,9 +259,9 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         if (this.getFollowTarget() == null) {
             strollMoveHandle(currentTick);
         } else {
-            findAndMove(this.getFollowTarget().getPosition().floor());// 移动处理
-            if (this.getFollowTarget().distance(this.getPosition()) < 3) {
-                canAttackEntity(this.getFollowTarget(), true);
+            // 防抖（怪物走路时频繁回头的问题）
+            if (this.route.getDestination().distance(this.getFollowTarget().getPosition()) > this.getConfig().getAttackDistance()) {
+                findAndMove(this.getFollowTarget().getPosition().floor());// 移动处理
             }
 
             //攻击目标实体
