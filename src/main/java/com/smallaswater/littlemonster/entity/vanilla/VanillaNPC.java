@@ -45,6 +45,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
 
     public String spawnPos = null;
 
+    public int strollTick = 0;
 
     // 下方是 BlocklyNukkit 实现
 
@@ -189,7 +190,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
                 return false;
             }
         }
-        // 丢失了配置
+        // 丢失配置时
         if (config == null) {
             this.close();
             return false;
@@ -215,40 +216,64 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         this.updatePassengers();
 
         if (currentTick % 20 == 0) {
+            if (this.getFollowTarget() != null) {
+                lookAt(this.getFollowTarget());
+            }
             this.getLevel().addParticle(new HappyVillagerParticle(this.getPosition().add(0, getHeight())));
         }
         checkTarget(currentTick);
 
-        if (this.getFollowTarget() != null) {
-            findAndMove(this.getFollowTarget().getPosition());// 移动处理
+        if (this.getFollowTarget() == null) {
+            strollMoveHandle(currentTick);
+        } else {
+            findAndMove(this.getFollowTarget().getPosition().floor());// 移动处理
             if (this.getFollowTarget().distance(this.getPosition()) < 3) {
                 canAttackEntity(this.getFollowTarget(), true);
             }
-        }
 
-        //攻击目标实体
-        if(this.getFollowTarget() instanceof EntityCreature) {
-            if (this.targetOption(this.getFollowTarget(), this.distance(this.getFollowTarget()))) {
-                this.setFollowTarget(null,false);
-                return true;
-            }
-            if(this.getFollowTarget() instanceof Player) {
-                Player player = (Player) this.getFollowTarget();
-                if (this.getFollowTarget() != this.followTarget || this.canAttack) {
-                    this.attackEntity(player);
+            //攻击目标实体
+            if (this.getFollowTarget() instanceof EntityCreature) {
+                if (this.targetOption(this.getFollowTarget(), this.distance(this.getFollowTarget()))) {
+                    this.setFollowTarget(null, false);
+                    return true;
                 }
-            } else {
-                if (this.canAttack) {
-                    this.attackEntity((EntityCreature) this.getFollowTarget());
+                if (this.getFollowTarget() instanceof Player) {
+                    Player player = (Player) this.getFollowTarget();
+                    if (this.getFollowTarget() != this.followTarget || this.canAttack) {
+                        this.attackEntity(player);
+                    }
+                } else {
+                    if (this.canAttack) {
+                        this.attackEntity((EntityCreature) this.getFollowTarget());
+                    }
                 }
+            } else if (this.getFollowTarget() != null && this.distance(this.getFollowTarget()) > this.seeSize) {
+                this.setFollowTarget(null);
             }
-        } else if (this.getFollowTarget() != null && this.distance(this.getFollowTarget()) > this.seeSize) {
-            this.setFollowTarget(null);
         }
         //调用nk预设函数
         return super.onUpdate(currentTick);
     }
 
+    public void strollMoveHandle(int currentTick) {
+        if (!getConfig().isCanMove()) return;
+        if (currentTick % 20 != 0) {
+            return;
+        }
+        // 处理随机移动
+        if (strollTick > 0) {
+            strollTick--;
+            return;
+        }
+        strollTick = Utils.rand(5, 20);
+        Position nodeNext = Pathfinder.getNode(this.getPosition(), 6);
+        if (nodeNext != null) {
+            this.stopMove();
+            this.lookAt(nodeNext);
+            directMove(nodeNext);
+        }
+
+    }
 
     /**
      * 受到攻击
@@ -289,6 +314,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
                 Player player = (Player) ((EntityDamageByEntityEvent) sure).getDamager();
                 this.handle.add(player.getName(), sure.getFinalDamage());
             }
+            return;
         }
         this.level.addParticle(new DestroyBlockParticle(this, new BlockRedstone()));
     }
@@ -297,7 +323,6 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
     @Override
     public boolean attack(EntityDamageEvent source) {
         this.updateMovement();
-
         if (this.damageDelay < config.getInvincibleTime()) {// 无敌时间
             source.setCancelled();
             return false;
@@ -305,13 +330,22 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         if (source.getAttackCooldown() >= this.config.getInvincibleTime()) {
             source.setAttackCooldown(this.config.getInvincibleTime());
         }
+
+        // 窒息伤害
+        if (source.getCause() == EntityDamageEvent.DamageCause.SUFFOCATION) {
+            source.setCancelled();
+            this.strollTick = 0;
+            return false;
+        }
+
         this.damageDelay = 0;
         if (enableHurt) {
             this.displayHurt();
         }
         if (!enableAttack) {
-            return true;
+            return false;
         }
+
         if (enableKnockBack) {
             if (source instanceof EntityDamageByEntityEvent) {
                 Entity damager = ((EntityDamageByEntityEvent) source).getDamager();
