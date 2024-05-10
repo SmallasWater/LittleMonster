@@ -104,8 +104,8 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
             return false;
         }
         if (targetEntity instanceof IEntity) {
-            if (Utils.canAttackNpc(this.vanillaNPC, (IEntity) targetEntity, false)) {
-                return true;
+            if (!Utils.canAttackNpc(this.vanillaNPC, (IEntity) targetEntity, false)) {
+                return false;
             }
         }
         if (!this.config.isActiveAttackEntity()) {
