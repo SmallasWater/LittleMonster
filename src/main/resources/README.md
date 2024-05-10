@@ -56,10 +56,10 @@ CustomEntity:
 装饰:
   手持: "267:0"
   副手: "267:0"
-  帽子: "0:0"
-  胸甲: "0:0"
-  护腿: "0:0"
-  靴子: "0:0"
+  帽子: "minecraft:air"
+  胸甲: "minecraft:air"
+  护腿: "minecraft:air"
+  靴子: "minecraft:air"
 
 掉落经验:
   - 1

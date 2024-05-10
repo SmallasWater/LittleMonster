@@ -16,6 +16,8 @@ import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.EntityEventPacket;
+import cn.nukkit.network.protocol.MobArmorEquipmentPacket;
+import cn.nukkit.network.protocol.MobEquipmentPacket;
 import cn.nukkit.utils.TextFormat;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
@@ -46,6 +48,15 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
     public String spawnPos = null;
 
     public int strollTick = 0;
+
+
+    // 防具
+    @Setter
+    private Item[] armor;
+
+    // 手持装备
+    @Setter
+    private Item tool;
 
     // 下方是 BlocklyNukkit 实现
 
@@ -181,6 +192,27 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         //super.knockBack(attacker, damage, x, z, base);
     }
 
+    @Override
+    public void spawnTo(Player player) {
+        super.spawnTo(player);
+
+        // 发送盔甲、武器 数据包
+        if (!this.armor[0].isNull() || !this.armor[1].isNull() || !this.armor[2].isNull() || !this.armor[3].isNull()) {
+            MobArmorEquipmentPacket pk = new MobArmorEquipmentPacket();
+            pk.eid = this.getId();
+            pk.slots = this.armor;
+
+            player.dataPacket(pk);
+        }
+
+        if (this.tool != null) {
+            MobEquipmentPacket pk2 = new MobEquipmentPacket();
+            pk2.eid = this.getId();
+            pk2.hotbarSlot = 0;
+            pk2.item = this.tool;
+            player.dataPacket(pk2);
+        }
+    }
     @Override
     public boolean onUpdate(int currentTick) {
         // 技能召唤的

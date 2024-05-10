@@ -234,10 +234,10 @@ public class MonsterConfig {
 
             monsterConfig.setItem(Item.fromString(config.getString("装饰.手持", "267:0")));
             ArrayList<Item> armor = new ArrayList<>();
-            armor.add(Item.fromString(config.getString("装饰.头盔", "0:0")));
-            armor.add(Item.fromString(config.getString("装饰.胸甲", "0:0")));
-            armor.add(Item.fromString(config.getString("装饰.护腿", "0:0")));
-            armor.add(Item.fromString(config.getString("装饰.靴子", "0:0")));
+            armor.add(Item.fromString(config.getString("装饰.头盔", "minecraft:air")));
+            armor.add(Item.fromString(config.getString("装饰.胸甲", "minecraft:air")));
+            armor.add(Item.fromString(config.getString("装饰.护腿", "minecraft:air")));
+            armor.add(Item.fromString(config.getString("装饰.靴子", "minecraft:air")));
             monsterConfig.setArmor(armor);
             monsterConfig.setOffhand(Item.fromString(config.getString("装饰.副手", "267:0")));
 
@@ -323,6 +323,8 @@ public class MonsterConfig {
         vanillaNpc.setScale((float) getSize());
         vanillaNpc.routeMax = getSeeLine();
         vanillaNpc.attackSleepTime = getAttaceSpeed();
+        vanillaNpc.setTool(item);
+        vanillaNpc.setArmor(armor.toArray(new Item[0]));
         //vanillaNpc.heal = getHeal();
         //vanillaNpc.healSettingTime = getHealTime();
         vanillaNpc.setImmobile(isImmobile());
