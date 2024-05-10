@@ -24,6 +24,7 @@ import cn.nukkit.network.protocol.EntityEventPacket;
 import cn.nukkit.potion.Effect;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.EntityCommandSender;
+import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
 import com.smallaswater.littlemonster.entity.vanilla.ai.entity.MovingVanillaEntity;
@@ -40,9 +41,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.smallaswater.littlemonster.entity.baselib.BaseEntity.*;
-import static com.smallaswater.littlemonster.entity.baselib.BaseEntity.ATTACK_MODE_MELEE;
 
 public class VanillaOperateNPC extends MovingVanillaEntity {
+    public VanillaNPC vanillaNPC;
 
     @Setter
     @Getter
@@ -102,11 +103,11 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
         if (this.targetOption(targetEntity, this.distance(targetEntity))) {
             return false;
         }
-//        if (targetEntity instanceof LittleNpc) {
-//            if (!Utils.canAttackNpc(this, (LittleNpc) targetEntity, false)) {
-//                return true;
-//            }
-//        }
+        if (targetEntity instanceof IEntity) {
+            if (Utils.canAttackNpc(this.vanillaNPC, (IEntity) targetEntity, false)) {
+                return true;
+            }
+        }
         if (!this.config.isActiveAttackEntity()) {
             if (!(targetEntity instanceof Player)) {
                 return false;
@@ -195,53 +196,55 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
      * 寻找目标并锁定
      */
     protected void checkTarget(int currentTick) {
-        if (isKnockback) {
+        if (isKnockback || closed) {
             return;
         }
 
-        if (currentTick % 15 == 0 || this.targetOption(this.followTarget)) {
-            //扫描附近实体
-            if (this.passengers.isEmpty()) {
-                //获取范围内可以攻击的生物
-                ArrayList<EntityCreature> scanEntities = new ArrayList<>();
-                for (Entity entity : Utils.getAroundPlayers(this, seeSize, true, true, true)) {
-                    //近战模式忽略部分会飞的实体 防止乱跑
-                    //触发事件模式无法确定插件是近战还是远程 当作近战处理
-                    //TODO 使用权重功能处理飞行生物，降低飞行生物目标权重
-                    if (this.getConfig().getAttaceMode() == ATTACK_MODE_MELEE || this.getConfig().getAttaceMode() == ATTACK_MODE_EVENT) {
-                        //忽略蝙蝠 鹦鹉
-                        if (entity.getNetworkId() == EntityBat.NETWORK_ID || entity.getNetworkId() == EntityParrot.NETWORK_ID) {
-                            continue;
-                        }
-                    }
+        if (currentTick % 15 != 0 || !this.targetOption(this.followTarget)) {
+            return;
+        }
 
-                    if (entity instanceof EntityCreature && entity != this) {
-                        if (this.canAttackEntity(entity, true)) {
-                            scanEntities.add((EntityCreature) entity);
-                            BaseEntity.TargetWeighted targetWeighted = this.getTargetWeighted((EntityCreature) entity);
-                            targetWeighted.setReason(BaseEntity.TargetWeighted.REASON_AUTO_SCAN);
-                        }
+        //扫描附近实体
+        if (this.passengers.isEmpty()) {
+            //获取范围内可以攻击的生物
+            ArrayList<EntityCreature> scanEntities = new ArrayList<>();
+            for (Entity entity : Utils.getAroundPlayers(this, seeSize, true, true, true)) {
+                //近战模式忽略部分会飞的实体 防止乱跑
+                //触发事件模式无法确定插件是近战还是远程 当作近战处理
+                //TODO 使用权重功能处理飞行生物，降低飞行生物目标权重
+                if (this.getConfig().getAttaceMode() == ATTACK_MODE_MELEE || this.getConfig().getAttaceMode() == ATTACK_MODE_EVENT) {
+                    //忽略蝙蝠 鹦鹉
+                    if (entity.getNetworkId() == EntityBat.NETWORK_ID || entity.getNetworkId() == EntityParrot.NETWORK_ID) {
+                        continue;
                     }
                 }
 
-                for (EntityCreature entity : this.targetWeightedMap.keySet()) {
-                    if (!scanEntities.contains(entity) && this.targetOption(entity, this.distance(entity))) {
-                        this.targetWeightedMap.remove(entity);
-                    } else {
-                        BaseEntity.TargetWeighted targetWeighted = this.getTargetWeighted(entity);
-                        //更新距离
-                        targetWeighted.setDistance(this.distance(entity));
+                if (entity instanceof EntityCreature && entity != this) {
+                    if (this.canAttackEntity(entity, true)) {
+                        scanEntities.add((EntityCreature) entity);
+                        BaseEntity.TargetWeighted targetWeighted = this.getTargetWeighted((EntityCreature) entity);
+                        targetWeighted.setReason(BaseEntity.TargetWeighted.REASON_AUTO_SCAN);
                     }
                 }
+            }
 
-                ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
-                entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
-                if (!entities.isEmpty()) {
-                    EntityCreature entity = entities.get(0);
-                    if (entity != this.getFollowTarget()) {
-                        if (canAttackEntity(entity, false)) {
-                            this.setFollowTarget(entity, true);
-                        }
+            for (EntityCreature entity : this.targetWeightedMap.keySet()) {
+                if (!scanEntities.contains(entity) && this.targetOption(entity, this.distance(entity))) {
+                    this.targetWeightedMap.remove(entity);
+                } else {
+                    BaseEntity.TargetWeighted targetWeighted = this.getTargetWeighted(entity);
+                    //更新距离
+                    targetWeighted.setDistance(this.distance(entity));
+                }
+            }
+
+            ArrayList<EntityCreature> entities = new ArrayList<>(this.targetWeightedMap.keySet());
+            entities.sort((p1, p2) -> Double.compare(this.getTargetWeighted(p2).getFinalWeighted() - this.getTargetWeighted(p1).getFinalWeighted(), 0.0D));
+            if (!entities.isEmpty()) {
+                EntityCreature entity = entities.get(0);
+                if (entity != this.getFollowTarget()) {
+                    if (canAttackEntity(entity, false)) {
+                        this.setFollowTarget(entity, true);
                     }
                 }
             }
@@ -320,8 +323,8 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
                     break;
                 case ATTACK_MODE_MELEE:
                 default:
-                    HashMap<EntityDamageEvent.DamageModifier, Float> damage = new LinkedHashMap<>();
-                    damage.put(EntityDamageEvent.DamageModifier.BASE, (float) getDamage());
+                    HashMap<EntityDamageEvent.DamageModifier, Float> damageMap = new LinkedHashMap<>();
+                    damageMap.put(EntityDamageEvent.DamageModifier.BASE, (float) getDamage());
                     if (entity instanceof Player) {
                         HashMap<Integer, Float> armorValues = new LinkedHashMap<Integer, Float>() {
                             {
@@ -352,10 +355,10 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
                             points += armorValues.getOrDefault(i.getId(), 0.0F);
                         }
 
-                        damage.put(EntityDamageEvent.DamageModifier.ARMOR, (float) ((double) damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0.0F) - Math.floor((double) (damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1.0F) * points) * 0.04D)));
+                        damageMap.put(EntityDamageEvent.DamageModifier.ARMOR, (float) ((double) damageMap.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0.0F) - Math.floor((double) (damageMap.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1.0F) * points) * 0.04D)));
                     }
 
-                    entity.attack(new EntityDamageByEntityEvent(this, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage, (float) config.getKnockBack()));
+                    entity.attack(new EntityDamageByEntityEvent(this, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damageMap, (float) config.getKnockBack()));
                     break;
             }
             for (Effect effect : config.getEffects()) {

@@ -99,7 +99,7 @@ public class Utils {
      *
      * @return 是否可以攻击
      * */
-    public static boolean canAttackNpc(LittleNpc damager, LittleNpc entity, boolean isBack){
+    public static boolean canAttackNpc(IEntity damager, IEntity entity, boolean isBack){
         if(damager.getConfig() == null || entity.getConfig() == null){
             return false;
 //            l1.setConfig(LittleMasterMainClass.getMasterMainClass().monsters.get(l1.getName()));
@@ -115,7 +115,7 @@ public class Utils {
                             .getConfig()
                             .getCampName())){
                 return damager.getConfig().isCanAttackSameCamp();
-            }else {
+            } else {
                 if(isBack){
                     return damager.getConfig().getToDamageCamp().contains(entity.getConfig().getCampName());
                 }else{
@@ -233,7 +233,8 @@ public class Utils {
     }
 
     public static String getMonster(Entity entity) {
-        if(entity instanceof IEntity){
+        if(entity instanceof IEntity) {
+            if (((IEntity) entity).getEntity().closed) return null;
             return ((IEntity) entity).getConfig().getName();
         }
         return null;

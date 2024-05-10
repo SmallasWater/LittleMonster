@@ -319,7 +319,7 @@ public class MonsterConfig {
                 .replace("{最大血量}", vanillaNpc.getMaxHealth() + ""));
         vanillaNpc.setConfig(this);
         vanillaNpc.speed = (float) getMoveSpeed() * 10;
-        vanillaNpc.damage = getDamage();
+        vanillaNpc.setDamage(getDamage());
         vanillaNpc.setHealth(getHealth());
         vanillaNpc.setMaxHealth(getHealth());
         vanillaNpc.setScale((float) getSize());

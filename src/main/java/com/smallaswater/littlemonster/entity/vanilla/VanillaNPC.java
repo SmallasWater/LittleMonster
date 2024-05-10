@@ -2,13 +2,15 @@ package com.smallaswater.littlemonster.entity.vanilla;
 
 import cn.nukkit.Player;
 import cn.nukkit.Server;
+import cn.nukkit.block.BlockRedstone;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
-import cn.nukkit.entity.EntityHuman;
+import cn.nukkit.entity.mob.EntityMob;
 import cn.nukkit.event.entity.*;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.particle.DestroyBlockParticle;
 import cn.nukkit.level.particle.HappyVillagerParticle;
 import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
@@ -17,24 +19,20 @@ import cn.nukkit.network.protocol.EntityEventPacket;
 import cn.nukkit.utils.TextFormat;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
-import com.smallaswater.littlemonster.entity.EntityCommandSender;
 import com.smallaswater.littlemonster.entity.IEntity;
+import com.smallaswater.littlemonster.entity.LittleNpc;
+import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
 import com.smallaswater.littlemonster.entity.vanilla.ai.route.AdvancedRouteFinder;
 import com.smallaswater.littlemonster.events.entity.LittleMonsterEntityDeathDropExpEvent;
 import com.smallaswater.littlemonster.items.BaseItem;
 import com.smallaswater.littlemonster.items.DeathCommand;
 import com.smallaswater.littlemonster.items.DropItem;
-import com.smallaswater.littlemonster.manager.BossBarManager;
-import com.smallaswater.littlemonster.threads.runnables.RouteFinderRunnable;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
-
-import static com.smallaswater.littlemonster.entity.baselib.BaseEntity.*;
 
 public class VanillaNPC extends VanillaOperateNPC implements IEntity {
     @Setter
@@ -47,19 +45,8 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
 
     public String spawnPos = null;
 
-    protected int attackDelay = 0;
-
 
     // 下方是 BlocklyNukkit 实现
-
-    public VanillaNPC vanillaNPC;
-
-    public Vector3 dvec = new Vector3(0, 0, 0);
-
-    public List<Item> extraDropItems = new ArrayList<>();
-    public boolean dropHand = false;
-    public boolean dropOffhand = false;
-    public List<Integer> dropSlot = new ArrayList<>();
 
     public boolean enableAttack = true;// 将会受到攻击
     public boolean enableHurt = true;// 受伤的红温
@@ -67,16 +54,15 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
     public boolean enableKnockBack = true;
     public double knockBase = 0.4d;
 
-    public boolean isjumping = false;
-    public double jumphigh = 1;
-    public boolean isonRoute = false;
-    public Vector3 nowtarget = null;
+    //public boolean isjumping = false;
+    public double jumpHigh = 1;
+    //public boolean isonRoute = false;
+    //public Vector3 nowtarget = null;
     public double speed = 3;
-    public int actions = 0;
-    public Vector3 actioinVec = new Vector3();
+    //public int actions = 0;
+    //public Vector3 actioinVec = new Vector3();
     public int routeMax = 50;
-    public Vector3 previousTo = null;
-    public boolean justDamaged = false;
+    //public Vector3 previousTo = null;
 
     public float halfWidth = 0.3f;
     public float width = 0.6f;
@@ -104,6 +90,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         this.setNameTagVisible(true);
         this.setNameTagAlwaysVisible(true);
         this.setScale(1.0f);
+        vanillaNPC = this;
     }
 
     @Override
@@ -206,7 +193,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         //处理骑乘
         this.updatePassengers();
 
-        if (currentTick % 10 == 0) {
+        if (currentTick % 20 == 0) {
             this.getLevel().addParticle(new HappyVillagerParticle(this.getPosition().add(0, getHeight())));
         }
         checkTarget(currentTick);
@@ -241,97 +228,111 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         return super.onUpdate(currentTick);
     }
 
+
+    /**
+     * 受到攻击
+     */
+    public void onAttack(EntityDamageEvent sure) {
+        if (isImmobile() && !config.isImmobile() && !LittleMonsterMainClass.hasRcRPG) {
+            sure.setCancelled();
+        }
+        if (sure instanceof EntityDamageByEntityEvent) {
+            if (config.isPassiveAttackEntity()) {
+                if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
+                    Player player = (Player) ((EntityDamageByEntityEvent) sure).getDamager();
+                    if (!targetOption(player, this.distance(player))) {
+                        this.getTargetWeighted(player).setReason(BaseEntity.TargetWeighted.REASON_PASSIVE_ATTACK_ENTITY);
+                    }
+
+                } else {
+                    Entity damager = ((EntityDamageByEntityEvent) sure).getDamager();
+                    if (!config.isAttackHostileEntity()) {
+                        if (damager instanceof EntityMob) {
+                            return;
+                        }
+                    }
+                    if (damager instanceof LittleNpc) {
+                        if (!Utils.canAttackNpc(this, (LittleNpc) damager, true)) {
+                            return;
+                        }
+                    }
+                    if (!targetOption(damager, distance(damager)) && damager instanceof EntityCreature) {
+                        this.getTargetWeighted((EntityCreature) damager).setReason(BaseEntity.TargetWeighted.REASON_PASSIVE_ATTACK_ENTITY);
+                    }
+                }
+            }
+            if (LittleMonsterMainClass.hasRcRPG) {
+                return;// 有 RcRPG 时无需处理攻击事件
+            }
+            if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
+                Player player = (Player) ((EntityDamageByEntityEvent) sure).getDamager();
+                this.handle.add(player.getName(), sure.getFinalDamage());
+            }
+        }
+        this.level.addParticle(new DestroyBlockParticle(this, new BlockRedstone()));
+    }
+
+
     @Override
     public boolean attack(EntityDamageEvent source) {
         this.updateMovement();
+
+        if (this.damageDelay < config.getInvincibleTime()) {// 无敌时间
+            source.setCancelled();
+            return false;
+        }
+        if (source.getAttackCooldown() >= this.config.getInvincibleTime()) {
+            source.setAttackCooldown(this.config.getInvincibleTime());
+        }
+        this.damageDelay = 0;
         if (enableHurt) {
             this.displayHurt();
         }
-        if (enableAttack) {
-            if (enableKnockBack) {
-                justDamaged = true;
-                if (source instanceof EntityDamageByEntityEvent) {
-                    Entity damager = ((EntityDamageByEntityEvent) source).getDamager();
-                    this.knockBack(damager, source.getFinalDamage(), -(damager.x - this.x), -(damager.z - this.z), knockBase);
-                }
-            }
-            return super.attack(source);
-        } else {
+        if (!enableAttack) {
             return true;
         }
+        if (enableKnockBack) {
+            if (source instanceof EntityDamageByEntityEvent) {
+                Entity damager = ((EntityDamageByEntityEvent) source).getDamager();
+                this.knockBack(damager, source.getFinalDamage(), -(damager.x - this.x), -(damager.z - this.z), knockBase);
+            }
+        }
+        if (super.attack(source)) {
+            this.onAttack(source);
+            return true;
+        } else {
+            return false;
+        }
+//        if (this.damageDelay >= config.getInvincibleTime()) {
+//            if (source.getAttackCooldown() >= this.config.getInvincibleTime()) {
+//                source.setAttackCooldown(this.config.getInvincibleTime());
+//            }
+//            this.damageDelay = 0;
+//            if (isKnockback && source instanceof EntityDamageByEntityEvent && ((EntityDamageByEntityEvent) source).getDamager() instanceof Player) {
+//                return false;
+//            } else if (this.fireProof && (source.getCause()
+//                    == EntityDamageEvent.DamageCause.FIRE || source.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK
+//                    || source.getCause() == EntityDamageEvent.DamageCause.LAVA)) {
+//                return false;
+//            } else {
+//                if (source instanceof EntityDamageByEntityEvent) {
+//                    ((EntityDamageByEntityEvent) source).setKnockBack(config.isKnock() ? 0.3F : 0);
+//                }
+//                this.stayTime = 0;
+//                if (super.attack(source)) {
+//                    this.onAttack(source);
+//                    return true;
+//                }
+//            }
+//        } else {
+//            source.setCancelled();
+//        }
+//        return false;
     }
 
     @Override
     public void close() {
-        List<Item> tmp = new ArrayList<>(extraDropItems);
-        tmp.forEach(each -> vanillaNPC.getLevel().dropItem(vanillaNPC, each));
         super.close();
-    }
-
-    public void addExtraDropItem(Item item) {
-        this.extraDropItems.add(item);
-    }
-
-    public boolean hasDropItem(Item item) {
-        if (dropHand) {
-            return true;
-        } else if (dropOffhand) {
-            return true;
-        } else {
-            for (Item i : this.extraDropItems) {
-                if (item.equals(i, true, true)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public void removeExtraDropItem(Item item) {
-        this.extraDropItems.remove(item);
-    }
-
-    public Item[] getExtraDropItems() {
-        return this.extraDropItems.toArray(new Item[0]);
-    }
-
-    public Item[] getDropItems() {
-        List<Item> tmp = new ArrayList<>(extraDropItems);
-        return tmp.toArray(new Item[0]);
-    }
-
-    public void setDropHand(boolean drop) {
-        this.dropHand = drop;
-    }
-
-    public void setDropHand() {
-        this.setDropHand(true);
-    }
-
-    public void setDropOffhand(boolean drop) {
-        this.dropOffhand = drop;
-    }
-
-    public void setDropOffhand() {
-        this.setDropOffhand(true);
-    }
-
-    public void addDropSlot(int slot) {
-        this.dropSlot.add(slot);
-    }
-
-    public int[] getDropSlots() {
-        int[] tmp = new int[dropSlot.size()];
-        int pos = 0;
-        for (int x : dropSlot) {
-            tmp[pos] = x;
-            pos++;
-        }
-        return tmp;
-    }
-
-    public void removeDropSlot(int slot) {
-        this.dropSlot.remove(slot);
     }
 
     public void turnRound(double yaw) {
@@ -371,7 +372,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
     }
 
     public void setJumpHigh(double j) {
-        this.jumphigh = j;
+        this.jumpHigh = j;
     }
 
     public void setEnableKnockBack(boolean knock) {
@@ -419,7 +420,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
 
     public void jump() {
         if (this.onGround) {
-            this.motionY = 0.42 * jumphigh;
+            this.motionY = 0.42 * jumpHigh;
         }
     }
 
