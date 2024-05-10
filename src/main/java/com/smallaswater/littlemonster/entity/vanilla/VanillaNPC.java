@@ -87,6 +87,8 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         this.dataProperties.putFloat(DATA_BOUNDING_BOX_HEIGHT, getHeight());
         this.dataProperties.putFloat(DATA_BOUNDING_BOX_WIDTH, getWidth());
 
+        this.setMaxHealth(config.getHealth());
+        this.setHealth(config.getHealth());
         this.setNameTagVisible(true);
         this.setNameTagAlwaysVisible(true);
         this.setScale(1.0f);
@@ -180,7 +182,26 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
 
     @Override
     public boolean onUpdate(int currentTick) {
-        //更新乘客
+        // 技能召唤的
+        if (this.deathFollowMaster && masterHuman != null) {
+            if (masterHuman.isClosed()) {
+                this.close();
+                return false;
+            }
+        }
+        // 丢失了配置
+        if (config == null) {
+            this.close();
+            return false;
+        }
+        // 更新名字
+        this.setNameTag(config.getTag()
+                .replace("{名称}", getConfig().getName())
+                .replace("{血量}", getHealth() + "")
+                .replace("{最大血量}", getMaxHealth() + ""));
+        //onHealthListener((int) Math.floor(getHealth()));
+
+        // 更新乘客
         try {
             for (Entity entity : this.getPassengers()) {
                 if (entity.distance(this) > 3) {

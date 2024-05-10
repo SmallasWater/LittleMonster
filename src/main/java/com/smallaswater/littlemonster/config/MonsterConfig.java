@@ -320,8 +320,6 @@ public class MonsterConfig {
         vanillaNpc.setConfig(this);
         vanillaNpc.speed = (float) getMoveSpeed() * 10;
         vanillaNpc.setDamage(getDamage());
-        vanillaNpc.setHealth(getHealth());
-        vanillaNpc.setMaxHealth(getHealth());
         vanillaNpc.setScale((float) getSize());
         vanillaNpc.routeMax = getSeeLine();
         vanillaNpc.attackSleepTime = getAttaceSpeed();
@@ -340,8 +338,8 @@ public class MonsterConfig {
         littleNpc.setConfig(this);
         littleNpc.speed = (float) getMoveSpeed();
         littleNpc.damage = getDamage();
-        littleNpc.setHealth(getHealth());
         littleNpc.setMaxHealth(getHealth());
+        littleNpc.setHealth(getHealth());
         littleNpc.setScale((float) getSize());
         littleNpc.seeSize = getSeeLine();
         littleNpc.attackSleepTime = getAttaceSpeed();

@@ -85,8 +85,8 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
         this.setNameTagVisible();
         this.loadSkill();
         this.setDataFlag(Entity.DATA_LEAD_HOLDER_EID, -1);
-        this.setHealth(config.getHealth());
         this.setMaxHealth(config.getHealth());
+        this.setHealth(config.getHealth());
         this.namedTag.putString(TAG, name);
         this.destinationDeviate = Math.max(1.5, config.getAttackDistance() * 0.8);
         if (this.route != null) {
