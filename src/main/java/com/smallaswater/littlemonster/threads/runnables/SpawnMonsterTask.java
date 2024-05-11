@@ -9,6 +9,8 @@ import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.utils.Utils;
 
+import static com.smallaswater.littlemonster.utils.Utils.isValidChunk;
+
 
 /**
  * @author SmallasWater
@@ -52,8 +54,10 @@ public class SpawnMonsterTask extends BasePluginThreadTask {
                                         .replace("{name}", positionConfig.getLittleNpc().getName())));
                             }
                             for (int i = 0; i < positionConfig.getCount(); i++) {
-                                IEntity npc = positionConfig.getLittleNpc().spawn(positionConfig.getSpawnPos(), positionConfig.getLiveTime());
-                                npc.setSpawnPos(positionConfig.getName());
+                                if (isValidChunk(positionConfig.getSpawnPos().getChunk())) {//TODO: 检查为什么会有无效区块
+                                    IEntity npc = positionConfig.getLittleNpc().spawn(positionConfig.getSpawnPos(), positionConfig.getLiveTime());
+                                    npc.setSpawnPos(positionConfig.getName());
+                                }
                             }
                         }
                         positionConfig.time = positionConfig.getRound();

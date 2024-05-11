@@ -260,7 +260,8 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
             strollMoveHandle(currentTick);
         } else {
             // 防抖（怪物走路时频繁回头的问题）
-            if (this.route.getDestination().distance(this.getFollowTarget().getPosition()) > this.getConfig().getAttackDistance()) {
+            if (this.route.getDestination() == null ||
+                    this.route.getDestination().distance(this.getFollowTarget().getPosition()) > this.getConfig().getAttackDistance()) {
                 findAndMove(this.getFollowTarget().getPosition().floor());// 移动处理
             }
 

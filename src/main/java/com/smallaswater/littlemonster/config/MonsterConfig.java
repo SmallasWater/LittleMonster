@@ -291,7 +291,7 @@ public class MonsterConfig {
             littleNpc = new LittleNpcCustomEntity(spawn.getChunk(), nbt, this);
             this.npcSetting((LittleNpc) littleNpc);
         } else if (this.networkId != -1) {
-            littleNpc = new VanillaNPC(spawn.getChunk(), nbt, this);
+            littleNpc = new VanillaNPC(spawn.getChunk(), Entity.getDefaultNBT(spawn), this);
             this.vanillaSetting((VanillaNPC) littleNpc);
         } else {
             littleNpc = new LittleNpc(spawn.getChunk(), nbt, this);

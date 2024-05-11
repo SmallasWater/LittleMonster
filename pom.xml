@@ -90,7 +90,7 @@
             <artifactId>MobPlugin</artifactId>
             <version>1.21.4</version>
             <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/MobPlugin-1.21.4.jar</systemPath>
+            <systemPath>${pom.basedir}/lib/MobPlugin-1.26.3.jar</systemPath>
         </dependency>
         <!--<dependency>
             <groupId>cn.ankele.plugin.MagicItem</groupId>

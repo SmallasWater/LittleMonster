@@ -7,6 +7,7 @@ import cn.nukkit.entity.EntityHuman;
 import cn.nukkit.entity.EntityLiving;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
+import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.potion.Effect;
@@ -327,6 +328,11 @@ public class Utils {
             stringBuilder.append(hv);
         }
         return stringBuilder.toString();
+    }
+
+
+    public static boolean isValidChunk(FullChunk chunk) {
+        return chunk != null && chunk.getProvider() != null;
     }
 
 }
