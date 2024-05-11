@@ -45,7 +45,7 @@ public class AttributeHealthSkill extends BaseSkillManager {
                     this.getMaster().damage = getEffect().doubleValue();
                     break;
                 case ATTACK_SPEED:
-                    this.getMaster().attackSleepTime = getEffect().intValue();
+                    this.getMaster().attackSleepTick = getEffect().intValue();
                     break;
                 default:
                     break;

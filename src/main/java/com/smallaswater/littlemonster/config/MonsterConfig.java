@@ -322,7 +322,7 @@ public class MonsterConfig {
         vanillaNpc.setDamage(getDamage());
         vanillaNpc.setScale((float) getSize());
         vanillaNpc.routeMax = getSeeLine();
-        vanillaNpc.attackSleepTime = getAttaceSpeed();
+        vanillaNpc.attackSleepTick = getAttaceSpeed();
         vanillaNpc.setTool(item);
         vanillaNpc.setArmor(armor.toArray(new Item[0]));
         //vanillaNpc.heal = getHeal();
@@ -344,7 +344,7 @@ public class MonsterConfig {
         littleNpc.setHealth(getHealth());
         littleNpc.setScale((float) getSize());
         littleNpc.seeSize = getSeeLine();
-        littleNpc.attackSleepTime = getAttaceSpeed();
+        littleNpc.attackSleepTick = getAttaceSpeed();
         littleNpc.heal = getHeal();
         littleNpc.healSettingTime = getHealTime();
         littleNpc.setImmobile(isImmobile());

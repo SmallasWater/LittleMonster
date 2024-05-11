@@ -20,13 +20,13 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.HugeExplodeSeedParticle;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
-import cn.nukkit.network.protocol.EntityEventPacket;
 import cn.nukkit.potion.Effect;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.EntityCommandSender;
 import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
+import com.smallaswater.littlemonster.entity.vanilla.ai.ShootAttackExecutor;
 import com.smallaswater.littlemonster.entity.vanilla.ai.entity.MovingVanillaEntity;
 import com.smallaswater.littlemonster.handle.DamageHandle;
 import com.smallaswater.littlemonster.manager.BossBarManager;
@@ -41,6 +41,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.smallaswater.littlemonster.entity.baselib.BaseEntity.*;
+import static com.smallaswater.littlemonster.entity.vanilla.ai.MeleeAttackExecutor.playArmSwingAnimation;
 
 public class VanillaOperateNPC extends MovingVanillaEntity {
     public VanillaNPC vanillaNPC;
@@ -56,7 +57,7 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
 
     //攻击速度
     @Getter
-    public int attackSleepTime = 23;
+    public int attackSleepTick = 23;
 
     protected int attackDelay = 0;
 
@@ -264,10 +265,10 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
     }
 
     /**
-     * 攻击玩家
+     * 攻击实体
      */
     public void attackEntity(EntityCreature entity) {
-        if (this.attackDelay <= attackSleepTime) {
+        if (this.attackDelay <= attackSleepTick) {
             return;
         }
         if (entity.distance(this) > this.getConfig().getAttackDistance()) {
@@ -277,6 +278,7 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
         this.attackDelay = 0;
         switch (this.getConfig().getAttaceMode()) {
             case ATTACK_MODE_RANGE:
+                playArmSwingAnimation(this);
                 LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, true);
                 for (Entity p : players) {
                     if (p instanceof Player && ((Player) p).isCreative()) {
@@ -291,35 +293,7 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
                 entity.getLevel().addSound(entity, Sound.RANDOM_EXPLODE);
                 break;
             case ATTACK_MODE_ARROW:
-                double f = 1.3D;
-                Entity k = Entity.createEntity("Arrow", this.add(0, this.getEyeHeight(), 0), this);
-                if (!(k instanceof EntityArrow)) {
-                    return;
-                }
-                EntityArrow arrow = (EntityArrow) k;
-                arrow.setMotion(
-                        new Vector3(-Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f,
-                                -Math.sin(Math.toRadians(pitch)) * f * f,
-                                Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f));
-                EntityShootBowEvent ev = new EntityShootBowEvent(this, Item.get(ItemID.ARROW, 0, 1), arrow, f);
-                this.server.getPluginManager().callEvent(ev);
-                EntityProjectile projectile = ev.getProjectile();
-                if (ev.isCancelled()) {
-                    projectile.kill();
-                } else {
-                    ProjectileLaunchEvent launch = new ProjectileLaunchEvent(projectile);
-                    this.server.getPluginManager().callEvent(launch);
-                    if (launch.isCancelled()) {
-                        projectile.kill();
-                    } else {
-                        if (NukkitTypeUtils.getNukkitType() == NukkitTypeUtils.NukkitType.MOT) {
-                            projectile.setCanBeSavedWithChunk(false);
-                        }
-                        projectile.spawnToAll();
-                        ((EntityArrow) projectile).setPickupMode(EntityArrow.PICKUP_NONE);
-                        this.getLevel().addSound(this, Sound.RANDOM_BOW);
-                    }
-                }
+                new ShootAttackExecutor().execute(this.vanillaNPC, entity);
                 break;
             case ATTACK_MODE_EVENT: //触发EntityInteractEvent
 //                  if (!hasBlockInLine(entity)) {
@@ -363,6 +337,7 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
 
                     damageMap.put(EntityDamageEvent.DamageModifier.ARMOR, (float) ((double) damageMap.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0.0F) - Math.floor((double) (damageMap.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1.0F) * points) * 0.04D)));
                 }
+                playArmSwingAnimation(this);
 
                 entity.attack(new EntityDamageByEntityEvent(this, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damageMap, (float) config.getKnockBack()));
                 break;
@@ -370,11 +345,6 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
         for (Effect effect : config.getEffects()) {
             entity.addEffect(effect);
         }
-        //摆臂动作
-        EntityEventPacket pk = new EntityEventPacket();
-        pk.eid = this.getId();
-        pk.event = EntityEventPacket.ARM_SWING;
-        Server.broadcastPacket(this.getViewers().values(), pk);
     }
 
 

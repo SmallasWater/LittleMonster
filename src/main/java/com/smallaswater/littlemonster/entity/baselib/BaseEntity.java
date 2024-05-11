@@ -25,9 +25,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -106,7 +104,7 @@ public abstract class BaseEntity extends EntityHuman {
     public double attackDistance = 0.1;
     //攻击速度
     @Getter
-    public int attackSleepTime = 23;
+    public int attackSleepTick = 23;
     //伤害
     public double damage = 2;
     //移动速度
