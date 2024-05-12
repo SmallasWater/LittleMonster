@@ -24,6 +24,7 @@ import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
+import com.smallaswater.littlemonster.entity.vanilla.ai.ShootAttackExecutor;
 import com.smallaswater.littlemonster.entity.vanilla.ai.route.AdvancedRouteFinder;
 import com.smallaswater.littlemonster.events.entity.LittleMonsterEntityDeathDropExpEvent;
 import com.smallaswater.littlemonster.items.BaseItem;
@@ -35,6 +36,8 @@ import lombok.Setter;
 
 import java.lang.reflect.Method;
 import java.util.*;
+
+import static com.smallaswater.littlemonster.entity.baselib.BaseEntity.ATTACK_MODE_ARROW;
 
 public class VanillaNPC extends VanillaOperateNPC implements IEntity {
     @Setter
@@ -105,6 +108,9 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         this.setNameTagAlwaysVisible(true);
         this.setScale(1.0f);
         vanillaNPC = this;
+        if (config.getAttaceMode() == ATTACK_MODE_ARROW) {
+            shootAttackExecutor = new ShootAttackExecutor();
+        }
     }
 
     @Override
@@ -245,6 +251,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         } catch (java.util.ConcurrentModificationException e) {
             //ignore
         }
+
         //处理骑乘
         this.updatePassengers();
 
@@ -257,12 +264,17 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         checkTarget(currentTick);
 
         if (this.getFollowTarget() == null) {
+            // 随机移动
             strollMoveHandle(currentTick);
         } else {
-            // 防抖（怪物走路时频繁回头的问题）
-            if (this.route.getDestination() == null ||
+            if (shootAttackExecutor != null &&
+                    shootAttackExecutor.inExecute &&
+                    shootAttackExecutor.failedAttackCount < 2) {// 在射箭过程中且失败次数小于2 则停止移动。
+                stopMove();
+            } else if (this.route.getDestination() == null ||
                     this.route.getDestination().distance(this.getFollowTarget().getPosition()) > this.getConfig().getAttackDistance()) {
-                findAndMove(this.getFollowTarget().getPosition().floor());// 移动处理
+                // 防抖（怪物走路时频繁回头的问题）
+                findAndMove(this.getFollowTarget().getPosition());
             }
 
             //攻击目标实体
@@ -274,11 +286,17 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
                 if (this.getFollowTarget() instanceof Player) {
                     Player player = (Player) this.getFollowTarget();
                     if (this.getFollowTarget() != this.followTarget || this.canAttack) {
-                        this.attackEntity(player);
+                        int atkResult = this.attackEntity(player);
+                        if (atkResult == 2) {// 为 2 代表因为攻击范围不够导致失败
+                            findAndMove(this.getFollowTarget());
+                        }
                     }
                 } else {
                     if (this.canAttack) {
-                        this.attackEntity((EntityCreature) this.getFollowTarget());
+                        int atkResult = this.attackEntity((EntityCreature) this.getFollowTarget());
+                        if (atkResult == 2) {
+                            findAndMove(this.getFollowTarget());
+                        }
                     }
                 }
             } else if (this.getFollowTarget() != null && this.distance(this.getFollowTarget()) > this.seeSize) {
@@ -301,7 +319,10 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         }
         strollTick = Utils.rand(5, 20);
         Position nodeNext = Pathfinder.getNode(this.getPosition(), 6);
-        if (nodeNext != null) {
+        if (nodeNext == null) {
+            // 随机移动失败，传送回重生点
+            this.teleport(LittleMonsterMainClass.getInstance().positions.get(getSpawnPos()).getSpawnPos());
+        } else {
             this.stopMove();
             this.lookAt(nodeNext);
             directMove(nodeNext);

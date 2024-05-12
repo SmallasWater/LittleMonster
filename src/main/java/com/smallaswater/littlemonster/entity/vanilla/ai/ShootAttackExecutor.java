@@ -10,7 +10,6 @@ import cn.nukkit.event.entity.EntityShootBowEvent;
 import cn.nukkit.event.entity.ProjectileLaunchEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.ItemBow;
-import cn.nukkit.item.ItemID;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.Sound;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -19,26 +18,26 @@ import cn.nukkit.nbt.tag.FloatTag;
 import cn.nukkit.nbt.tag.ListTag;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.entity.IEntity;
-import com.smallaswater.littlemonster.entity.vanilla.VanillaNPC;
 
 public class ShootAttackExecutor {
     //protected float speed;
     //protected int maxShootDistanceSquared;
     //protected int coolDownTick;
-    //protected boolean inExecute;
+    public boolean inExecute;
+    public int failedAttackCount = 0;// 攻击失败次数
 
     //protected float damage;
     public boolean execute(IEntity ientity, Entity target) {
-        //inExecute = true;
+        inExecute = true;
         if (ientity.isVanillaEntity()) {
-            VanillaNPC vanillaNPC = (VanillaNPC) ientity.getEntity();
+            //VanillaNPC vanillaNPC = (VanillaNPC) ientity.getEntity();
             //this.speed = (float) vanillaNPC.speed;
             //this.maxShootDistanceSquared = (int) (vanillaNPC.getConfig().getAttackDistance() * vanillaNPC.getConfig().getAttackDistance());
             //this.coolDownTick = vanillaNPC.getAttackSleepTick();
             //this.damage = vanillaNPC.getDamage();
             playBowAnimation(ientity, target);
             LittleMonsterMainClass.getInstance().getServer().getScheduler().scheduleDelayedTask(()->{
-                //inExecute = false;
+                inExecute = false;
                 bowShoot(ientity, target);
                 stopBowAnimation(ientity);
             }, 40);
@@ -49,7 +48,7 @@ public class ShootAttackExecutor {
         return true;
     }
 
-    protected static void bowShoot(IEntity ientity, Entity target) {
+    protected void bowShoot(IEntity ientity, Entity target) {
         ItemBow bow = (ItemBow) Item.get(261);
         EntityLiving entity = (EntityLiving) ientity.getEntity();
 
@@ -70,9 +69,14 @@ public class ShootAttackExecutor {
 
         EntityArrow arrow = (EntityArrow) Entity.createEntity("Arrow", entity.chunk, nbt, entity, false);
 
-        if (arrow == null) {
-            return;
-        }
+        arrow.age = 900;// 原 1200 tick 现在只剩 300 tick 也就是 15s
+        LittleMonsterMainClass.getInstance().getServer().getScheduler().scheduleDelayedTask(()->{
+            if (arrow.onGround) {
+                failedAttackCount++;
+            } else if (arrow.hadCollision) {
+                failedAttackCount = 0;
+            }
+        }, 30);// 1.5s 后判断
 
         EntityShootBowEvent entityShootBowEvent = new EntityShootBowEvent(entity, bow, arrow, f);
         Server.getInstance().getPluginManager().callEvent(entityShootBowEvent);
@@ -88,9 +92,9 @@ public class ShootAttackExecutor {
             }
 
             if (entityShootBowEvent.getProjectile() != null) {
-                ProjectileLaunchEvent projectev = new ProjectileLaunchEvent(entityShootBowEvent.getProjectile());
-                Server.getInstance().getPluginManager().callEvent(projectev);
-                if (projectev.isCancelled()) {
+                ProjectileLaunchEvent projected = new ProjectileLaunchEvent(entityShootBowEvent.getProjectile());
+                Server.getInstance().getPluginManager().callEvent(projected);
+                if (projected.isCancelled()) {
                     projectile.kill();
                 } else {
                     projectile.spawnToAll();

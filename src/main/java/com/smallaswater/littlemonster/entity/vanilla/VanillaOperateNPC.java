@@ -89,6 +89,8 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
     int stayTime = 0;
     boolean canAttack = true;
 
+    public ShootAttackExecutor shootAttackExecutor = null;
+
     public VanillaOperateNPC(FullChunk chunk, CompoundTag nbt, MonsterConfig config) {
         super(chunk, nbt);
     }
@@ -267,12 +269,12 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
     /**
      * 攻击实体
      */
-    public void attackEntity(EntityCreature entity) {
+    public int attackEntity(EntityCreature entity) {
         if (this.attackDelay <= attackSleepTick) {
-            return;
+            return 1;
         }
-        if (entity.distance(this) > this.getConfig().getAttackDistance()) {
-            return;
+        if (this.distance(entity) > this.getConfig().getAttackDistance()) {
+            return 2;
         }
 
         this.attackDelay = 0;
@@ -293,7 +295,7 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
                 entity.getLevel().addSound(entity, Sound.RANDOM_EXPLODE);
                 break;
             case ATTACK_MODE_ARROW:
-                new ShootAttackExecutor().execute(this.vanillaNPC, entity);
+                shootAttackExecutor.execute(this.vanillaNPC, entity);
                 break;
             case ATTACK_MODE_EVENT: //触发EntityInteractEvent
 //                  if (!hasBlockInLine(entity)) {
@@ -345,6 +347,7 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
         for (Effect effect : config.getEffects()) {
             entity.addEffect(effect);
         }
+        return 0;
     }
 
 
