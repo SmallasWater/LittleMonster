@@ -59,11 +59,11 @@ public class ShootAttackExecutor {
                         .add(new DoubleTag("", entity.y + entity.getHeight() / 2 + 0.2f))
                         .add(new DoubleTag("", entity.z)))
                 .putList(new ListTag<DoubleTag>("Motion")
-                        .add(new DoubleTag("", -Math.sin(entity.headYaw / 180 * Math.PI) * Math.cos(entity.pitch / 180 * Math.PI)))
+                        .add(new DoubleTag("", -Math.sin(entity.yaw / 180 * Math.PI) * Math.cos(entity.pitch / 180 * Math.PI)))
                         .add(new DoubleTag("", -Math.sin(entity.pitch / 180 * Math.PI)))
-                        .add(new DoubleTag("", Math.cos(entity.headYaw / 180 * Math.PI) * Math.cos(entity.pitch / 180 * Math.PI))))
+                        .add(new DoubleTag("", Math.cos(entity.yaw / 180 * Math.PI) * Math.cos(entity.pitch / 180 * Math.PI))))
                 .putList(new ListTag<FloatTag>("Rotation")
-                        .add(new FloatTag("", (entity.headYaw > 180 ? 360 : 0) - (float) entity.headYaw))
+                        .add(new FloatTag("", (entity.yaw > 180 ? 360 : 0) - (float) entity.yaw))
                         .add(new FloatTag("", (float) -entity.pitch)))
                 .putDouble("damage", ientity.getConfig().getDamage());
         double f = 3;
