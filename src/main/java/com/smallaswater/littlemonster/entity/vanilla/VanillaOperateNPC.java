@@ -1,6 +1,5 @@
 package com.smallaswater.littlemonster.entity.vanilla;
 
-import cn.lanink.gamecore.utils.NukkitTypeUtils;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
@@ -10,11 +9,8 @@ import cn.nukkit.entity.mob.EntityMob;
 import cn.nukkit.entity.passive.EntityAnimal;
 import cn.nukkit.entity.passive.EntityBat;
 import cn.nukkit.entity.passive.EntityParrot;
-import cn.nukkit.entity.projectile.EntityArrow;
-import cn.nukkit.entity.projectile.EntityProjectile;
 import cn.nukkit.event.entity.*;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.ItemID;
 import cn.nukkit.level.Sound;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.HugeExplodeSeedParticle;

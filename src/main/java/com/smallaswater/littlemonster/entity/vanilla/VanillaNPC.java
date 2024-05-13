@@ -12,6 +12,7 @@ import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.DestroyBlockParticle;
 import cn.nukkit.level.particle.HappyVillagerParticle;
+import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -95,6 +96,10 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
             width = temp.getWidth();
             length = temp.getLength();
             height = temp.getHeight();
+            // length 可能为0，详见 `AxisAlignedBB bb` 计算
+            if (length == 0) {
+                length = width;
+            }
             eyeHeight = temp.getEyeHeight();
             halfWidth = this.getWidth() / 2;
             temp.close();
@@ -202,7 +207,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
     public void spawnTo(Player player) {
         super.spawnTo(player);
 
-        // 发送盔甲、武器 数据包
+        // 发送盔甲
         if (!this.armor[0].isNull() || !this.armor[1].isNull() || !this.armor[2].isNull() || !this.armor[3].isNull()) {
             MobArmorEquipmentPacket pk = new MobArmorEquipmentPacket();
             pk.eid = this.getId();
@@ -211,12 +216,13 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
             player.dataPacket(pk);
         }
 
+        // 发送武器
         if (this.tool != null) {
-            MobEquipmentPacket pk2 = new MobEquipmentPacket();
-            pk2.eid = this.getId();
-            pk2.hotbarSlot = 0;
-            pk2.item = this.tool;
-            player.dataPacket(pk2);
+            MobEquipmentPacket pk = new MobEquipmentPacket();
+            pk.eid = this.getId();
+            pk.hotbarSlot = 0;
+            pk.item = this.tool;
+            player.dataPacket(pk);
         }
     }
 
@@ -255,11 +261,11 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         //处理骑乘
         this.updatePassengers();
 
-        if (currentTick % 20 == 0) {
+        if (currentTick % 10 == 0) {
             if (this.getFollowTarget() != null) {
                 lookAt(this.getFollowTarget());
             }
-            this.getLevel().addParticle(new HappyVillagerParticle(this.getPosition().add(0, getHeight())));
+            //this.getLevel().addParticle(new HappyVillagerParticle(this.getPosition().add(0, getHeight())));
         }
         checkTarget(currentTick);
 
@@ -277,7 +283,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
                 findAndMove(this.getFollowTarget().getPosition());
             }
 
-            //攻击目标实体
+            // 攻击目标实体
             if (this.getFollowTarget() instanceof EntityCreature) {
                 if (this.targetOption(this.getFollowTarget(), this.distance(this.getFollowTarget()))) {
                     this.setFollowTarget(null, false);
@@ -287,14 +293,14 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
                     Player player = (Player) this.getFollowTarget();
                     if (this.getFollowTarget() != this.followTarget || this.canAttack) {
                         int atkResult = this.attackEntity(player);
-                        if (atkResult == 2) {// 为 2 代表因为攻击范围不够导致失败
+                        if (atkResult == 2 && shootAttackExecutor != null) {// 为 2 代表因为攻击范围不够导致失败
                             findAndMove(this.getFollowTarget());
                         }
                     }
                 } else {
                     if (this.canAttack) {
                         int atkResult = this.attackEntity((EntityCreature) this.getFollowTarget());
-                        if (atkResult == 2) {
+                        if (atkResult == 2 && shootAttackExecutor != null) {
                             findAndMove(this.getFollowTarget());
                         }
                     }
@@ -303,7 +309,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
                 this.setFollowTarget(null);
             }
         }
-        //调用nk预设函数
+        // 调用nk预设函数
         return super.onUpdate(currentTick);
     }
 
@@ -317,7 +323,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
             strollTick--;
             return;
         }
-        strollTick = Utils.rand(5, 20);
+        strollTick = Utils.rand(10, 25);
         Position nodeNext = Pathfinder.getNode(this.getPosition(), 6);
         if (nodeNext == null) {
             // 随机移动失败，传送回重生点
@@ -330,9 +336,6 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
 
     }
 
-    /**
-     * 受到攻击
-     */
     public void onAttack(EntityDamageEvent sure) {
         if (isImmobile() && !config.isImmobile() && !LittleMonsterMainClass.hasRcRPG) {
             sure.setCancelled();
@@ -374,7 +377,9 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         this.level.addParticle(new DestroyBlockParticle(this, new BlockRedstone()));
     }
 
-
+    /**
+     * 受到攻击
+     */
     @Override
     public boolean attack(EntityDamageEvent source) {
         this.updateMovement();
@@ -392,6 +397,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
             this.strollTick = 0;
             return false;
         }
+        //LittleMonsterMainClass.getInstance().getLogger().info("受到攻击 "+source.getCause());
 
         this.damageDelay = 0;
         if (enableHurt) {

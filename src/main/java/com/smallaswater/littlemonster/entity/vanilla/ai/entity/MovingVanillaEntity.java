@@ -124,13 +124,13 @@ abstract public class MovingVanillaEntity extends EntityCreature {
 
         AxisAlignedBB bb = this.getBoundingBox();
         final double x = this.getX(), y = this.getY(), z = this.getZ();
-        final float dx = this.getWidth() / 2, dy = this.getLength() , dz = this.getHeight() / 2;
+        final float dx = this.getWidth() / 2, dz = this.getLength() / 2, dy = this.getHeight();
         bb.setMaxX(x + dx);
         bb.setMinX(x - dx);
-        bb.setMaxY(y + dy);
-        bb.setMinY(y);
         bb.setMaxZ(z + dz);
         bb.setMinZ(z - dz);
+        bb.setMaxY(y + dy);
+        bb.setMinY(y);
 
         return hasUpdate;
     }
