@@ -37,6 +37,7 @@ import lombok.Setter;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 import static com.smallaswater.littlemonster.entity.baselib.BaseEntity.ATTACK_MODE_ARROW;
 
@@ -324,15 +325,18 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
             return;
         }
         strollTick = Utils.rand(10, 25);
-        Position nodeNext = Pathfinder.getNode(this.getPosition(), 6);
-        if (nodeNext == null) {
-            // 随机移动失败，传送回重生点
-            this.teleport(LittleMonsterMainClass.getInstance().positions.get(getSpawnPos()).getSpawnPos());
-        } else {
-            this.stopMove();
-            this.lookAt(nodeNext);
-            directMove(nodeNext);
-        }
+
+        CompletableFuture.runAsync(() -> {// 似乎会过度消耗性能，如果并行执行无法优化，请考虑回退。
+            Position nodeNext = Pathfinder.getNode(this.getPosition(), 6);
+            if (nodeNext == null) {
+                // 随机移动失败，传送回重生点
+                this.teleport(LittleMonsterMainClass.getInstance().positions.get(getSpawnPos()).getSpawnPos());
+            } else {
+                this.stopMove();
+                this.lookAt(nodeNext);
+                directMove(nodeNext);
+            }
+        });
 
     }
 
