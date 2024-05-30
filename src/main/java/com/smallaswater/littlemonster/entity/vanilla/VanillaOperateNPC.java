@@ -32,10 +32,12 @@ import lombok.Setter;
 import nukkitcoders.mobplugin.entities.animal.WalkingAnimal;
 import nukkitcoders.mobplugin.entities.monster.Monster;
 import org.jetbrains.annotations.NotNull;
+import xyz.lightsky.squarepet.pet.BaseSquarePet;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.smallaswater.littlemonster.LittleMonsterMainClass.hasMobPlugin;
 import static com.smallaswater.littlemonster.entity.baselib.BaseEntity.*;
 import static com.smallaswater.littlemonster.entity.vanilla.ai.MeleeAttackExecutor.playArmSwingAnimation;
 
@@ -116,7 +118,7 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
             return false;
         }
 
-        if (Server.getInstance().getPluginManager().getPlugin("MobPlugin") != null) {
+        if (hasMobPlugin) {
             if (!config.isAttackFriendEntity()) {
                 if (targetEntity instanceof WalkingAnimal) {
                     return false;
@@ -207,7 +209,7 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
         if (this.passengers.isEmpty()) {
             //获取范围内可以攻击的生物
             ArrayList<EntityCreature> scanEntities = new ArrayList<>();
-            for (Entity entity : Utils.getAroundPlayers(this, seeSize, true, true, true)) {
+            for (Entity entity : Utils.getAroundPlayers(this, seeSize, true, true, false)) {
                 //近战模式忽略部分会飞的实体 防止乱跑
                 //触发事件模式无法确定插件是近战还是远程 当作近战处理
                 //TODO 使用权重功能处理飞行生物，降低飞行生物目标权重
@@ -277,7 +279,7 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
         switch (this.getConfig().getAttaceMode()) {
             case ATTACK_MODE_RANGE:
                 playArmSwingAnimation(this);
-                LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, true);
+                LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, false);
                 for (Entity p : players) {
                     if (p instanceof Player && ((Player) p).isCreative()) {
                         continue;

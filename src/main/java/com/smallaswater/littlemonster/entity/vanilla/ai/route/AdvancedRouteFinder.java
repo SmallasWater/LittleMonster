@@ -107,7 +107,7 @@ public class AdvancedRouteFinder extends RouteFinder{
 			node.closed = true;
 			open.remove(node);
 
-			for(Node neighbor : this.getNeighbors(node)){
+			for(Node neighbor : this.getNeighbors(node)){// 获取节点的邻里方块并遍历
 				if(neighbor.closed) continue;
 
 				double tentative_gScore = node.g + neighbor.getVector3().distance(node.getVector3());

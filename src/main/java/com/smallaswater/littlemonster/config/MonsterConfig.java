@@ -15,6 +15,7 @@ import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.entity.LittleNpcCustomEntity;
 import com.smallaswater.littlemonster.entity.vanilla.VanillaNPC;
+import com.smallaswater.littlemonster.entity.vanilla.mob.EntitySlime;
 import com.smallaswater.littlemonster.items.DeathCommand;
 import com.smallaswater.littlemonster.items.DropItem;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
@@ -291,7 +292,11 @@ public class MonsterConfig {
             littleNpc = new LittleNpcCustomEntity(spawn.getChunk(), nbt, this);
             this.npcSetting((LittleNpc) littleNpc);
         } else if (this.networkId != -1) {
-            littleNpc = new VanillaNPC(spawn.getChunk(), Entity.getDefaultNBT(spawn), this);
+            if (this.networkId == 37) {
+                littleNpc = new EntitySlime(spawn.getChunk(), Entity.getDefaultNBT(spawn), this);
+            } else {
+                littleNpc = new VanillaNPC(spawn.getChunk(), Entity.getDefaultNBT(spawn), this, false);
+            }
             this.vanillaSetting((VanillaNPC) littleNpc);
         } else {
             littleNpc = new LittleNpc(spawn.getChunk(), nbt, this);

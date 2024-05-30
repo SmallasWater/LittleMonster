@@ -3,6 +3,7 @@ package com.smallaswater.littlemonster.utils;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.EntityHuman;
 import cn.nukkit.entity.EntityLiving;
 import cn.nukkit.level.Level;
@@ -17,6 +18,8 @@ import com.smallaswater.littlemonster.config.PositionConfig;
 import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.entity.baselib.Area;
+import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
+import xyz.lightsky.squarepet.pet.BaseSquarePet;
 
 import java.io.File;
 import java.io.IOException;
@@ -133,13 +136,14 @@ public class Utils {
 
     public static LinkedList<Entity> getAroundPlayers(Entity player, int size,boolean isPlayer, boolean isEntity,boolean isNpc) {
         LinkedList<Entity> explodePlayer = new LinkedList<>();
+        final double halfSize = size / 2.0;
         for(Entity player1: player.level.getNearbyEntities(new Area(
-                player.x - size / 2.0,
-                player.x + size / 2.0,
-                player.y - size / 2.0,
-                player.y + size / 2.0,
-                player.z - size / 2.0,
-                player.z + size / 2.0),player,true)){
+                player.x - halfSize,
+                player.x + halfSize,
+                player.y - halfSize,
+                player.y + halfSize,
+                player.z - halfSize,
+                player.z + halfSize),player,true)){
             if(isPlayer && player1 instanceof Player){
                 explodePlayer.add(player1);
                 continue;
@@ -152,6 +156,8 @@ public class Utils {
                         }
                     }
                 }else if(player1 instanceof EntityLiving &&!(player1 instanceof EntityHuman) && !player1.isImmobile()){
+                    explodePlayer.add(player1);
+                }else if (player1 instanceof BaseSquarePet) {// 添加对 宠物 的目标选取
                     explodePlayer.add(player1);
                 }
             }

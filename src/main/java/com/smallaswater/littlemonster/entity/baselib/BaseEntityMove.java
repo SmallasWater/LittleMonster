@@ -26,6 +26,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
+import static com.smallaswater.littlemonster.LittleMonsterMainClass.hasMobPlugin;
+
 
 /**
  * @author SmallasWater
@@ -170,7 +172,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                 for (EntityCreature entity : this.targetWeightedMap.keySet()) {
                     if (!scanEntities.contains(entity) && this.targetOption(entity, this.distance(entity))) {
                         this.targetWeightedMap.remove(entity);
-                    }else {
+                    } else {
                         TargetWeighted targetWeighted = this.getTargetWeighted(entity);
                         //更新距离
                         targetWeighted.setDistance(this.distance(entity));
@@ -278,7 +280,7 @@ public abstract class BaseEntityMove extends BaseEntity {
             return false;
         }
 
-        if (Server.getInstance().getPluginManager().getPlugin("MobPlugin") != null) {
+        if (hasMobPlugin) {
             if (!config.isAttackFriendEntity()) {
                 if (targetEntity instanceof WalkingAnimal) {
                     return false;

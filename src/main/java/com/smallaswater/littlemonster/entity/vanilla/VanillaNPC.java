@@ -6,6 +6,7 @@ import cn.nukkit.block.BlockRedstone;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.mob.EntityMob;
+import cn.nukkit.entity.mob.EntitySlime;
 import cn.nukkit.event.entity.*;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Position;
@@ -72,13 +73,13 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
     public double knockBase = 0.4d;
 
     //public boolean isjumping = false;
-    public double jumpHigh = 1;
+    public double jumpHigh = 1.26;
     //public boolean isonRoute = false;
     //public Vector3 nowtarget = null;
     public double speed = 3;
     //public int actions = 0;
     //public Vector3 actioinVec = new Vector3();
-    public int routeMax = 50;
+    public int routeMax = 80;
     //public Vector3 previousTo = null;
 
     public float halfWidth = 0.3f;
@@ -89,9 +90,10 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
 
     public final int networkId;
 
-    public VanillaNPC(FullChunk chunk, CompoundTag nbt, MonsterConfig config) {
+    public VanillaNPC(FullChunk chunk, CompoundTag nbt, MonsterConfig config, Boolean skip) {
         super(chunk, nbt, config);
         this.networkId = config.getNetworkId();
+        if (skip) return;
         Entity temp = Entity.createEntity(String.valueOf(config.getNetworkId()), chunk, nbt);
         if (temp != null) {
             width = temp.getWidth();
@@ -112,11 +114,15 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         this.setHealth(config.getHealth());
         this.setNameTagVisible(true);
         this.setNameTagAlwaysVisible(true);
-        this.setScale(1.0f);
         vanillaNPC = this;
         if (config.getAttaceMode() == ATTACK_MODE_ARROW) {
             shootAttackExecutor = new ShootAttackExecutor();
         }
+    }
+
+    @Override
+    public void initEntity() {
+        super.initEntity();
     }
 
     @Override
@@ -538,9 +544,10 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         this.getLevel().getPlayers().values().forEach((player -> player.dataPacket(pk)));
     }
 
+    @Override
     public void jump() {
         if (this.onGround) {
-            this.motionY = 0.42 * jumpHigh;
+            this.motionY = jumpHigh;
         }
     }
 

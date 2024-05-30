@@ -52,6 +52,8 @@ public class LittleMonsterMainClass extends PluginBase {
 
     public static boolean hasRcRPG;
     public static boolean hasMagicItem;
+    public static boolean hasMobPlugin;
+    public static boolean hasSquarePet;
 
     @Override
     public void onLoad() {
@@ -76,6 +78,8 @@ public class LittleMonsterMainClass extends PluginBase {
 
         hasRcRPG = Server.getInstance().getPluginManager().getPlugin("RcRPG") != null;
         hasMagicItem = Server.getInstance().getPluginManager().getPlugin("MagicItem") != null;
+        hasMobPlugin = Server.getInstance().getPluginManager().getPlugin("MobPlugin") != null;
+        hasSquarePet = Server.getInstance().getPluginManager().getPlugin("SquarePet") != null;
 
         Entity.registerEntity("LittleNpc", LittleNpc.class);
         BaseSkillManager.initSkill();
