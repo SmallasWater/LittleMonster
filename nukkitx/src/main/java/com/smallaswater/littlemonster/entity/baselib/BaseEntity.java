@@ -415,7 +415,7 @@ public abstract class BaseEntity extends EntityHuman {
      *
      * @return 经验值
      */
-    public int runDeathDropExp() {
+    public int deathDropExp() {
         if (config.getDropExp().size() > 1) {
             return Utils.rand(config.getDropExp().get(0), config.getDropExp().get(1));
         } else if (!config.getDropExp().isEmpty()) {

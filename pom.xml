@@ -6,7 +6,7 @@
 
     <groupId>com.smallaswater</groupId>
     <artifactId>LittleMonster</artifactId>
-    <version>1.7.1</version>
+    <version>1.7.2</version>
     <packaging>pom</packaging>
     <modules>
         <module>nukkitx</module>
@@ -21,7 +21,6 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
         <lib.GameCore.version>1.6.13</lib.GameCore.version>
-        <nukkitPluginsPath>C:\BedrockServer\MOT\plugins</nukkitPluginsPath>
     </properties>
 
     <distributionManagement>

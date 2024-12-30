@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.smallaswater</groupId>
         <artifactId>LittleMonster</artifactId>
-        <version>1.7.1</version>
+        <version>1.7.2</version>
     </parent>
 
     <artifactId>nukkitx</artifactId>
@@ -74,15 +74,23 @@
     </dependencies>
 
     <build>
-        <finalName>${parent.artifactId}_${project.artifactId}_v${parent.version}</finalName>
+        <finalName>${parent.artifactId}-${parent.version}-${project.artifactId}</finalName>
 
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <includes>
-                    <include>**/*.yml</include> <!-- 仅过滤 YAML 文件 -->
+                    <include>**/plugin.yml</include>
                 </includes>
-                <filtering>true</filtering> <!-- 启用过滤 -->
+                <filtering>true</filtering>
+            </resource>
+
+            <resource>
+                <directory>src/main/resources</directory>
+                <excludes>
+                    <exclude>**/plugin.yml</exclude>
+                </excludes>
+                <filtering>false</filtering>
             </resource>
         </resources>
 

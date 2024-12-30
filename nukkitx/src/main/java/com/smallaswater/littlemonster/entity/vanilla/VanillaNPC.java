@@ -737,31 +737,17 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
                     );
                 }
 
-                LittleMonsterEntityDeathDropExpEvent expEvent = new LittleMonsterEntityDeathDropExpEvent(this, this.deathDropExp());
+                LittleMonsterEntityDeathDropExpEvent expEvent = new LittleMonsterEntityDeathDropExpEvent(this, this.deathDropExp(), d);
                 Server.getInstance().getPluginManager().callEvent(expEvent);
                 if (!expEvent.isCancelled()) {
-                    int dropExp = expEvent.getDropExp();
-                    int addition = 0;
-                    // TODO 事件完成后移除这个兼容
-                    if (LittleMonsterMainClass.hasRcRPG) {// 经验加成
-                        try {
-                            Method getPlayerAttr = Class.forName("RcRPG.AttrManager.PlayerAttr").getMethod("getPlayerAttr", Player.class);
-                            Object manager = getPlayerAttr.invoke(null, damager);
-                            float experienceGainMultiplier = manager.getClass().getField("experienceGainMultiplier").getFloat(manager);
-                            if (experienceGainMultiplier > 0) {
-                                addition = (int) (experienceGainMultiplier * dropExp);
-                            }
-                        } catch (Exception e) {
-                            LittleMonsterMainClass.getInstance().getLogger().error("RcRPG经验加成获取失败", e);
-                        }
+                    String tipText;
+                    if (expEvent.getDifference() > 0) {
+                        tipText = "经验 +" + expEvent.getOriginExp() + "§a(" + expEvent.getDifference() + ")";
+                    } else {
+                        tipText = "经验 +" + expEvent.getTotalExp();
                     }
-                    String tipText = "经验 +" + dropExp;
-                    if (addition > 0) {
-                        tipText = "经验 +" + dropExp + "§a(" + addition + ")";
-                        dropExp += addition;
-                    }
-                    if (dropExp > 0) {
-                        ((Player) damager).addExperience(dropExp);// TODO:升级音效
+                    if (expEvent.getTotalExp() > 0) {
+                        ((Player) damager).addExperience(expEvent.getTotalExp());// TODO:升级音效
                         ((Player) damager).sendActionBar(tipText);
                     }
                 }
