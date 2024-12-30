@@ -32,7 +32,6 @@ import lombok.Setter;
 import nukkitcoders.mobplugin.entities.animal.WalkingAnimal;
 import nukkitcoders.mobplugin.entities.monster.Monster;
 import org.jetbrains.annotations.NotNull;
-import xyz.lightsky.squarepet.pet.BaseSquarePet;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

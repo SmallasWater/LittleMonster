@@ -43,6 +43,8 @@ import java.util.concurrent.CompletableFuture;
 import static com.smallaswater.littlemonster.entity.baselib.BaseEntity.ATTACK_MODE_ARROW;
 
 public class VanillaNPC extends VanillaOperateNPC implements IEntity {
+    public static final String TAG = "LittleMonster";
+
     @Setter
     @Getter
     private int liveTime = -1;
@@ -112,6 +114,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
 
         this.setMaxHealth(config.getHealth());
         this.setHealth(config.getHealth());
+        this.namedTag.putString(TAG, config.getName());
         this.setNameTagVisible(true);
         this.setNameTagAlwaysVisible(true);
         vanillaNPC = this;

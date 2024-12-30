@@ -142,7 +142,6 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
                     for (Player player : getDamagePlayers()) {
                         disCommand(cmd, "@" + BaseItem.TARGETALL, player.getName());
                     }
-
                 } else {
                     if (cmd.contains("@" + BaseItem.TARGET)) {
                         if (damager instanceof Player) {

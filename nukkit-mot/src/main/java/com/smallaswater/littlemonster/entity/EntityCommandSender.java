@@ -2,6 +2,7 @@ package com.smallaswater.littlemonster.entity;
 
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.lang.CommandOutputContainer;
 import cn.nukkit.lang.TextContainer;
 import cn.nukkit.permission.PermissibleBase;
 import cn.nukkit.permission.Permission;
@@ -17,11 +18,11 @@ import java.util.Map;
  * Create on 2021/9/9 17:41
  * Package com.smallaswater.littlemonster.entity
  */
-public class EntityCommandSender implements CommandSender {
+public class EntityCommandSender implements IEntityCommandSender {
 
     private final PermissibleBase perm = new PermissibleBase(this);
 
-    private String name;
+    private final String name;
 
     public EntityCommandSender(String name) {
         this.name = name;
@@ -78,16 +79,6 @@ public class EntityCommandSender implements CommandSender {
     }
 
     @Override
-    public boolean isPlayer() {
-        return false;
-    }
-
-    @Override
-    public Server getServer() {
-        return Server.getInstance();
-    }
-
-    @Override
     public void sendMessage(String message) {
         message = this.getServer().getLanguage().translateString(message);
         String[] var2 = message.trim().split("\n");
@@ -103,16 +94,12 @@ public class EntityCommandSender implements CommandSender {
     }
 
     @Override
+    public void sendCommandOutput(CommandOutputContainer commandOutputContainer) {
+        // only nukkit-mot
+    }
+
+    @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    public boolean isOp() {
-        return true;
-    }
-
-    @Override
-    public void setOp(boolean value) {
     }
 }

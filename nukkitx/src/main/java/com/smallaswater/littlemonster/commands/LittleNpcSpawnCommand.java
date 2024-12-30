@@ -15,7 +15,7 @@ import cn.nukkit.utils.TextFormat;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.config.PositionConfig;
-import com.smallaswater.littlemonster.entity.EntityCommandSender;
+import com.smallaswater.littlemonster.entity.IEntityCommandSender;
 import com.smallaswater.littlemonster.items.BaseItem;
 import com.smallaswater.littlemonster.utils.Utils;
 import com.smallaswater.littlemonster.windows.LittleWindow;
@@ -177,7 +177,7 @@ public class LittleNpcSpawnCommand extends Command {
                             player.sendMessage(TextFormat.colorize('&', stringBuilder.toString()));
                            return true;
                         }else{
-                            if(sender instanceof EntityCommandSender){
+                            if(sender instanceof IEntityCommandSender){
                                 return true;
                             }
                             sender.sendMessage("玩家不在线");
