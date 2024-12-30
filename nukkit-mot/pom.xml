@@ -71,6 +71,7 @@
                                 <filter>
                                     <artifact>com.smallaswater:nukkitx</artifact>
                                     <excludes>
+                                        <exclude>com/smallaswater/littlemonster/common/EntityTool.class</exclude>
                                         <exclude>com/smallaswater/littlemonster/entity/EntityCommandSender.class</exclude>
                                         <exclude>META-INF/MANIFEST.MF</exclude>
                                     </excludes>

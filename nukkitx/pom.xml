@@ -23,8 +23,8 @@
     <dependencies>
         <dependency>
             <groupId>cn.nukkit</groupId>
-            <artifactId>Nukkit</artifactId>
-            <version>MOT-java8-SNAPSHOT</version>
+            <artifactId>nukkit</artifactId>
+            <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 

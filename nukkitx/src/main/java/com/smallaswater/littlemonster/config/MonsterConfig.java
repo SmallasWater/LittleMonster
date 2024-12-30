@@ -11,6 +11,7 @@ import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
+import com.smallaswater.littlemonster.common.EntityTool;
 import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.entity.LittleNpcCustomEntity;
@@ -306,9 +307,7 @@ public class MonsterConfig {
         if (time > 0) {
             littleNpc.setLiveTime(time);
         }
-        if (NukkitTypeUtils.getNukkitType() == NukkitTypeUtils.NukkitType.MOT) {
-            littleNpc.setCanBeSavedWithChunk(false);
-        }
+        EntityTool.setEntityCanBeSavedWithChunk(littleNpc.getEntity(), false);
         littleNpc.spawnToAll();
         return littleNpc;
     }

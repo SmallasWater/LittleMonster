@@ -8,7 +8,6 @@ import com.smallaswater.littlemonster.config.MonsterConfig;
 public interface IEntity {
     Entity getEntity();
     void setLiveTime(int time);
-    void setCanBeSavedWithChunk(boolean is);
     void spawnToAll();
 
     void setSpawnPos(String name);

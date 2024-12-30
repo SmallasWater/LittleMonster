@@ -23,6 +23,7 @@ import cn.nukkit.network.protocol.EntityEventPacket;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.TextFormat;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
+import com.smallaswater.littlemonster.common.EntityTool;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntityMove;
 import com.smallaswater.littlemonster.events.entity.LittleMonsterEntityDeathDropExpEvent;
@@ -517,9 +518,7 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
                         if (launch.isCancelled()) {
                             projectile.kill();
                         } else {
-                            if (NukkitTypeUtils.getNukkitType() == NukkitTypeUtils.NukkitType.MOT) {
-                                projectile.setCanBeSavedWithChunk(false);
-                            }
+                            EntityTool.setEntityCanBeSavedWithChunk(projectile, false);
                             projectile.spawnToAll();
                             ((EntityArrow) projectile).setPickupMode(EntityArrow.PICKUP_NONE);
                             this.level.addSound(this, Sound.RANDOM_BOW);
