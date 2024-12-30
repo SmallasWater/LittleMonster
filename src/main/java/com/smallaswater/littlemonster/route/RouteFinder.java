@@ -10,6 +10,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class RouteFinder {
@@ -28,6 +29,8 @@ public abstract class RouteFinder {
 
    protected Vector3 originalDestination;
    protected Vector3 destination;
+
+   protected final ReentrantLock destinationLock = new ReentrantLock();
 
    /**
     * 目的地偏离
@@ -82,22 +85,27 @@ public abstract class RouteFinder {
    }
 
    public void setDestination(Vector3 destination, boolean enableOffset) {
-      int tick = Server.getInstance().getTick();
-      if (tick - this.lastSetDestinationTick < 18) {
-         return;
-      }
-      this.lastSetDestinationTick = tick;
-      this.originalDestination = destination.clone();
-      this.destination = destination.clone();
-      this.enableOffset = enableOffset;
-      if (this.isFinished()) {
-         this.finished = false;
-      }
-      if (this.isSearching()) {
-         this.interrupt = true;
-         //this.research();
-      }
+      try {
+         this.destinationLock.lock();
+         int tick = Server.getInstance().getTick();
+         if (tick - this.lastSetDestinationTick < 18) {
+            return;
+         }
+         this.lastSetDestinationTick = tick;
+         this.originalDestination = destination.clone();
+         this.destination = destination.clone();
+         this.enableOffset = enableOffset;
+         if (this.isFinished()) {
+            this.finished = false;
+         }
+         if (this.isSearching()) {
+            this.interrupt = true;
+            //this.research();
+         }
 //      RouteFinderThreadPool.executeRouteFinderThread(new RouteFinderSearchTask(this, enableOffset));
+      } finally {
+         this.destinationLock.unlock();
+      }
    }
 
    public boolean isFinished() {

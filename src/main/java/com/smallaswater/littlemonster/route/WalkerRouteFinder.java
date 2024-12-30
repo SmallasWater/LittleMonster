@@ -69,25 +69,30 @@ public class WalkerRouteFinder extends SimpleRouteFinder {
          this.start = this.entity;
       }
 
-      if (this.originalDestination == null && this.entity.getTargetVector() != null) {
-         this.originalDestination = this.entity.getTargetVector().clone();
-      }
-
-      if (this.originalDestination == null) {
-         this.searching = false;
-         this.finished = true;
-         if (LittleMonsterMainClass.debug) {
-            LittleMonsterMainClass.getInstance().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 没有目标");
+      try {
+         this.destinationLock.lock();
+         if (this.originalDestination == null && this.entity.getTargetVector() != null) {
+            this.originalDestination = this.entity.getTargetVector().clone();
          }
-         return false;
-      }
 
-      //找一个可以站立的目标点
-      Position safeSpawn = this.level.getSafeSpawn(this.originalDestination);
-      if (safeSpawn.distance(this.originalDestination) < 10) {
-         this.destination = safeSpawn;
-      } else {
-         this.destination = this.originalDestination;
+         if (this.originalDestination == null) {
+            this.searching = false;
+            this.finished = true;
+            if (LittleMonsterMainClass.debug) {
+               LittleMonsterMainClass.getInstance().getLogger().info("[debug] 实体" + this.entity.getName() + " 寻路失败 没有目标");
+            }
+            return false;
+         }
+
+         //找一个可以站立的目标点
+         Position safeSpawn = this.level.getSafeSpawn(this.originalDestination);
+         if (safeSpawn.distance(this.originalDestination) < 10) {
+            this.destination = safeSpawn;
+         } else {
+            this.destination = this.originalDestination;
+         }
+      } finally {
+         this.destinationLock.unlock();
       }
 
       try {
