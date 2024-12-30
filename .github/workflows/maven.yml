@@ -35,8 +35,7 @@ jobs:
         with:
           name: nukkitx platform artifact
           path: staging/LittleMonster-nukkitx-SNAPSHOT.jar
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: nukkit-mot platform artifact
           path: staging/LittleMonster-mot-SNAPSHOT.jar
-
