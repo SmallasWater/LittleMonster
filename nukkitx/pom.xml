@@ -8,6 +8,7 @@
     </parent>
 
     <artifactId>LittleMonster</artifactId>
+    <version>${parent.version}</version>
     <packaging>jar</packaging>
 
     <properties>

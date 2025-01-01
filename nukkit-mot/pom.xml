@@ -42,14 +42,6 @@
             <scope>system</scope>
             <systemPath>${pom.basedir}/../lib/MobPlugin-1.26.3.jar</systemPath>
         </dependency>
-
-        <!-- 单元测试-->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
