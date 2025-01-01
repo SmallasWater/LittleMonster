@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.smallaswater</groupId>
-        <artifactId>LittleMonster-parent</artifactId>
+        <artifactId>LittleMonster</artifactId>
         <version>1.7.2</version>
     </parent>
 
     <artifactId>LittleMonster</artifactId>
-    <version>${parent.version}</version>
+    <version>${parent.version}-NKX</version>
     <packaging>jar</packaging>
 
     <properties>
