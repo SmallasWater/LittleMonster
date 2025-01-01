@@ -1,0 +1,11 @@
+name: LittleMonster
+main: com.smallaswater.littlemonster.LittleMonsterMainClass
+version: "${project.version}"
+authors:
+  - 若水
+  - LT_Name
+api: 1.0.13
+softdepend:
+  - "MemoriesOfTime-GameCore"
+  - "RcRPG"
+  - "MagicItem"
