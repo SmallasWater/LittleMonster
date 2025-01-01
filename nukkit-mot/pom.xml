@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.smallaswater</groupId>
-        <artifactId>LittleMonster</artifactId>
+        <artifactId>LittleMonster-parent</artifactId>
         <version>1.7.2</version>
     </parent>
 
-    <artifactId>mot</artifactId>
-    <version>${parent.version}-nkmot</version>
+    <artifactId>LittleMonster</artifactId>
+    <version>${parent.version}-NKMOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -24,7 +24,7 @@
     <dependencies>
         <dependency>
             <groupId>com.smallaswater</groupId>
-            <artifactId>nukkitx</artifactId>
+            <artifactId>LittleMonster</artifactId>
             <version>${parent.version}</version>
         </dependency>
 
@@ -53,8 +53,6 @@
     </dependencies>
 
     <build>
-        <finalName>${parent.artifactId}-${parent.version}-${project.artifactId}</finalName>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

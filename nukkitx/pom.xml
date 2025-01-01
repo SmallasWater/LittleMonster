@@ -3,11 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.smallaswater</groupId>
-        <artifactId>LittleMonster</artifactId>
+        <artifactId>LittleMonster-parent</artifactId>
         <version>1.7.2</version>
     </parent>
 
-    <artifactId>nukkitx</artifactId>
+    <artifactId>LittleMonster</artifactId>
     <packaging>jar</packaging>
 
     <properties>
@@ -67,8 +67,6 @@
     </dependencies>
 
     <build>
-        <finalName>${parent.artifactId}-${parent.version}-${project.artifactId}</finalName>
-
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
