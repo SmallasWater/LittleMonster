@@ -8,6 +8,7 @@
     </parent>
 
     <artifactId>mot</artifactId>
+    <version>${parent.version}-nkmot</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -24,7 +25,7 @@
         <dependency>
             <groupId>com.smallaswater</groupId>
             <artifactId>nukkitx</artifactId>
-            <version>${project.version}</version>
+            <version>${parent.version}</version>
         </dependency>
 
         <dependency>
