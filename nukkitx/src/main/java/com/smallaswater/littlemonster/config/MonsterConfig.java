@@ -16,6 +16,7 @@ import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.entity.LittleNpcCustomEntity;
 import com.smallaswater.littlemonster.entity.vanilla.VanillaNPC;
+import com.smallaswater.littlemonster.entity.vanilla.VanillaNPCCustomEntity;
 import com.smallaswater.littlemonster.entity.vanilla.mob.EntitySlime;
 import com.smallaswater.littlemonster.items.DeathCommand;
 import com.smallaswater.littlemonster.items.DropItem;
@@ -200,7 +201,15 @@ public class MonsterConfig {
                 if (NukkitTypeUtils.getNukkitType() == NukkitTypeUtils.NukkitType.MOT) {
                     monsterConfig.setEnableCustomEntity(true);
                     String identifier = config.getString("CustomEntity.identifier");
-                    if (!CUSTOM_ENTITY_DEFINITIONS.containsKey(identifier)) {
+                    if(config.getInt("实体NetworkId") >= 10 && !CUSTOM_ENTITY_DEFINITIONS.containsKey(identifier)){
+                        EntityDefinition entityDefinition = EntityDefinition.builder()
+                                .identifier(identifier)
+                                .spawnEgg(false)
+                                .implementation(VanillaNPCCustomEntity.class)
+                                .build();
+                        EntityManager.get().registerDefinition(entityDefinition);
+                        CUSTOM_ENTITY_DEFINITIONS.put(identifier, entityDefinition);
+                    } else if (!CUSTOM_ENTITY_DEFINITIONS.containsKey(identifier)) {
                         EntityDefinition entityDefinition = EntityDefinition.builder()
                                 .identifier(identifier)
                                 .spawnEgg(false)
@@ -290,8 +299,17 @@ public class MonsterConfig {
 
         IEntity littleNpc;
         if (this.enableCustomEntity) {
-            littleNpc = new LittleNpcCustomEntity(spawn.getChunk(), nbt, this);
-            this.npcSetting((LittleNpc) littleNpc);
+            if(this.networkId >= 10 ){
+                if(this.networkId == 37){
+                    littleNpc = new EntitySlime(spawn.getChunk(), Entity.getDefaultNBT(spawn), this);
+                }else{
+                    littleNpc = new VanillaNPCCustomEntity(spawn.getChunk(), nbt, this,false);
+                }
+                this.vanillaSetting((VanillaNPC) littleNpc);
+            } else {
+                littleNpc = new LittleNpcCustomEntity(spawn.getChunk(), nbt, this);
+                this.npcSetting((LittleNpc) littleNpc);
+            }
         } else if (this.networkId != -1) {
             if (this.networkId == 37) {
                 littleNpc = new EntitySlime(spawn.getChunk(), Entity.getDefaultNBT(spawn), this);
@@ -336,6 +354,7 @@ public class MonsterConfig {
         //vanillaNpc.getInventory().setArmorContents(armor.toArray(new Item[0]));
         //vanillaNpc.getOffhandInventory().setItem(0, offhand);
     }
+
     public void npcSetting(LittleNpc littleNpc) {
         littleNpc.setNameTag(getTag()
                 .replace("{名称}", littleNpc.getName())

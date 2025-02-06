@@ -1,4 +1,4 @@
-package com.smallaswater.littlemonster.entity;
+package com.smallaswater.littlemonster.entity.vanilla;
 
 import cn.lanink.gamecore.utils.EntityUtils;
 import cn.nukkit.Player;
@@ -6,37 +6,30 @@ import cn.nukkit.entity.custom.CustomEntity;
 import cn.nukkit.entity.custom.EntityDefinition;
 import cn.nukkit.entity.custom.EntityManager;
 import cn.nukkit.entity.data.IntEntityData;
-import cn.nukkit.entity.data.Skin;
+//import cn.nukkit.entity.data.Skin;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.SetEntityLinkPacket;
 import com.smallaswater.littlemonster.config.MonsterConfig;
+import com.smallaswater.littlemonster.entity.IEntity;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * @author LT_Name
- */
-public class LittleNpcCustomEntity extends LittleNpc implements CustomEntity, IEntity {
-
+public class VanillaNPCCustomEntity extends VanillaNPC implements CustomEntity,IEntity {
     private static final EntityDefinition DEFAULT_DEFINITION = EntityDefinition.builder()
-            .identifier("little_npc_custom_entity")
+            .identifier("vanilla_npc_custom_entity")
             .spawnEgg(false)
-            .implementation(LittleNpcCustomEntity.class)
+            .implementation(VanillaNPCCustomEntity.class)
             .build();
-
     static {
         EntityManager.get().registerDefinition(DEFAULT_DEFINITION);
     }
 
     private EntityDefinition definition;
 
-    public LittleNpcCustomEntity(FullChunk chunk, CompoundTag nbt) {
-        super(chunk, nbt);
-    }
 
-    public LittleNpcCustomEntity(FullChunk chunk, CompoundTag nbt, @NotNull MonsterConfig config) {
-        super(chunk, nbt, config);
+    public VanillaNPCCustomEntity(FullChunk chunk, CompoundTag nbt, @NotNull MonsterConfig config,boolean skip) {
+        super(chunk, nbt, config, skip);
         this.setDefinition(config.getCustomEntityDefinition());
     }
 
@@ -53,12 +46,12 @@ public class LittleNpcCustomEntity extends LittleNpc implements CustomEntity, IE
         this.definition = EntityDefinition.builder()
                 .identifier(identifier)
                 .spawnEgg(false)
-                .implementation(LittleNpcCustomEntity.class)
+                .implementation(VanillaNPCCustomEntity.class)
                 .build();
     }
 
     /**
-     * 获取实体定义
+     * 获取原版实体定义
      *
      * @return 实体定义
      */
@@ -84,7 +77,7 @@ public class LittleNpcCustomEntity extends LittleNpc implements CustomEntity, IE
     }
 
     @Override
-    protected void initEntity() {
+    public void initEntity() {
         super.initEntity();
         this.setDataProperty(
                 new IntEntityData(EntityUtils.getEntityField("DATA_SKIN_ID", DATA_SKIN_ID),
@@ -118,13 +111,15 @@ public class LittleNpcCustomEntity extends LittleNpc implements CustomEntity, IE
         }
     }
 
-    @Override
-    public void setSkin(Skin skin) {
-        this.skin = skin;
-    }
+    //基于原版实体目前不需要实现
+    //@Override
+    //public void setSkin(Skin skin) {
+        //this.skin = skin;
+    //}
 
     @Override
     public boolean isVanillaEntity() {
         return false;
     }
+
 }
