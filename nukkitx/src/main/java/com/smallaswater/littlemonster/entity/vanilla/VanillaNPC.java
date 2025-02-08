@@ -32,6 +32,8 @@ import com.smallaswater.littlemonster.events.entity.LittleMonsterEntityDeathDrop
 import com.smallaswater.littlemonster.items.BaseItem;
 import com.smallaswater.littlemonster.items.DeathCommand;
 import com.smallaswater.littlemonster.items.DropItem;
+import com.smallaswater.littlemonster.manager.BossBarManager;
+import com.smallaswater.littlemonster.threads.runnables.RouteFinderRunnable;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,6 +46,12 @@ import static com.smallaswater.littlemonster.entity.baselib.BaseEntity.ATTACK_MO
 
 public class VanillaNPC extends VanillaOperateNPC implements IEntity {
     public static final String TAG = "LittleMonster";
+
+    protected int healTime = 0;
+
+    public int healSettingTime;
+
+    public int heal;
 
     @Setter
     @Getter
@@ -236,6 +244,8 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         }
     }
 
+    private Player boss = null;
+
     @Override
     public boolean onUpdate(int currentTick) {
         // 技能召唤的
@@ -256,6 +266,47 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
                 .replace("{血量}", getHealth() + "")
                 .replace("{最大血量}", getMaxHealth() + ""));
         //onHealthListener((int) Math.floor(getHealth()));
+
+        if (this.getFollowTarget() != null && this.getFollowTarget() instanceof Player) {
+            if (healTime >= healSettingTime &&
+                    heal > 0 &&
+                    !config.isUnFightHeal()) {
+                healTime = 0;
+                this.heal(heal);
+            }
+            if (config.isShowBossBar()) {
+                if (targetOption(this.getFollowTarget(), this.distance(this.getFollowTarget()))) {
+                    if (boss != null) {
+                        BossBarManager.BossBarApi.removeBossBar(boss);
+                        boss = null;
+                    }
+                    return false;
+                }
+                if (this.getFollowTarget() instanceof Player) {
+                    boss = (Player) this.getFollowTarget();
+                    if (!BossBarManager.BossBarApi.hasCreate((Player) this.getFollowTarget(), getId())) {
+                        BossBarManager.BossBarApi.createBossBar((Player) this.getFollowTarget(), getId());
+                    }
+                    BossBarManager.BossBarApi.showBoss((Player) getFollowTarget(),
+                            getNameTag(),
+                            getHealth(),
+                            getMaxHealth());
+                }
+            }
+        } else {
+            if (getFollowTarget() == null || !config.isUnFightHeal()) {
+                if (healTime >= healSettingTime && heal > 0) {
+                    healTime = 0;
+                    this.heal(heal);
+                }
+            }
+            if (config.isShowBossBar()) {
+                if (boss != null) {
+                    BossBarManager.BossBarApi.removeBossBar(boss);
+                    boss = null;
+                }
+            }
+        }
 
         // 更新乘客
         try {
