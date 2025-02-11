@@ -26,6 +26,7 @@ import com.smallaswater.littlemonster.entity.vanilla.ai.ShootAttackExecutor;
 import com.smallaswater.littlemonster.entity.vanilla.ai.entity.MovingVanillaEntity;
 import com.smallaswater.littlemonster.handle.DamageHandle;
 import com.smallaswater.littlemonster.manager.BossBarManager;
+import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,7 +41,7 @@ import static com.smallaswater.littlemonster.LittleMonsterMainClass.hasMobPlugin
 import static com.smallaswater.littlemonster.entity.baselib.BaseEntity.*;
 import static com.smallaswater.littlemonster.entity.vanilla.ai.MeleeAttackExecutor.playArmSwingAnimation;
 
-public class VanillaOperateNPC extends MovingVanillaEntity {
+public class BaseVanillaNPC extends MovingVanillaEntity {
     public VanillaNPC vanillaNPC;
 
     @Setter
@@ -52,9 +53,11 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
     @Getter
     protected EntityHuman masterHuman = null;
 
-    //攻击速度
+    /**
+     * 攻击速度
+     */
     @Getter
-    public int attackSleepTick = 23;
+    public int entityAttackSpeed = 23;
 
     protected int attackDelay = 0;
 
@@ -62,16 +65,15 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
 
     protected int healDelay = 0;
 
-    @Setter
+    /**
+     * 攻击力
+     */
     @Getter
-    //伤害
     public int damage = 2;
 
     public int seeSize = 20;
 
     public DamageHandle handle = new DamageHandle();
-
-    protected final ConcurrentHashMap<EntityCreature, TargetWeighted> targetWeightedMap = new ConcurrentHashMap<>();
 
     //目标
     Vector3 target_ = null;
@@ -82,13 +84,19 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
 
     private Player boss = null;
 
+    protected final ConcurrentHashMap<EntityCreature, TargetWeighted> targetWeightedMap = new ConcurrentHashMap<>();
+
+    protected ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
+
+    protected ArrayList<Integer> healthList = new ArrayList<>();
+
     //停留
     int stayTime = 0;
     boolean canAttack = true;
 
     public ShootAttackExecutor shootAttackExecutor = null;
 
-    public VanillaOperateNPC(FullChunk chunk, CompoundTag nbt, MonsterConfig config) {
+    public BaseVanillaNPC(FullChunk chunk, CompoundTag nbt, MonsterConfig config) {
         super(chunk, nbt);
     }
 
@@ -212,7 +220,7 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
                 //近战模式忽略部分会飞的实体 防止乱跑
                 //触发事件模式无法确定插件是近战还是远程 当作近战处理
                 //TODO 使用权重功能处理飞行生物，降低飞行生物目标权重
-                if (this.getConfig().getAttaceMode() == ATTACK_MODE_MELEE || this.getConfig().getAttaceMode() == ATTACK_MODE_EVENT) {
+                if (this.getConfig().getAttackMode() == ATTACK_MODE_MELEE || this.getConfig().getAttackMode() == ATTACK_MODE_EVENT) {
                     //忽略蝙蝠 鹦鹉
                     if (entity.getNetworkId() == EntityBat.NETWORK_ID || entity.getNetworkId() == EntityParrot.NETWORK_ID) {
                         continue;
@@ -267,7 +275,7 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
      * 攻击实体
      */
     public int attackEntity(EntityCreature entity) {
-        if (this.attackDelay <= attackSleepTick) {
+        if (this.attackDelay <= entityAttackSpeed) {
             return 1;
         }
         if (this.distance(entity) > this.getConfig().getAttackDistance()) {
@@ -275,7 +283,7 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
         }
 
         this.attackDelay = 0;
-        switch (this.getConfig().getAttaceMode()) {
+        switch (this.getConfig().getAttackMode()) {
             case ATTACK_MODE_RANGE:
                 playArmSwingAnimation(this);
                 LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, false);
@@ -420,15 +428,10 @@ public class VanillaOperateNPC extends MovingVanillaEntity {
 
         //如果在类实例化时调用onClose方法 这些变量可能为null
         //noinspection ConstantConditions
-        if (this.targetWeightedMap != null) {
-            this.targetWeightedMap.clear();
-        }
-//        if (this.skillManagers != null) {
-//            this.skillManagers.clear();
-//        }
-//        if (this.healthList != null) {
-//            this.healthList.clear();
-//        }
+        this.targetWeightedMap.clear();
+        this.skillManagers.clear();
+        this.healthList.clear();
+
         this.handle = null;
         this.route = null;
         super.close();

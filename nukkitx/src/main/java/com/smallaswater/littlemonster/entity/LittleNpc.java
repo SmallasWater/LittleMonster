@@ -1,11 +1,11 @@
 package com.smallaswater.littlemonster.entity;
 
-import cn.lanink.gamecore.utils.NukkitTypeUtils;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.BlockRedstone;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
+import cn.nukkit.entity.data.Skin;
 import cn.nukkit.entity.mob.EntityMob;
 import cn.nukkit.entity.projectile.EntityArrow;
 import cn.nukkit.entity.projectile.EntityProjectile;
@@ -41,9 +41,7 @@ import com.smallaswater.littlemonster.threads.runnables.RouteFinderRunnable;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Getter;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -67,19 +65,12 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
 
     public int healSettingTime;
 
-    private ArrayList<Integer> healthList = new ArrayList<>();
-
     public DamageHandle handle = new DamageHandle();
 
     //TODO 唯一标识
     public UUID uuid;
 
-    public LittleNpc(FullChunk chunk, CompoundTag nbt) {
-        super(chunk, nbt, null);
-        this.close();
-    }
-
-    public LittleNpc(FullChunk chunk, CompoundTag nbt, @NotNull MonsterConfig config) {
+    public LittleNpc(FullChunk chunk, CompoundTag nbt, MonsterConfig config) {
         super(chunk, nbt, config);
         this.name = config.getName();
         this.setNameTagAlwaysVisible();
@@ -99,16 +90,15 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
 
     private Player getDamageMax() {
         double max = 0;
-        Player p = null;
-        for (Map.Entry<String, Double> player : handle.playerDamageList.entrySet()) {
-            if (player.getValue() > max) {
-                if (Server.getInstance().getPlayer(player.getKey()) != null) {
-                    p = Server.getInstance().getPlayer(player.getKey());
-                }
-                max = player.getValue();
+        Player player = null;
+        for (Map.Entry<String, Double> p : handle.playerDamageList.entrySet()) {
+            if (p.getValue() > max) {
+                if (Server.getInstance().getPlayer(p.getKey()) != null) continue;
+                player = Server.getInstance().getPlayer(p.getKey());
+                max = p.getValue();
             }
         }
-        return p;
+        return player;
     }
 
     private void disCommand(String cmd) {
@@ -210,34 +200,6 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
         return name;
     }
 
-    @Override
-    public void onClose() {
-        if (boss != null) {
-            BossBarManager.BossBarApi.removeBossBar(boss);
-            boss = null;
-        }
-        if (config != null) {
-            if (config.isDisplayDamage() && this.handle != null) {
-                handle.display();
-            }
-        }
-
-        //如果在类实例化时调用onClose方法 这些变量可能为null
-        //noinspection ConstantConditions
-        if (this.targetWeightedMap != null) {
-            this.targetWeightedMap.clear();
-        }
-        if (this.skillManagers != null) {
-            this.skillManagers.clear();
-        }
-        if (this.healthList != null) {
-            this.healthList.clear();
-        }
-        this.handle = null;
-        RouteFinderRunnable.removeRoute(this);
-        this.route = null;
-    }
-
     private ArrayList<Player> getDamagePlayers() {
         ArrayList<Player> players = new ArrayList<>();
         Player player;
@@ -250,62 +212,7 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
         return players;
     }
 
-    private void loadSkill() {
-        BaseSkillManager baseSkillManager;
-        for (BaseSkillManager skillManager : config.getSkillManagers()) {
-            baseSkillManager = skillManager.clone();
-            baseSkillManager.setMaster(this);
-            skillManagers.add(baseSkillManager);
-        }
-    }
-
-    private ArrayList<BaseSkillManager> getHealthSkill(int health) {
-
-        ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
-        for (BaseSkillManager skillManager : this.skillManagers) {
-            if (skillManager.health >= health) {
-                if (!healthList.contains(skillManager.health)) {
-                    skillManagers.add(skillManager);
-                    healthList.add(skillManager.health);
-                }
-            }
-        }
-        return skillManagers;
-    }
-
     private Player boss = null;
-
-    private void onHealthListener(int health) {
-        ArrayList<BaseSkillManager> skillAreaManagers = getHealthSkill(health);
-        if (!skillAreaManagers.isEmpty()) {
-            for (BaseSkillManager skillManager : skillAreaManagers) {
-                if (skillManager instanceof BaseSkillAreaManager) {
-                    if (this.getFollowTarget() != null) {
-                        if (!targetOption(this.getFollowTarget(), distance(this.getFollowTarget()))) {
-
-                            if (skillManager.mode == 1) {
-                                skillManager.display(Utils.getAroundPlayers(this, config.getArea(), true, true, true).toArray(new Entity[0]));
-                            } else {
-                                if (this.getFollowTarget() instanceof Player) {
-                                    skillManager.display(this.getFollowTarget());
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    if (skillManager instanceof AttributeHealthSkill) {
-                        skillManager.display((Player) null);
-                    }
-                    if (skillManager instanceof SummonHealthSkill) {
-                        skillManager.display(this);
-                    }
-                    if (skillManager instanceof MessageHealthSkill) {
-                        skillManager.display(getDamagePlayers().toArray(new Player[0]));
-                    }
-                }
-            }
-        }
-    }
 
     private int age = 0;
 
@@ -478,10 +385,10 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
     //攻击玩家~
     @Override
     public void attackEntity(EntityCreature entity) {
-        if (this.attackDelay > attackSleepTick && (entity.distance(this) <= this.getConfig().getAttackDistance() || entity.distance(this.add(0, this.getHealth(), 0)) <= this.getConfig().getAttackDistance())) {
+        if (this.attackDelay > getEntityAttackSpeed() && (entity.distance(this) <= getConfig().getAttackDistance() || entity.distance(this.add(0, this.getHealth(), 0)) <= getConfig().getAttackDistance())) {
             this.attackDelay = 0;
             this.waitTime = 0;
-            switch (this.getConfig().getAttaceMode()) {
+            switch (getConfig().getAttackMode()) {
                 case ATTACK_MODE_RANGE:
                     LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, true);
                     for (Entity p : players) {
@@ -534,7 +441,7 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
                 case ATTACK_MODE_MELEE:
                 default:
                     HashMap<EntityDamageEvent.DamageModifier, Float> damage = new LinkedHashMap<>();
-                    damage.put(EntityDamageEvent.DamageModifier.BASE, getDamage());
+                    damage.put(EntityDamageEvent.DamageModifier.BASE, (float) getDamage());
                     if (entity instanceof Player) {
                         HashMap<Integer, Float> armorValues = new LinkedHashMap<Integer, Float>() {
                             {
@@ -587,23 +494,39 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
         if (inventory != null && inventory.getViewers() != null) {
             inventory.getViewers().clear();
         }
-        super.close();
         if (this.route != null) {
             this.route.interrupt();
         }
         RouteFinderRunnable.routeEntitys.remove(this);
 
-        this.onClose();
+        super.close();
+        if (boss != null) {
+            BossBarManager.BossBarApi.removeBossBar(boss);
+            boss = null;
+        }
+        if (config != null) {
+            if (config.isDisplayDamage() && this.handle != null) {
+                handle.display();
+            }
+        }
+        this.handle = null;
+        RouteFinderRunnable.removeRoute(this);
+        this.route = null;
     }
 
     @Override
     public void saveNBT() {
-        //不保存实体数据
+        // ignore
     }
 
     @Override
-    public float getDamage() {
-        return (float) damage;
+    public void setAttackDamage(int damage) {
+        this.damage = damage;
+    }
+
+    @Override
+    public void setEntityAttackSpeed(int speed) {
+        this.entityAttackSpeed = speed;
     }
 
     @Override
@@ -657,4 +580,55 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
     public Entity getEntity() {
         return this;
     }
+
+    @Override
+    public void setSkinByIEntity(Skin skin) {
+        this.setSkin(skin);
+    }
+
+    @Override
+    public ArrayList<BaseSkillManager> getSkillManagers() {
+        return skillManagers;
+    }
+
+    public ArrayList<BaseSkillManager> getHealthSkill(int health) {
+        ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
+        for (BaseSkillManager skillManager : getSkillManagers()) {
+            if (skillManager.health < health) continue;
+            if (!healthList.contains(skillManager.health)) {
+                skillManagers.add(skillManager);
+                healthList.add(skillManager.health);
+            }
+        }
+        return skillManagers;
+    }
+
+    public void onHealthListener(int health) {
+        ArrayList<BaseSkillManager> skillAreaManagers = getHealthSkill(health);
+        if (skillAreaManagers.isEmpty()) return;
+        for (BaseSkillManager skillManager : skillAreaManagers) {
+            if (skillManager instanceof BaseSkillAreaManager) {
+                if (getFollowTarget() == null) continue;
+                if (targetOption(this.getFollowTarget(), distance(getFollowTarget()))) continue;
+                if (skillManager.mode == 1) {
+                    skillManager.display(Utils.getAroundPlayers(this, config.getArea(), true, true, true).toArray(new Entity[0]));
+                } else {
+                    if (getFollowTarget() instanceof Player) {
+                        skillManager.display(getFollowTarget());
+                    }
+                }
+            } else {
+                if (skillManager instanceof AttributeHealthSkill) {
+                    skillManager.display((Player) null);
+                }
+                if (skillManager instanceof SummonHealthSkill) {
+                    skillManager.display(this.getEntity());
+                }
+                if (skillManager instanceof MessageHealthSkill) {
+                    skillManager.display(getDamagePlayers().toArray(new Player[0]));
+                }
+            }
+        }
+    }
+
 }

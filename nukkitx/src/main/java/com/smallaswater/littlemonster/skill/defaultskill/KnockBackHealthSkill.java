@@ -39,8 +39,8 @@ public class KnockBackHealthSkill extends BaseSkillManager implements BaseSkillA
     protected void privateDisplay(Entity... entities) {
         for (Entity entity : entities) {
             this.knockBack(entity,
-                    (entity.x - getMaster().getLocation().x),
-                    (entity.z - getMaster().getLocation().z),
+                    (entity.getX() - getMaster().getEntity().getX()),
+                    (entity.getZ() - getMaster().getEntity().getZ()),
                     getEffect().doubleValue()
             );
         }

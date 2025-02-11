@@ -19,6 +19,8 @@ import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.route.RouteFinder;
 import com.smallaswater.littlemonster.route.WalkerRouteFinder;
 import com.smallaswater.littlemonster.utils.Utils;
+import lombok.Getter;
+import lombok.Setter;
 import nukkitcoders.mobplugin.entities.animal.WalkingAnimal;
 import nukkitcoders.mobplugin.entities.monster.Monster;
 import org.jetbrains.annotations.NotNull;
@@ -40,7 +42,10 @@ public abstract class BaseEntityMove extends BaseEntity {
     private static final double FLOW_MULTIPLIER = .1;
 
     protected double destinationDeviate = 0.8;
+
     //每个生物都创建一个Route 太消耗资源 ，不如存放一个列表统一管理销毁
+    @Setter
+    @Getter
     public RouteFinder route = new WalkerRouteFinder(this);
 
     private Vector3 randomMoveTarget = null;
@@ -152,7 +157,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                     //近战模式忽略部分会飞的实体 防止乱跑
                     //触发事件模式无法确定插件是近战还是远程 当作近战处理
                     //TODO 使用权重功能处理飞行生物，降低飞行生物目标权重
-                    if (this.getConfig().getAttaceMode() == ATTACK_MODE_MELEE || this.getConfig().getAttaceMode() == ATTACK_MODE_EVENT) {
+                    if (this.getConfig().getAttackMode() == ATTACK_MODE_MELEE || this.getConfig().getAttackMode() == ATTACK_MODE_EVENT) {
                         //忽略蝙蝠 鹦鹉
                         if (entity.getNetworkId() == EntityBat.NETWORK_ID || entity.getNetworkId() == EntityParrot.NETWORK_ID) {
                             continue;
@@ -303,11 +308,6 @@ public abstract class BaseEntityMove extends BaseEntity {
         return true;
     }
 
-    /**
-     * 生物移除
-     * */
-    abstract public void onClose();
-
     @Override
     public boolean onUpdate(int currentTick) {
         if (this.config == null) {
@@ -425,7 +425,7 @@ public abstract class BaseEntityMove extends BaseEntity {
                 LittleMonsterMainClass.getInstance().getLogger().info("stayTime: " + this.stayTime);
             }
         } else {
-            if (this.getConfig().getAttaceMode() != ATTACK_MODE_EVENT && this.getConfig().getAttaceMode() != ATTACK_MODE_ARROW) {
+            if (this.getConfig().getAttackMode() != ATTACK_MODE_EVENT && this.getConfig().getAttackMode() != ATTACK_MODE_ARROW) {
                 this.waitTime = 0;
             } else if (this.followTarget == null || (this.distance(this.followTarget) > seeSize)) {
                 this.waitTime = 0;
@@ -471,7 +471,7 @@ public abstract class BaseEntityMove extends BaseEntity {
 //                && !hasBlockInLine(this.followTarget)
         ) {
             target = this.followTarget;
-        }else {
+        } else {
             target = this.target;
         }
 
@@ -492,14 +492,6 @@ public abstract class BaseEntityMove extends BaseEntity {
             this.yaw = yaw;
             this.pitch = setPitch ? pitch : 0;
         }
-    }
-
-    public RouteFinder getRoute() {
-        return this.route;
-    }
-
-    public void setRoute(RouteFinder route) {
-        this.route = route;
     }
 
 }

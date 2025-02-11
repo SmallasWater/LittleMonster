@@ -62,7 +62,11 @@ public abstract class BaseEntity extends EntityHuman {
     @Getter
     private boolean movement = true;
 
+    protected final ConcurrentHashMap<EntityCreature, TargetWeighted> targetWeightedMap = new ConcurrentHashMap<>();
+
     protected ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
+
+    protected ArrayList<Integer> healthList = new ArrayList<>();
 
     protected int attackDelay = 0;
 
@@ -73,8 +77,6 @@ public abstract class BaseEntity extends EntityHuman {
     protected MonsterConfig config;
 
     boolean canAttack = true;
-
-    protected final ConcurrentHashMap<EntityCreature, TargetWeighted> targetWeightedMap = new ConcurrentHashMap<>();
 
     /**
      * 攻击模式 近战
@@ -89,25 +91,25 @@ public abstract class BaseEntity extends EntityHuman {
      */
     public static final int ATTACK_MODE_ARROW = 2;
     /**
-     * 攻击模式 触发EntityInteractEvent事件
+     * 攻击模式 触发 EntityInteractEvent 事件
      */
     public static final int ATTACK_MODE_EVENT = 3;
 
-    //开发接口
-    //攻击方式
-    @Deprecated
-    public int attactMode = ATTACK_MODE_MELEE;
     /**
-     * 攻击距离
+     * 攻击速度
      */
-    @Deprecated
-    public double attackDistance = 0.1;
-    //攻击速度
     @Getter
-    public int attackSleepTick = 23;
-    //伤害
-    public double damage = 2;
-    //移动速度
+    public int entityAttackSpeed = 23;
+
+    /**
+     * 攻击力
+     */
+    @Getter
+    public int damage = 2;
+
+    /**
+     * 移动速度
+     */
     public float speed = 1.0f;
 
     public int seeSize = 20;
@@ -312,13 +314,6 @@ public abstract class BaseEntity extends EntityHuman {
      */
     abstract public void attackEntity(EntityCreature player);
 
-    /**
-     * 生物伤害
-     *
-     * @return 伤害值
-     */
-    abstract public float getDamage();
-
     //private final ReentrantLock hasBlockInLineLock = new ReentrantLock();
     //private int lastCheckBlockInLineTick = 0;
     //private final AtomicBoolean isHasBlock = new AtomicBoolean();
@@ -408,6 +403,14 @@ public abstract class BaseEntity extends EntityHuman {
         }
 
         super.setSkin(skin);
+    }
+
+    @Override
+    public void close() {
+        super.close();
+        this.targetWeightedMap.clear();
+        this.skillManagers.clear();
+        this.healthList.clear();
     }
 
     /**

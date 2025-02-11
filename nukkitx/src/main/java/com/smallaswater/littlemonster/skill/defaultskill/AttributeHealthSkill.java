@@ -3,6 +3,8 @@ package com.smallaswater.littlemonster.skill.defaultskill;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.data.Skin;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * @author SmallasWater
@@ -13,14 +15,11 @@ public class AttributeHealthSkill extends BaseSkillManager {
 
     private Skin skin;
 
+    @Getter
     private AttributeType attributeType;
 
     public AttributeHealthSkill(String name) {
         super(name);
-    }
-
-    public AttributeType getAttributeType() {
-        return attributeType;
     }
 
     public void setSkin(Skin skin) {
@@ -36,16 +35,16 @@ public class AttributeHealthSkill extends BaseSkillManager {
         if (this.getMaster() != null) {
             switch (this.attributeType) {
                 case SKIN:
-                    this.getMaster().setSkin(this.skin);
+                    this.getMaster().setSkinByIEntity(this.skin);
                     break;
                 case SCALE:
-                    this.getMaster().setScale(getEffect().floatValue());
+                    this.getMaster().getEntity().setScale(getEffect().floatValue());
                     break;
                 case DAMAGE:
-                    this.getMaster().damage = getEffect().doubleValue();
+                    this.getMaster().setAttackDamage(getEffect().intValue());
                     break;
                 case ATTACK_SPEED:
-                    this.getMaster().attackSleepTick = getEffect().intValue();
+                    this.getMaster().setEntityAttackSpeed(getEffect().intValue());
                     break;
                 default:
                     break;

@@ -5,15 +5,13 @@ import cn.nukkit.Server;
 import cn.nukkit.block.BlockRedstone;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
+import cn.nukkit.entity.data.Skin;
 import cn.nukkit.entity.mob.EntityMob;
-import cn.nukkit.entity.mob.EntitySlime;
 import cn.nukkit.event.entity.*;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.DestroyBlockParticle;
-import cn.nukkit.level.particle.HappyVillagerParticle;
-import cn.nukkit.math.AxisAlignedBB;
 import cn.nukkit.math.Vector2;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
@@ -32,17 +30,21 @@ import com.smallaswater.littlemonster.events.entity.LittleMonsterEntityDeathDrop
 import com.smallaswater.littlemonster.items.BaseItem;
 import com.smallaswater.littlemonster.items.DeathCommand;
 import com.smallaswater.littlemonster.items.DropItem;
+import com.smallaswater.littlemonster.skill.BaseSkillAreaManager;
+import com.smallaswater.littlemonster.skill.BaseSkillManager;
+import com.smallaswater.littlemonster.skill.defaultskill.AttributeHealthSkill;
+import com.smallaswater.littlemonster.skill.defaultskill.MessageHealthSkill;
+import com.smallaswater.littlemonster.skill.defaultskill.SummonHealthSkill;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 import static com.smallaswater.littlemonster.entity.baselib.BaseEntity.ATTACK_MODE_ARROW;
 
-public class VanillaNPC extends VanillaOperateNPC implements IEntity {
+public class VanillaNPC extends BaseVanillaNPC implements IEntity {
     public static final String TAG = "LittleMonster";
 
     @Setter
@@ -56,7 +58,6 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
     public String spawnPos = null;
 
     public int strollTick = 0;
-
 
     // 防具
     @Setter
@@ -117,8 +118,9 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
         this.namedTag.putString(TAG, config.getName());
         this.setNameTagVisible(true);
         this.setNameTagAlwaysVisible(true);
+        this.loadSkill();
         vanillaNPC = this;
-        if (config.getAttaceMode() == ATTACK_MODE_ARROW) {
+        if (config.getAttackMode() == ATTACK_MODE_ARROW) {
             shootAttackExecutor = new ShootAttackExecutor();
         }
     }
@@ -255,7 +257,7 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
                 .replace("{名称}", getConfig().getName())
                 .replace("{血量}", getHealth() + "")
                 .replace("{最大血量}", getMaxHealth() + ""));
-        //onHealthListener((int) Math.floor(getHealth()));
+        onHealthListener((int) Math.floor(getHealth()));
 
         // 更新乘客
         try {
@@ -265,18 +267,18 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
                 }
             }
         } catch (java.util.ConcurrentModificationException e) {
-            //ignore
+            // ignore
         }
 
-        //处理骑乘
-        this.updatePassengers();
-
-        if (currentTick % 10 == 0) {
-            if (this.getFollowTarget() != null) {
-                lookAt(this.getFollowTarget());
-            }
-            //this.getLevel().addParticle(new HappyVillagerParticle(this.getPosition().add(0, getHeight())));
-        }
+//        //处理骑乘
+//        this.updatePassengers();
+//
+//        if (currentTick % 10 == 0) {
+//            if (this.getFollowTarget() != null) {
+//                lookAt(this.getFollowTarget());
+//            }
+//            this.getLevel().addParticle(new HappyVillagerParticle(this.getPosition().add(0, getHeight())));
+//        }
         checkTarget(currentTick);
 
         if (this.getFollowTarget() == null) {
@@ -674,6 +676,16 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
     }
 
     @Override
+    public void setAttackDamage(int damage) {
+        this.damage = damage;
+    }
+
+    @Override
+    public void setEntityAttackSpeed(int speed) {
+        this.entityAttackSpeed = speed;
+    }
+
+    @Override
     public void onDeath(EntityDeathEvent event) {
         Entity damager = null;
         EntityDamageEvent d = event.getEntity().getLastDamageCause();
@@ -758,5 +770,55 @@ public class VanillaNPC extends VanillaOperateNPC implements IEntity {
     @Override
     public Entity getEntity() {
         return this;
+    }
+
+    @Override
+    public void setSkinByIEntity(Skin skin) {
+        // ignore
+    }
+
+    @Override
+    public ArrayList<BaseSkillManager> getSkillManagers() {
+        return skillManagers;
+    }
+
+    public ArrayList<BaseSkillManager> getHealthSkill(int health) {
+        ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
+        for (BaseSkillManager skillManager : getSkillManagers()) {
+            if (skillManager.health < health) continue;
+            if (!healthList.contains(skillManager.health)) {
+                skillManagers.add(skillManager);
+                healthList.add(skillManager.health);
+            }
+        }
+        return skillManagers;
+    }
+
+    public void onHealthListener(int health) {
+        ArrayList<BaseSkillManager> skillAreaManagers = getHealthSkill(health);
+        if (skillAreaManagers.isEmpty()) return;
+        for (BaseSkillManager skillManager : skillAreaManagers) {
+            if (skillManager instanceof BaseSkillAreaManager) {
+                if (getFollowTarget() == null) continue;
+                if (targetOption(this.getFollowTarget(), distance(getFollowTarget()))) continue;
+                if (skillManager.mode == 1) {
+                    skillManager.display(Utils.getAroundPlayers(this, config.getArea(), true, true, true).toArray(new Entity[0]));
+                } else {
+                    if (getFollowTarget() instanceof Player) {
+                        skillManager.display(getFollowTarget());
+                    }
+                }
+            } else {
+                if (skillManager instanceof AttributeHealthSkill) {
+                    skillManager.display((Player) null);
+                }
+                if (skillManager instanceof SummonHealthSkill) {
+                    skillManager.display(this.getEntity());
+                }
+                if (skillManager instanceof MessageHealthSkill) {
+                    skillManager.display(getDamagePlayers().toArray(new Player[0]));
+                }
+            }
+        }
     }
 }

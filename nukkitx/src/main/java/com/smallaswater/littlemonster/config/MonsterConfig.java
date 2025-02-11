@@ -78,12 +78,12 @@ public class MonsterConfig {
     /**
      * 攻击速度
      */
-    private int attaceSpeed;
+    private int attackSpeed;
 
     /**
      * 攻击方式
      */
-    private int attaceMode;
+    private int attackMode;
 
     /**
      * 移动速度
@@ -186,8 +186,8 @@ public class MonsterConfig {
             monsterConfig.setCanMove(config.getBoolean("未锁定时是否移动", true));
             monsterConfig.setKnock(config.getBoolean("是否可击退", false));
             monsterConfig.setSkin(config.getString("皮肤", "粉蓝双瞳猫耳少女"));
-            monsterConfig.setAttaceSpeed(config.getInt("攻击速度", 23));
-            monsterConfig.setAttaceMode(config.getInt("攻击方式", 0));
+            monsterConfig.setAttackSpeed(config.getInt("攻击速度", 23));
+            monsterConfig.setAttackMode(config.getInt("攻击方式", 0));
             monsterConfig.setAttackDistance(config.getDouble("攻击距离", 0.1));
             monsterConfig.setMoveSpeed(config.getDouble("移动速度", 1.0));
             monsterConfig.setInvincibleTime(config.getInt("无敌时间", 3));
@@ -219,12 +219,12 @@ public class MonsterConfig {
             }
 
             BaseSkillManager skillManager;
-            Map skillConfig = config.get("技能", new HashMap<>());
-            for (Object health : skillConfig.keySet()) {
-                List list = (List) skillConfig.get(health);
+            HashMap<String, List<Object>> skillConfig = config.get("技能", new HashMap<>());
+            for (String health : skillConfig.keySet()) {
+                List<Object> list = skillConfig.get(health);
                 for (Object o : list) {
-                    if (o instanceof Map) {
-                        skillManager = fromSkill(health.toString(), (Map) o);
+                    if (o instanceof HashMap) {
+                        skillManager = fromSkill(health, (HashMap<String, Object>) o);
                         if (skillManager != null) {
                             monsterConfig.addSkill(skillManager);
                         }
@@ -323,10 +323,10 @@ public class MonsterConfig {
                 .replace("{最大血量}", vanillaNpc.getMaxHealth() + ""));
         vanillaNpc.setConfig(this);
         vanillaNpc.speed = (float) getMoveSpeed() * 10;
-        vanillaNpc.setDamage(getDamage());
+        vanillaNpc.setAttackDamage(getDamage());
         vanillaNpc.setScale((float) getSize());
         vanillaNpc.routeMax = getSeeLine();
-        vanillaNpc.attackSleepTick = getAttaceSpeed();
+        vanillaNpc.entityAttackSpeed = getAttackSpeed();
         vanillaNpc.setTool(item);
         vanillaNpc.setArmor(armor.toArray(new Item[0]));
         //vanillaNpc.heal = getHeal();
@@ -343,12 +343,12 @@ public class MonsterConfig {
                 .replace("{最大血量}", littleNpc.getMaxHealth() + ""));
         littleNpc.setConfig(this);
         littleNpc.speed = (float) getMoveSpeed();
-        littleNpc.damage = getDamage();
+        littleNpc.setAttackDamage(getDamage());
         littleNpc.setMaxHealth(getHealth());
         littleNpc.setHealth(getHealth());
         littleNpc.setScale((float) getSize());
         littleNpc.seeSize = getSeeLine();
-        littleNpc.attackSleepTick = getAttaceSpeed();
+        littleNpc.entityAttackSpeed = getAttackSpeed();
         littleNpc.heal = getHeal();
         littleNpc.healSettingTime = getHealTime();
         littleNpc.setImmobile(isImmobile());
@@ -360,17 +360,13 @@ public class MonsterConfig {
         littleNpc.getInventory().setArmorContents(armor.toArray(new Item[0]));
         littleNpc.getOffhandInventory().setItem(0, offhand);
         littleNpc.setSkin(skin);
-
-        //即将弃用
-        littleNpc.attackDistance = getAttackDistance();
-        littleNpc.attactMode = getAttaceMode();
     }
 
     public void saveAll() {
         config.save();
     }
 
-    private static BaseSkillManager fromSkill(String health, Map map) {
+    private static BaseSkillManager fromSkill(String health, HashMap<String, Object> map) {
         BaseSkillManager skillManager = null;
         if (map.containsKey("技能名")) {
             skillManager = fromSkillByName(map.get("技能名").toString());
