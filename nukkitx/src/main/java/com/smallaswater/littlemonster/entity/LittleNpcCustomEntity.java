@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 public class LittleNpcCustomEntity extends LittleNpc implements CustomEntity, IEntity {
 
     private static final EntityDefinition DEFAULT_DEFINITION = EntityDefinition.builder()
-            .identifier("LittleNpcCustomEntity")
+            .identifier("little_npc_custom_entity")
             .spawnEgg(false)
             .implementation(LittleNpcCustomEntity.class)
             .build();

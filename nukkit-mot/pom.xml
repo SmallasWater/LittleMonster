@@ -4,10 +4,11 @@
     <parent>
         <groupId>com.smallaswater</groupId>
         <artifactId>LittleMonster</artifactId>
-        <version>1.7.2</version>
+        <version>1.7.3-SNAPSHOT</version>
     </parent>
 
-    <artifactId>mot</artifactId>
+    <artifactId>LittleMonster</artifactId>
+    <version>${parent.version}-NKMOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -23,8 +24,8 @@
     <dependencies>
         <dependency>
             <groupId>com.smallaswater</groupId>
-            <artifactId>nukkitx</artifactId>
-            <version>${project.version}</version>
+            <artifactId>LittleMonster</artifactId>
+            <version>${parent.version}-NKX</version>
         </dependency>
 
         <dependency>
@@ -41,19 +42,9 @@
             <scope>system</scope>
             <systemPath>${pom.basedir}/../lib/MobPlugin-1.26.3.jar</systemPath>
         </dependency>
-
-        <!-- 单元测试-->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
-        <finalName>${parent.artifactId}-${parent.version}-${project.artifactId}</finalName>
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

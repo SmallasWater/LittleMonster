@@ -4,10 +4,11 @@
     <parent>
         <groupId>com.smallaswater</groupId>
         <artifactId>LittleMonster</artifactId>
-        <version>1.7.2</version>
+        <version>1.7.3-SNAPSHOT</version>
     </parent>
 
-    <artifactId>nukkitx</artifactId>
+    <artifactId>LittleMonster</artifactId>
+    <version>${parent.version}-NKX</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -56,19 +57,9 @@
             <artifactId>economyapi</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <!-- 单元测试-->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
 
     <build>
-        <finalName>${parent.artifactId}-${parent.version}-${project.artifactId}</finalName>
-
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -111,7 +102,7 @@
                         </goals>
                         <configuration>
                             <includes>
-                                <include>${project.basedir}/../src/main/resources/plugin.yml</include>
+<!--                                <include>${project.basedir}/../src/main/resources/plugin.yml</include>-->
                                 <include>
                                     ${project.basedir}/src/main/java/com/smallaswater/littlemonster/utils/GameCoreDownload.java
                                 </include>
