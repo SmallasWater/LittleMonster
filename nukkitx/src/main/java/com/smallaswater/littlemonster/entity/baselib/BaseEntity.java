@@ -47,7 +47,6 @@ public abstract class BaseEntity extends EntityHuman {
 
     protected float moveMultiplier = 1.0f;
 
-    protected int healTime = 0;
     //停留
     int stayTime = 0;
 
@@ -71,6 +70,8 @@ public abstract class BaseEntity extends EntityHuman {
     protected int attackDelay = 0;
 
     protected int damageDelay = 0;
+
+    protected int healDelay = 0;
 
     @Setter
     @Getter
@@ -266,8 +267,8 @@ public abstract class BaseEntity extends EntityHuman {
         if (this instanceof LittleNpc && this.damageDelay < 1000) {
             ++this.damageDelay;
         }
-        if (this instanceof LittleNpc && this.healTime < 1000) {
-            ++this.healTime;
+        if (this instanceof LittleNpc && this.healDelay < 1000) {
+            ++this.healDelay;
         }
         onUpdata();
         return true;

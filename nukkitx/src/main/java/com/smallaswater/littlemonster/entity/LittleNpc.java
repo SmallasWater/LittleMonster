@@ -61,10 +61,6 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
 
     public String spawnPos = null;
 
-    public int heal;
-
-    public int healSettingTime;
-
     public DamageHandle handle = new DamageHandle();
 
     //TODO 唯一标识
@@ -247,46 +243,6 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
                 .replace("{血量}", getHealth() + "")
                 .replace("{最大血量}", getMaxHealth() + ""));
         onHealthListener((int) Math.floor(getHealth()));
-        if (this.getFollowTarget() != null && this.getFollowTarget() instanceof Player) {
-            if (healTime >= healSettingTime &&
-                    heal > 0 &&
-                    !config.isUnFightHeal()) {
-                healTime = 0;
-                this.heal(heal);
-            }
-            if (config.isShowBossBar()) {
-                if (targetOption(this.getFollowTarget(), this.distance(this.getFollowTarget()))) {
-                    if (boss != null) {
-                        BossBarManager.BossBarApi.removeBossBar(boss);
-                        boss = null;
-                    }
-                    return;
-                }
-                if (this.getFollowTarget() instanceof Player) {
-                    boss = (Player) this.getFollowTarget();
-                    if (!BossBarManager.BossBarApi.hasCreate((Player) this.getFollowTarget(), getId())) {
-                        BossBarManager.BossBarApi.createBossBar((Player) this.getFollowTarget(), getId());
-                    }
-                    BossBarManager.BossBarApi.showBoss((Player) getFollowTarget(),
-                            getNameTag(),
-                            getHealth(),
-                            getMaxHealth());
-                }
-            }
-        } else {
-            if (getFollowTarget() == null || !config.isUnFightHeal()) {
-                if (healTime >= healSettingTime && heal > 0) {
-                    healTime = 0;
-                    this.heal(heal);
-                }
-            }
-            if (config.isShowBossBar()) {
-                if (boss != null) {
-                    BossBarManager.BossBarApi.removeBossBar(boss);
-                    boss = null;
-                }
-            }
-        }
     }
 
     @Override
@@ -603,29 +559,76 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
         return skillManagers;
     }
 
+    public int healSettingTime;
+
+    public int heal;
+
     public void onHealthListener(int health) {
+        // 血量技能处理
         ArrayList<BaseSkillManager> skillAreaManagers = getHealthSkill(health);
-        if (skillAreaManagers.isEmpty()) return;
-        for (BaseSkillManager skillManager : skillAreaManagers) {
-            if (skillManager instanceof BaseSkillAreaManager) {
-                if (getFollowTarget() == null) continue;
-                if (targetOption(this.getFollowTarget(), distance(getFollowTarget()))) continue;
-                if (skillManager.mode == 1) {
-                    skillManager.display(Utils.getAroundPlayers(this, config.getArea(), true, true, true).toArray(new Entity[0]));
+        if (!skillAreaManagers.isEmpty()) {
+            for (BaseSkillManager skillManager : skillAreaManagers) {
+                if (skillManager instanceof BaseSkillAreaManager) {
+                    if (getFollowTarget() == null) continue;
+                    if (targetOption(this.getFollowTarget(), distance(getFollowTarget()))) continue;
+                    if (skillManager.mode == 1) {
+                        skillManager.display(Utils.getAroundPlayers(this, config.getArea(), true, true, true).toArray(new Entity[0]));
+                    } else {
+                        if (getFollowTarget() instanceof Player) {
+                            skillManager.display(getFollowTarget());
+                        }
+                    }
                 } else {
-                    if (getFollowTarget() instanceof Player) {
-                        skillManager.display(getFollowTarget());
+                    if (skillManager instanceof AttributeHealthSkill) {
+                        skillManager.display((Player) null);
+                    }
+                    if (skillManager instanceof SummonHealthSkill) {
+                        skillManager.display(this.getEntity());
+                    }
+                    if (skillManager instanceof MessageHealthSkill) {
+                        skillManager.display(getDamagePlayers().toArray(new Player[0]));
                     }
                 }
-            } else {
-                if (skillManager instanceof AttributeHealthSkill) {
-                    skillManager.display((Player) null);
+            }
+        }
+        // BossBar 处理
+        if (this.getFollowTarget() != null && this.getFollowTarget() instanceof Player) {
+            if (healDelay >= healSettingTime &&
+                    heal > 0 &&
+                    !config.isUnFightHeal()) {
+                healDelay = 0;
+                this.heal(heal);
+            }
+            if (config.isShowBossBar()) {
+                if (targetOption(this.getFollowTarget(), this.distance(this.getFollowTarget()))) {
+                    if (boss != null) {
+                        BossBarManager.BossBarApi.removeBossBar(boss);
+                        boss = null;
+                    }
+                    return;
                 }
-                if (skillManager instanceof SummonHealthSkill) {
-                    skillManager.display(this.getEntity());
+                if (this.getFollowTarget() instanceof Player) {
+                    boss = (Player) this.getFollowTarget();
+                    if (!BossBarManager.BossBarApi.hasCreate((Player) this.getFollowTarget(), getId())) {
+                        BossBarManager.BossBarApi.createBossBar((Player) this.getFollowTarget(), getId());
+                    }
+                    BossBarManager.BossBarApi.showBoss((Player) getFollowTarget(),
+                            getNameTag(),
+                            getHealth(),
+                            getMaxHealth());
                 }
-                if (skillManager instanceof MessageHealthSkill) {
-                    skillManager.display(getDamagePlayers().toArray(new Player[0]));
+            }
+        } else {
+            if (getFollowTarget() == null || !config.isUnFightHeal()) {
+                if (healDelay >= healSettingTime && heal > 0) {
+                    healDelay = 0;
+                    this.heal(heal);
+                }
+            }
+            if (config.isShowBossBar()) {
+                if (boss != null) {
+                    BossBarManager.BossBarApi.removeBossBar(boss);
+                    boss = null;
                 }
             }
         }
