@@ -326,6 +326,14 @@ public class VanillaNPC extends BaseVanillaNPC implements IEntity {
         return super.onUpdate(currentTick);
     }
 
+    @Override
+    public void reset() {
+        super.reset();
+        if (config != null) {
+            config.vanillaSetting(this);
+        }
+    }
+
     public void strollMoveHandle(int currentTick) {
         if (!getConfig().isCanMove()) return;
         if (currentTick % 20 != 0) {
@@ -349,7 +357,6 @@ public class VanillaNPC extends BaseVanillaNPC implements IEntity {
                 directMove(nodeNext);
             }
         });
-
     }
 
     public void onAttack(EntityDamageEvent sure) {
@@ -435,6 +442,7 @@ public class VanillaNPC extends BaseVanillaNPC implements IEntity {
         } else {
             return false;
         }
+        // 上面的实现完全等价与下方代码时，需删除冗余
 //        if (this.damageDelay >= config.getInvincibleTime()) {
 //            if (source.getAttackCooldown() >= this.config.getInvincibleTime()) {
 //                source.setAttackCooldown(this.config.getInvincibleTime());

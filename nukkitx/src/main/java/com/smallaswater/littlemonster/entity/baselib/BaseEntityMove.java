@@ -120,11 +120,6 @@ public abstract class BaseEntityMove extends BaseEntity {
     }
 
     /**
-     * 等待时长
-     * */
-    public int waitTime = 0;
-
-    /**
      * @return 是否寻找新目标
      */
     private boolean isNeedCheck(){

@@ -98,6 +98,7 @@ public class BaseVanillaNPC extends MovingVanillaEntity {
 
     public BaseVanillaNPC(FullChunk chunk, CompoundTag nbt, MonsterConfig config) {
         super(chunk, nbt);
+        this.setConfig(config);
     }
 
     /**
@@ -353,6 +354,22 @@ public class BaseVanillaNPC extends MovingVanillaEntity {
             entity.addEffect(effect);
         }
         return 0;
+    }
+
+    @Override
+    public void heal(float amount) {
+        if (getHealth() < getMaxHealth()) {
+            healthList.removeIf(i -> getHealth() + amount >= i);
+            if (getHealth() + amount >= getMaxHealth()) {
+                reset();
+            }
+        }
+        this.heal(new EntityRegainHealthEvent(this, amount, 0));
+    }
+
+    public void reset() {
+        handle = new DamageHandle();
+        healthList = new ArrayList<>();
     }
 
 

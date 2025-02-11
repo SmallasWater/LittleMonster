@@ -2,22 +2,32 @@ package com.smallaswater.littlemonster.entity.baselib;
 
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.EntityHuman;
 import cn.nukkit.entity.data.Skin;
-import cn.nukkit.event.entity.EntityDamageByEntityEvent;
-import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.entity.projectile.EntityArrow;
+import cn.nukkit.entity.projectile.EntityProjectile;
+import cn.nukkit.event.entity.*;
+import cn.nukkit.item.Item;
+import cn.nukkit.item.ItemID;
 import cn.nukkit.level.Level;
+import cn.nukkit.level.Sound;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.particle.HugeExplodeSeedParticle;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
+import cn.nukkit.network.protocol.EntityEventPacket;
 import cn.nukkit.network.protocol.PlayerSkinPacket;
 import cn.nukkit.network.protocol.RemoveEntityPacket;
 import cn.nukkit.network.protocol.SetEntityLinkPacket;
+import cn.nukkit.potion.Effect;
+import com.smallaswater.littlemonster.common.EntityTool;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
+import com.smallaswater.littlemonster.handle.DamageHandle;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Data;
@@ -25,7 +35,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -114,6 +124,13 @@ public abstract class BaseEntity extends EntityHuman {
     public float speed = 1.0f;
 
     public int seeSize = 20;
+
+    public DamageHandle handle = new DamageHandle();
+
+    /**
+     * EntityMove 的等待时长
+     * */
+    public int waitTime = 0;
 
     BaseEntity(FullChunk chunk, CompoundTag nbt, @NotNull MonsterConfig config) {
         super(chunk, nbt);
@@ -311,9 +328,112 @@ public abstract class BaseEntity extends EntityHuman {
     /**
      * 攻击生物
      *
-     * @param player 生物
+     * @param entity 生物
      */
-    abstract public void attackEntity(EntityCreature player);
+    public void attackEntity(EntityCreature entity) {
+        if (this.attackDelay > getEntityAttackSpeed() && (entity.distance(this) <= getConfig().getAttackDistance() || entity.distance(this.add(0, this.getHealth(), 0)) <= getConfig().getAttackDistance())) {
+            this.attackDelay = 0;
+            this.waitTime = 0;
+            switch (getConfig().getAttackMode()) {
+                case ATTACK_MODE_RANGE:
+                    LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, true);
+                    for (Entity p : players) {
+                        if (p instanceof Player && ((Player) p).isCreative()) {
+                            continue;
+                        }
+                        if (p instanceof LittleNpc) {
+                            continue;
+                        }
+                        p.attack(new EntityDamageByEntityEvent(this, p, EntityDamageEvent.DamageCause.ENTITY_ATTACK, getDamage(), (float) config.getKnockBack()));
+                    }
+                    entity.level.addParticle(new HugeExplodeSeedParticle(entity));
+                    entity.level.addSound(entity, Sound.RANDOM_EXPLODE);
+                    break;
+                case ATTACK_MODE_ARROW:
+                    double f = 1.3D;
+                    Entity k = Entity.createEntity("Arrow", this.add(0, this.getEyeHeight(), 0), this);
+                    if (!(k instanceof EntityArrow)) {
+                        return;
+                    }
+                    EntityArrow arrow = (EntityArrow) k;
+                    arrow.setMotion(
+                            new Vector3(-Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f,
+                                    -Math.sin(Math.toRadians(pitch)) * f * f,
+                                    Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f));
+                    EntityShootBowEvent ev = new EntityShootBowEvent(this, Item.get(ItemID.ARROW, 0, 1), arrow, f);
+                    this.server.getPluginManager().callEvent(ev);
+                    EntityProjectile projectile = ev.getProjectile();
+                    if (ev.isCancelled()) {
+                        projectile.kill();
+                    } else {
+                        ProjectileLaunchEvent launch = new ProjectileLaunchEvent(projectile);
+                        this.server.getPluginManager().callEvent(launch);
+                        if (launch.isCancelled()) {
+                            projectile.kill();
+                        } else {
+                            EntityTool.setEntityCanBeSavedWithChunk(projectile, false);
+                            projectile.spawnToAll();
+                            ((EntityArrow) projectile).setPickupMode(EntityArrow.PICKUP_NONE);
+                            this.level.addSound(this, Sound.RANDOM_BOW);
+                        }
+                    }
+                    break;
+                case ATTACK_MODE_EVENT: //触发EntityInteractEvent
+//                  if (!hasBlockInLine(entity)) {
+                    EntityInteractEvent event = new EntityInteractEvent(this, entity.getPosition().add(0.5, entity.getEyeHeight(), 0.5).getLevelBlock());
+                    Server.getInstance().getPluginManager().callEvent(event);
+//                  }
+                    break;
+                case ATTACK_MODE_MELEE:
+                default:
+                    HashMap<EntityDamageEvent.DamageModifier, Float> damage = new LinkedHashMap<>();
+                    damage.put(EntityDamageEvent.DamageModifier.BASE, (float) getDamage());
+                    if (entity instanceof Player) {
+                        HashMap<Integer, Float> armorValues = new LinkedHashMap<Integer, Float>() {
+                            {
+                                this.put(298, 1.0F);
+                                this.put(299, 3.0F);
+                                this.put(300, 2.0F);
+                                this.put(301, 1.0F);
+                                this.put(302, 1.0F);
+                                this.put(303, 5.0F);
+                                this.put(304, 4.0F);
+                                this.put(305, 1.0F);
+                                this.put(314, 1.0F);
+                                this.put(315, 5.0F);
+                                this.put(316, 3.0F);
+                                this.put(317, 1.0F);
+                                this.put(306, 2.0F);
+                                this.put(307, 6.0F);
+                                this.put(308, 5.0F);
+                                this.put(309, 2.0F);
+                                this.put(310, 3.0F);
+                                this.put(311, 8.0F);
+                                this.put(312, 6.0F);
+                                this.put(313, 3.0F);
+                            }
+                        };
+                        float points = 0.0F;
+                        for (Item i : ((Player) entity).getInventory().getArmorContents()) {
+                            points += armorValues.getOrDefault(i.getId(), 0.0F);
+                        }
+
+                        damage.put(EntityDamageEvent.DamageModifier.ARMOR, (float) ((double) damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0.0F) - Math.floor((double) (damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1.0F) * points) * 0.04D)));
+                    }
+
+                    entity.attack(new EntityDamageByEntityEvent(this, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage, (float) config.getKnockBack()));
+                    break;
+            }
+            for (Effect effect : config.getEffects()) {
+                entity.addEffect(effect);
+            }
+            //摆臂动作
+            EntityEventPacket pk = new EntityEventPacket();
+            pk.eid = this.getId();
+            pk.event = EntityEventPacket.ARM_SWING;
+            Server.broadcastPacket(this.getViewers().values(), pk);
+        }
+    }
 
     //private final ReentrantLock hasBlockInLineLock = new ReentrantLock();
     //private int lastCheckBlockInLineTick = 0;
@@ -470,4 +590,45 @@ public abstract class BaseEntity extends EntityHuman {
 
     }
 
+    @Override
+    public void heal(float amount) {
+        if (getHealth() < getMaxHealth()) {
+            healthList.removeIf(i -> getHealth() + amount >= i);
+            if (getHealth() + amount >= getMaxHealth()) {
+                reset();
+            }
+        }
+        this.heal(new EntityRegainHealthEvent(this, amount, 0));
+    }
+
+    public void reset() {
+        handle = new DamageHandle();
+        healthList = new ArrayList<>();
+    }
+
+    protected ArrayList<Player> getDamagePlayers() {
+        ArrayList<Player> players = new ArrayList<>();
+        Player player;
+        for (String name : handle.playerDamageList.keySet()) {
+            player = Server.getInstance().getPlayer(name);
+            if (player != null) {
+                players.add(player);
+            }
+        }
+        return players;
+    }
+
+    protected Player getDamageMax() {
+        double max = 0;
+        Player p = null;
+        for (Map.Entry<String, Double> player : handle.playerDamageList.entrySet()) {
+            if (player.getValue() > max) {
+                if (Server.getInstance().getPlayer(player.getKey()) != null) {
+                    p = Server.getInstance().getPlayer(player.getKey());
+                }
+                max = player.getValue();
+            }
+        }
+        return p;
+    }
 }

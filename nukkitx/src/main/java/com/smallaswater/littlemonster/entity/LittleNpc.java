@@ -61,8 +61,6 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
 
     public String spawnPos = null;
 
-    public DamageHandle handle = new DamageHandle();
-
     //TODO 唯一标识
     public UUID uuid;
 
@@ -82,19 +80,6 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
         }
         uuid = UUID.randomUUID();
         RouteFinderRunnable.addRoute(this);
-    }
-
-    private Player getDamageMax() {
-        double max = 0;
-        Player player = null;
-        for (Map.Entry<String, Double> p : handle.playerDamageList.entrySet()) {
-            if (p.getValue() > max) {
-                if (Server.getInstance().getPlayer(p.getKey()) != null) continue;
-                player = Server.getInstance().getPlayer(p.getKey());
-                max = p.getValue();
-            }
-        }
-        return player;
     }
 
     private void disCommand(String cmd) {
@@ -196,18 +181,6 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
         return name;
     }
 
-    private ArrayList<Player> getDamagePlayers() {
-        ArrayList<Player> players = new ArrayList<>();
-        Player player;
-        for (String name : handle.playerDamageList.keySet()) {
-            player = Server.getInstance().getPlayer(name);
-            if (player != null) {
-                players.add(player);
-            }
-        }
-        return players;
-    }
-
     private Player boss = null;
 
     private int age = 0;
@@ -246,19 +219,8 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
     }
 
     @Override
-    public void heal(float amount) {
-        if (getHealth() < getMaxHealth()) {
-            healthList.removeIf(i -> getHealth() + amount >= i);
-            if (getHealth() + amount >= getMaxHealth()) {
-                reset();
-            }
-        }
-        this.heal(new EntityRegainHealthEvent(this, amount, 0));
-    }
-
     public void reset() {
-        handle = new DamageHandle();
-        healthList = new ArrayList<>();
+        super.reset();
         if (config != null) {
             config.npcSetting(this);
         }
@@ -335,113 +297,6 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
                 this.getTargetWeighted((EntityCreature) sure.getDamager()).setReason(TargetWeighted.REASON_PASSIVE_ATTACK_ENTITY);
                 //setFollowTarget(sure.getDamager());
             }
-        }
-    }
-
-    //攻击玩家~
-    @Override
-    public void attackEntity(EntityCreature entity) {
-        if (this.attackDelay > getEntityAttackSpeed() && (entity.distance(this) <= getConfig().getAttackDistance() || entity.distance(this.add(0, this.getHealth(), 0)) <= getConfig().getAttackDistance())) {
-            this.attackDelay = 0;
-            this.waitTime = 0;
-            switch (getConfig().getAttackMode()) {
-                case ATTACK_MODE_RANGE:
-                    LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, true);
-                    for (Entity p : players) {
-                        if (p instanceof Player && ((Player) p).isCreative()) {
-                            continue;
-                        }
-                        if (p instanceof LittleNpc) {
-                            continue;
-                        }
-                        p.attack(new EntityDamageByEntityEvent(this, p, EntityDamageEvent.DamageCause.ENTITY_ATTACK, getDamage(), (float) config.getKnockBack()));
-                    }
-                    entity.level.addParticle(new HugeExplodeSeedParticle(entity));
-                    entity.level.addSound(entity, Sound.RANDOM_EXPLODE);
-                    break;
-                case ATTACK_MODE_ARROW:
-                    double f = 1.3D;
-                    Entity k = Entity.createEntity("Arrow", this.add(0, this.getEyeHeight(), 0), this);
-                    if (!(k instanceof EntityArrow)) {
-                        return;
-                    }
-                    EntityArrow arrow = (EntityArrow) k;
-                    arrow.setMotion(
-                            new Vector3(-Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f,
-                                    -Math.sin(Math.toRadians(pitch)) * f * f,
-                                    Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f));
-                    EntityShootBowEvent ev = new EntityShootBowEvent(this, Item.get(ItemID.ARROW, 0, 1), arrow, f);
-                    this.server.getPluginManager().callEvent(ev);
-                    EntityProjectile projectile = ev.getProjectile();
-                    if (ev.isCancelled()) {
-                        projectile.kill();
-                    } else {
-                        ProjectileLaunchEvent launch = new ProjectileLaunchEvent(projectile);
-                        this.server.getPluginManager().callEvent(launch);
-                        if (launch.isCancelled()) {
-                            projectile.kill();
-                        } else {
-                            EntityTool.setEntityCanBeSavedWithChunk(projectile, false);
-                            projectile.spawnToAll();
-                            ((EntityArrow) projectile).setPickupMode(EntityArrow.PICKUP_NONE);
-                            this.level.addSound(this, Sound.RANDOM_BOW);
-                        }
-                    }
-                    break;
-                case ATTACK_MODE_EVENT: //触发EntityInteractEvent
-//                  if (!hasBlockInLine(entity)) {
-                    EntityInteractEvent event = new EntityInteractEvent(this, entity.getPosition().add(0.5, entity.getEyeHeight(), 0.5).getLevelBlock());
-                    Server.getInstance().getPluginManager().callEvent(event);
-//                  }
-                    break;
-                case ATTACK_MODE_MELEE:
-                default:
-                    HashMap<EntityDamageEvent.DamageModifier, Float> damage = new LinkedHashMap<>();
-                    damage.put(EntityDamageEvent.DamageModifier.BASE, (float) getDamage());
-                    if (entity instanceof Player) {
-                        HashMap<Integer, Float> armorValues = new LinkedHashMap<Integer, Float>() {
-                            {
-                                this.put(298, 1.0F);
-                                this.put(299, 3.0F);
-                                this.put(300, 2.0F);
-                                this.put(301, 1.0F);
-                                this.put(302, 1.0F);
-                                this.put(303, 5.0F);
-                                this.put(304, 4.0F);
-                                this.put(305, 1.0F);
-                                this.put(314, 1.0F);
-                                this.put(315, 5.0F);
-                                this.put(316, 3.0F);
-                                this.put(317, 1.0F);
-                                this.put(306, 2.0F);
-                                this.put(307, 6.0F);
-                                this.put(308, 5.0F);
-                                this.put(309, 2.0F);
-                                this.put(310, 3.0F);
-                                this.put(311, 8.0F);
-                                this.put(312, 6.0F);
-                                this.put(313, 3.0F);
-                            }
-                        };
-                        float points = 0.0F;
-                        for (Item i : ((Player) entity).getInventory().getArmorContents()) {
-                            points += armorValues.getOrDefault(i.getId(), 0.0F);
-                        }
-
-                        damage.put(EntityDamageEvent.DamageModifier.ARMOR, (float) ((double) damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0.0F) - Math.floor((double) (damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1.0F) * points) * 0.04D)));
-                    }
-
-                    entity.attack(new EntityDamageByEntityEvent(this, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage, (float) config.getKnockBack()));
-                    break;
-            }
-            for (Effect effect : config.getEffects()) {
-                entity.addEffect(effect);
-            }
-            //摆臂动作
-            EntityEventPacket pk = new EntityEventPacket();
-            pk.eid = this.getId();
-            pk.event = EntityEventPacket.ARM_SWING;
-            Server.broadcastPacket(this.getViewers().values(), pk);
         }
     }
 

@@ -339,7 +339,7 @@ public class MonsterConfig {
                 .replace("{名称}", vanillaNpc.getName())
                 .replace("{血量}", vanillaNpc.getHealth() + "")
                 .replace("{最大血量}", vanillaNpc.getMaxHealth() + ""));
-        vanillaNpc.setConfig(this);
+//        vanillaNpc.setConfig(this); // 不需要此处，因为 loadSkill 在实例化时需要读取 config，此时太晚了
         vanillaNpc.speed = (float) getMoveSpeed() * 10;
         vanillaNpc.setAttackDamage(getDamage());
         vanillaNpc.setScale((float) getSize());
@@ -360,7 +360,7 @@ public class MonsterConfig {
                 .replace("{名称}", littleNpc.getName())
                 .replace("{血量}", littleNpc.getHealth() + "")
                 .replace("{最大血量}", littleNpc.getMaxHealth() + ""));
-        littleNpc.setConfig(this);
+//        littleNpc.setConfig(this);
         littleNpc.speed = (float) getMoveSpeed();
         littleNpc.setAttackDamage(getDamage());
         littleNpc.setMaxHealth(getHealth());
