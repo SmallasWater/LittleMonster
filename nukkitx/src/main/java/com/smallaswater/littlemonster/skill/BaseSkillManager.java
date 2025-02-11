@@ -1,6 +1,7 @@
 package com.smallaswater.littlemonster.skill;
 
 import cn.nukkit.entity.Entity;
+import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.defaultskill.*;
 import com.smallaswater.littlemonster.utils.Utils;
@@ -21,7 +22,7 @@ public abstract class BaseSkillManager implements Cloneable {
 
     public int mode;
 
-    private LittleNpc master;
+    private IEntity master;
 
     private Number effect;
 
@@ -68,11 +69,11 @@ public abstract class BaseSkillManager implements Cloneable {
         return effect;
     }
 
-    public void setMaster(LittleNpc master) {
+    public void setMaster(IEntity master) {
         this.master = master;
     }
 
-    protected LittleNpc getMaster() {
+    protected IEntity getMaster() {
         return master;
     }
 

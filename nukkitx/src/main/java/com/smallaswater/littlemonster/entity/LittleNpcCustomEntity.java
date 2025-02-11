@@ -31,11 +31,7 @@ public class LittleNpcCustomEntity extends LittleNpc implements CustomEntity, IE
 
     private EntityDefinition definition;
 
-    public LittleNpcCustomEntity(FullChunk chunk, CompoundTag nbt) {
-        super(chunk, nbt);
-    }
-
-    public LittleNpcCustomEntity(FullChunk chunk, CompoundTag nbt, @NotNull MonsterConfig config) {
+    public LittleNpcCustomEntity(FullChunk chunk, CompoundTag nbt, MonsterConfig config) {
         super(chunk, nbt, config);
         this.setDefinition(config.getCustomEntityDefinition());
     }

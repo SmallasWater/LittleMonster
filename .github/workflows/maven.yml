@@ -29,7 +29,7 @@ jobs:
       - name: Prepare Artifact
         run: |
           mkdir -p staging
-          cp nukkitx/target//LittleMonster-*.jar staging/LittleMonster-nukkitx-SNAPSHOT.jar
+          cp nukkitx/target/LittleMonster-*.jar staging/LittleMonster-nukkitx-SNAPSHOT.jar
           cp nukkit-mot/target/LittleMonster-*.jar staging/LittleMonster-mot-SNAPSHOT.jar
       - uses: actions/upload-artifact@v4
         with:

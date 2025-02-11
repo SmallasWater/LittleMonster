@@ -1,11 +1,11 @@
 package com.smallaswater.littlemonster.entity;
 
-import cn.lanink.gamecore.utils.NukkitTypeUtils;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.BlockRedstone;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
+import cn.nukkit.entity.data.Skin;
 import cn.nukkit.entity.mob.EntityMob;
 import cn.nukkit.entity.projectile.EntityArrow;
 import cn.nukkit.entity.projectile.EntityProjectile;
@@ -41,9 +41,7 @@ import com.smallaswater.littlemonster.threads.runnables.RouteFinderRunnable;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Getter;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -63,23 +61,10 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
 
     public String spawnPos = null;
 
-    public int heal;
-
-    public int healSettingTime;
-
-    private ArrayList<Integer> healthList = new ArrayList<>();
-
-    public DamageHandle handle = new DamageHandle();
-
     //TODO 唯一标识
     public UUID uuid;
 
-    public LittleNpc(FullChunk chunk, CompoundTag nbt) {
-        super(chunk, nbt, null);
-        this.close();
-    }
-
-    public LittleNpc(FullChunk chunk, CompoundTag nbt, @NotNull MonsterConfig config) {
+    public LittleNpc(FullChunk chunk, CompoundTag nbt, MonsterConfig config) {
         super(chunk, nbt, config);
         this.name = config.getName();
         this.setNameTagAlwaysVisible();
@@ -95,20 +80,6 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
         }
         uuid = UUID.randomUUID();
         RouteFinderRunnable.addRoute(this);
-    }
-
-    private Player getDamageMax() {
-        double max = 0;
-        Player p = null;
-        for (Map.Entry<String, Double> player : handle.playerDamageList.entrySet()) {
-            if (player.getValue() > max) {
-                if (Server.getInstance().getPlayer(player.getKey()) != null) {
-                    p = Server.getInstance().getPlayer(player.getKey());
-                }
-                max = player.getValue();
-            }
-        }
-        return p;
     }
 
     private void disCommand(String cmd) {
@@ -210,102 +181,7 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
         return name;
     }
 
-    @Override
-    public void onClose() {
-        if (boss != null) {
-            BossBarManager.BossBarApi.removeBossBar(boss);
-            boss = null;
-        }
-        if (config != null) {
-            if (config.isDisplayDamage() && this.handle != null) {
-                handle.display();
-            }
-        }
-
-        //如果在类实例化时调用onClose方法 这些变量可能为null
-        //noinspection ConstantConditions
-        if (this.targetWeightedMap != null) {
-            this.targetWeightedMap.clear();
-        }
-        if (this.skillManagers != null) {
-            this.skillManagers.clear();
-        }
-        if (this.healthList != null) {
-            this.healthList.clear();
-        }
-        this.handle = null;
-        RouteFinderRunnable.removeRoute(this);
-        this.route = null;
-    }
-
-    private ArrayList<Player> getDamagePlayers() {
-        ArrayList<Player> players = new ArrayList<>();
-        Player player;
-        for (String name : handle.playerDamageList.keySet()) {
-            player = Server.getInstance().getPlayer(name);
-            if (player != null) {
-                players.add(player);
-            }
-        }
-        return players;
-    }
-
-    private void loadSkill() {
-        BaseSkillManager baseSkillManager;
-        for (BaseSkillManager skillManager : config.getSkillManagers()) {
-            baseSkillManager = skillManager.clone();
-            baseSkillManager.setMaster(this);
-            skillManagers.add(baseSkillManager);
-        }
-    }
-
-    private ArrayList<BaseSkillManager> getHealthSkill(int health) {
-
-        ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
-        for (BaseSkillManager skillManager : this.skillManagers) {
-            if (skillManager.health >= health) {
-                if (!healthList.contains(skillManager.health)) {
-                    skillManagers.add(skillManager);
-                    healthList.add(skillManager.health);
-                }
-            }
-        }
-        return skillManagers;
-    }
-
     private Player boss = null;
-
-    private void onHealthListener(int health) {
-        ArrayList<BaseSkillManager> skillAreaManagers = getHealthSkill(health);
-        if (!skillAreaManagers.isEmpty()) {
-            for (BaseSkillManager skillManager : skillAreaManagers) {
-                if (skillManager instanceof BaseSkillAreaManager) {
-                    if (this.getFollowTarget() != null) {
-                        if (!targetOption(this.getFollowTarget(), distance(this.getFollowTarget()))) {
-
-                            if (skillManager.mode == 1) {
-                                skillManager.display(Utils.getAroundPlayers(this, config.getArea(), true, true, true).toArray(new Entity[0]));
-                            } else {
-                                if (this.getFollowTarget() instanceof Player) {
-                                    skillManager.display(this.getFollowTarget());
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    if (skillManager instanceof AttributeHealthSkill) {
-                        skillManager.display((Player) null);
-                    }
-                    if (skillManager instanceof SummonHealthSkill) {
-                        skillManager.display(this);
-                    }
-                    if (skillManager instanceof MessageHealthSkill) {
-                        skillManager.display(getDamagePlayers().toArray(new Player[0]));
-                    }
-                }
-            }
-        }
-    }
 
     private int age = 0;
 
@@ -340,62 +216,11 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
                 .replace("{血量}", getHealth() + "")
                 .replace("{最大血量}", getMaxHealth() + ""));
         onHealthListener((int) Math.floor(getHealth()));
-        if (this.getFollowTarget() != null && this.getFollowTarget() instanceof Player) {
-            if (healTime >= healSettingTime &&
-                    heal > 0 &&
-                    !config.isUnFightHeal()) {
-                healTime = 0;
-                this.heal(heal);
-            }
-            if (config.isShowBossBar()) {
-                if (targetOption(this.getFollowTarget(), this.distance(this.getFollowTarget()))) {
-                    if (boss != null) {
-                        BossBarManager.BossBarApi.removeBossBar(boss);
-                        boss = null;
-                    }
-                    return;
-                }
-                if (this.getFollowTarget() instanceof Player) {
-                    boss = (Player) this.getFollowTarget();
-                    if (!BossBarManager.BossBarApi.hasCreate((Player) this.getFollowTarget(), getId())) {
-                        BossBarManager.BossBarApi.createBossBar((Player) this.getFollowTarget(), getId());
-                    }
-                    BossBarManager.BossBarApi.showBoss((Player) getFollowTarget(),
-                            getNameTag(),
-                            getHealth(),
-                            getMaxHealth());
-                }
-            }
-        } else {
-            if (getFollowTarget() == null || !config.isUnFightHeal()) {
-                if (healTime >= healSettingTime && heal > 0) {
-                    healTime = 0;
-                    this.heal(heal);
-                }
-            }
-            if (config.isShowBossBar()) {
-                if (boss != null) {
-                    BossBarManager.BossBarApi.removeBossBar(boss);
-                    boss = null;
-                }
-            }
-        }
     }
 
     @Override
-    public void heal(float amount) {
-        if (getHealth() < getMaxHealth()) {
-            healthList.removeIf(i -> getHealth() + amount >= i);
-            if (getHealth() + amount >= getMaxHealth()) {
-                reset();
-            }
-        }
-        this.heal(new EntityRegainHealthEvent(this, amount, 0));
-    }
-
     public void reset() {
-        handle = new DamageHandle();
-        healthList = new ArrayList<>();
+        super.reset();
         if (config != null) {
             config.npcSetting(this);
         }
@@ -475,135 +300,44 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
         }
     }
 
-    //攻击玩家~
-    @Override
-    public void attackEntity(EntityCreature entity) {
-        if (this.attackDelay > attackSleepTick && (entity.distance(this) <= this.getConfig().getAttackDistance() || entity.distance(this.add(0, this.getHealth(), 0)) <= this.getConfig().getAttackDistance())) {
-            this.attackDelay = 0;
-            this.waitTime = 0;
-            switch (this.getConfig().getAttaceMode()) {
-                case ATTACK_MODE_RANGE:
-                    LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, true);
-                    for (Entity p : players) {
-                        if (p instanceof Player && ((Player) p).isCreative()) {
-                            continue;
-                        }
-                        if (p instanceof LittleNpc) {
-                            continue;
-                        }
-                        p.attack(new EntityDamageByEntityEvent(this, p, EntityDamageEvent.DamageCause.ENTITY_ATTACK, getDamage(), (float) config.getKnockBack()));
-                    }
-                    entity.level.addParticle(new HugeExplodeSeedParticle(entity));
-                    entity.level.addSound(entity, Sound.RANDOM_EXPLODE);
-                    break;
-                case ATTACK_MODE_ARROW:
-                    double f = 1.3D;
-                    Entity k = Entity.createEntity("Arrow", this.add(0, this.getEyeHeight(), 0), this);
-                    if (!(k instanceof EntityArrow)) {
-                        return;
-                    }
-                    EntityArrow arrow = (EntityArrow) k;
-                    arrow.setMotion(
-                            new Vector3(-Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f,
-                                    -Math.sin(Math.toRadians(pitch)) * f * f,
-                                    Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)) * f * f));
-                    EntityShootBowEvent ev = new EntityShootBowEvent(this, Item.get(ItemID.ARROW, 0, 1), arrow, f);
-                    this.server.getPluginManager().callEvent(ev);
-                    EntityProjectile projectile = ev.getProjectile();
-                    if (ev.isCancelled()) {
-                        projectile.kill();
-                    } else {
-                        ProjectileLaunchEvent launch = new ProjectileLaunchEvent(projectile);
-                        this.server.getPluginManager().callEvent(launch);
-                        if (launch.isCancelled()) {
-                            projectile.kill();
-                        } else {
-                            EntityTool.setEntityCanBeSavedWithChunk(projectile, false);
-                            projectile.spawnToAll();
-                            ((EntityArrow) projectile).setPickupMode(EntityArrow.PICKUP_NONE);
-                            this.level.addSound(this, Sound.RANDOM_BOW);
-                        }
-                    }
-                    break;
-                case ATTACK_MODE_EVENT: //触发EntityInteractEvent
-//                  if (!hasBlockInLine(entity)) {
-                    EntityInteractEvent event = new EntityInteractEvent(this, entity.getPosition().add(0.5, entity.getEyeHeight(), 0.5).getLevelBlock());
-                    Server.getInstance().getPluginManager().callEvent(event);
-//                  }
-                    break;
-                case ATTACK_MODE_MELEE:
-                default:
-                    HashMap<EntityDamageEvent.DamageModifier, Float> damage = new LinkedHashMap<>();
-                    damage.put(EntityDamageEvent.DamageModifier.BASE, getDamage());
-                    if (entity instanceof Player) {
-                        HashMap<Integer, Float> armorValues = new LinkedHashMap<Integer, Float>() {
-                            {
-                                this.put(298, 1.0F);
-                                this.put(299, 3.0F);
-                                this.put(300, 2.0F);
-                                this.put(301, 1.0F);
-                                this.put(302, 1.0F);
-                                this.put(303, 5.0F);
-                                this.put(304, 4.0F);
-                                this.put(305, 1.0F);
-                                this.put(314, 1.0F);
-                                this.put(315, 5.0F);
-                                this.put(316, 3.0F);
-                                this.put(317, 1.0F);
-                                this.put(306, 2.0F);
-                                this.put(307, 6.0F);
-                                this.put(308, 5.0F);
-                                this.put(309, 2.0F);
-                                this.put(310, 3.0F);
-                                this.put(311, 8.0F);
-                                this.put(312, 6.0F);
-                                this.put(313, 3.0F);
-                            }
-                        };
-                        float points = 0.0F;
-                        for (Item i : ((Player) entity).getInventory().getArmorContents()) {
-                            points += armorValues.getOrDefault(i.getId(), 0.0F);
-                        }
-
-                        damage.put(EntityDamageEvent.DamageModifier.ARMOR, (float) ((double) damage.getOrDefault(EntityDamageEvent.DamageModifier.ARMOR, 0.0F) - Math.floor((double) (damage.getOrDefault(EntityDamageEvent.DamageModifier.BASE, 1.0F) * points) * 0.04D)));
-                    }
-
-                    entity.attack(new EntityDamageByEntityEvent(this, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, damage, (float) config.getKnockBack()));
-                    break;
-            }
-            for (Effect effect : config.getEffects()) {
-                entity.addEffect(effect);
-            }
-            //摆臂动作
-            EntityEventPacket pk = new EntityEventPacket();
-            pk.eid = this.getId();
-            pk.event = EntityEventPacket.ARM_SWING;
-            Server.broadcastPacket(this.getViewers().values(), pk);
-        }
-    }
-
     @Override
     public void close() {
         if (inventory != null && inventory.getViewers() != null) {
             inventory.getViewers().clear();
         }
-        super.close();
         if (this.route != null) {
             this.route.interrupt();
         }
         RouteFinderRunnable.routeEntitys.remove(this);
 
-        this.onClose();
+        super.close();
+        if (boss != null) {
+            BossBarManager.BossBarApi.removeBossBar(boss);
+            boss = null;
+        }
+        if (config != null) {
+            if (config.isDisplayDamage() && this.handle != null) {
+                handle.display();
+            }
+        }
+        this.handle = null;
+        RouteFinderRunnable.removeRoute(this);
+        this.route = null;
     }
 
     @Override
     public void saveNBT() {
-        //不保存实体数据
+        // ignore
     }
 
     @Override
-    public float getDamage() {
-        return (float) damage;
+    public void setAttackDamage(int damage) {
+        this.damage = damage;
+    }
+
+    @Override
+    public void setEntityAttackSpeed(int speed) {
+        this.entityAttackSpeed = speed;
     }
 
     @Override
@@ -657,4 +391,102 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
     public Entity getEntity() {
         return this;
     }
+
+    @Override
+    public void setSkinByIEntity(Skin skin) {
+        this.setSkin(skin);
+    }
+
+    @Override
+    public ArrayList<BaseSkillManager> getSkillManagers() {
+        return skillManagers;
+    }
+
+    public ArrayList<BaseSkillManager> getHealthSkill(int health) {
+        ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
+        for (BaseSkillManager skillManager : getSkillManagers()) {
+            if (skillManager.health < health) continue;
+            if (!healthList.contains(skillManager.health)) {
+                skillManagers.add(skillManager);
+                healthList.add(skillManager.health);
+            }
+        }
+        return skillManagers;
+    }
+
+    public int healSettingTime;
+
+    public int heal;
+
+    public void onHealthListener(int health) {
+        // 血量技能处理
+        ArrayList<BaseSkillManager> skillAreaManagers = getHealthSkill(health);
+        if (!skillAreaManagers.isEmpty()) {
+            for (BaseSkillManager skillManager : skillAreaManagers) {
+                if (skillManager instanceof BaseSkillAreaManager) {
+                    if (getFollowTarget() == null) continue;
+                    if (targetOption(this.getFollowTarget(), distance(getFollowTarget()))) continue;
+                    if (skillManager.mode == 1) {
+                        skillManager.display(Utils.getAroundPlayers(this, config.getArea(), true, true, true).toArray(new Entity[0]));
+                    } else {
+                        if (getFollowTarget() instanceof Player) {
+                            skillManager.display(getFollowTarget());
+                        }
+                    }
+                } else {
+                    if (skillManager instanceof AttributeHealthSkill) {
+                        skillManager.display((Player) null);
+                    }
+                    if (skillManager instanceof SummonHealthSkill) {
+                        skillManager.display(this.getEntity());
+                    }
+                    if (skillManager instanceof MessageHealthSkill) {
+                        skillManager.display(getDamagePlayers().toArray(new Player[0]));
+                    }
+                }
+            }
+        }
+        // BossBar 处理
+        if (this.getFollowTarget() != null && this.getFollowTarget() instanceof Player) {
+            if (healDelay >= healSettingTime &&
+                    heal > 0 &&
+                    !config.isUnFightHeal()) {
+                healDelay = 0;
+                this.heal(heal);
+            }
+            if (config.isShowBossBar()) {
+                if (targetOption(this.getFollowTarget(), this.distance(this.getFollowTarget()))) {
+                    if (boss != null) {
+                        BossBarManager.BossBarApi.removeBossBar(boss);
+                        boss = null;
+                    }
+                    return;
+                }
+                if (this.getFollowTarget() instanceof Player) {
+                    boss = (Player) this.getFollowTarget();
+                    if (!BossBarManager.BossBarApi.hasCreate((Player) this.getFollowTarget(), getId())) {
+                        BossBarManager.BossBarApi.createBossBar((Player) this.getFollowTarget(), getId());
+                    }
+                    BossBarManager.BossBarApi.showBoss((Player) getFollowTarget(),
+                            getNameTag(),
+                            getHealth(),
+                            getMaxHealth());
+                }
+            }
+        } else {
+            if (getFollowTarget() == null || !config.isUnFightHeal()) {
+                if (healDelay >= healSettingTime && heal > 0) {
+                    healDelay = 0;
+                    this.heal(heal);
+                }
+            }
+            if (config.isShowBossBar()) {
+                if (boss != null) {
+                    BossBarManager.BossBarApi.removeBossBar(boss);
+                    boss = null;
+                }
+            }
+        }
+    }
+
 }

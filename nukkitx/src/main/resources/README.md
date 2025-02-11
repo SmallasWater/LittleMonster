@@ -1,6 +1,6 @@
 ## LittleMonster
 
-**版本: v1.7.1**
+**版本: v1.7.3**
 
 感谢您使用LittleMonster副本插件 使用本插件时请阅读如下规则
 1. 本插件作者为若水, LT_Name
