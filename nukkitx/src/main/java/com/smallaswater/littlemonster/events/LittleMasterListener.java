@@ -21,6 +21,7 @@ import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
+import com.smallaswater.littlemonster.entity.vanilla.VanillaNPC;
 import com.smallaswater.littlemonster.manager.KeyHandleManager;
 import com.smallaswater.littlemonster.manager.TimerHandleManager;
 import com.smallaswater.littlemonster.threads.PluginMasterThreadPool;
@@ -39,7 +40,7 @@ public class LittleMasterListener implements Listener {
         if(e instanceof EntityDamageByEntityEvent){
             Entity entity = e.getEntity();
             //Entity d = ((EntityDamageByEntityEvent) e).getDamager();
-            if(entity instanceof LittleNpc){
+            if(entity instanceof LittleNpc || entity instanceof VanillaNPC){
                 //卡墙修复
                 if(e.getCause() == EntityDamageEvent.DamageCause.FALL){
                     entity.teleport(entity.add(0,2));
@@ -49,11 +50,19 @@ public class LittleMasterListener implements Listener {
                     ((LittleNpc) entity).handle.add(d.getName(),e.getDamage());
                 }*/
                 if (LittleMonsterMainClass.hasRcRPG) return;// 有 RcRPG 时无需处理伤害事件
-                float damage = e.getDamage() - ((LittleNpc) entity).getConfig().getDelDamage();
-                if(damage < 0){
-                    damage = 0;
+                if(entity instanceof LittleNpc){
+                    float damage = e.getDamage() - ((LittleNpc) entity).getConfig().getDelDamage();
+                    if(damage < 0){
+                        damage = 0;
+                    }
+                    e.setDamage(damage);
+                }else{
+                    float damage = e.getDamage() - ((VanillaNPC) entity).getConfig().getDelDamage();
+                    if(damage < 0){
+                        damage = 0;
+                    }
+                    e.setDamage(damage);
                 }
-                e.setDamage(damage);
             }
         }
     }
