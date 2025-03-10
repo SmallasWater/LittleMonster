@@ -130,12 +130,16 @@ public class LittleNpcSpawnCommand extends Command {
                         }
                     }else if(strings.length > 5){
                         if (LittleMonsterMainClass.getInstance().monsters.containsKey(strings[1])) {
+                            int time = -1;
                             Position position = new Position(Double.parseDouble(strings[2]),
                                     Double.parseDouble(strings[3]),
                                     Double.parseDouble(strings[4]),
                                     Server.getInstance().getLevelByName(strings[5]));
-                            LittleMonsterMainClass.getInstance().monsters.get(strings[1]).spawn(position);
-                            sender.sendMessage("§a怪物 " + strings[1] + "在"+position+"生成");
+                            if(strings.length > 6){
+                                time = Integer.parseInt(strings[6]);
+                            }
+                            LittleMonsterMainClass.getInstance().monsters.get(strings[1]).spawn(position,time);
+                            sender.sendMessage("§a怪物 " + strings[1] + "在"+position+"生成"+((time > 0)?" 存活 §e"+time+"§a 秒":""));
                         } else {
                             sender.sendMessage("§c怪物 " + strings[1] + "不存在");
                         }

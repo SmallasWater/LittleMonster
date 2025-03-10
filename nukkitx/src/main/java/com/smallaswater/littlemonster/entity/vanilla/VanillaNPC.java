@@ -9,6 +9,7 @@ import cn.nukkit.entity.data.Skin;
 import cn.nukkit.entity.mob.EntityMob;
 import cn.nukkit.event.entity.*;
 import cn.nukkit.item.Item;
+import cn.nukkit.level.ParticleEffect;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.DestroyBlockParticle;
@@ -240,9 +241,24 @@ public class VanillaNPC extends BaseVanillaNPC implements IEntity {
     }
 
     private Player boss = null;
+    private int age = 0;
+
+    private int cacheAge = 0;
 
     @Override
     public boolean onUpdate(int currentTick) {
+        if (cacheAge >= 20) {
+            age++;
+            cacheAge = 0;//秒实现
+        } else {
+            cacheAge++;//tick实现
+        }
+
+        if (liveTime != -1 && age >= liveTime) {
+            this.getLevel().addParticleEffect(this, ParticleEffect.BASIC_SMOKE);
+            this.close();
+            return false;
+        }
         // 技能召唤的
         if (this.deathFollowMaster && masterHuman != null) {
             if (masterHuman.isClosed()) {
@@ -411,7 +427,7 @@ public class VanillaNPC extends BaseVanillaNPC implements IEntity {
                 Player player = (Player) ((EntityDamageByEntityEvent) sure).getDamager();
                 //此处通过怪物血量来记录玩家伤害值，避免getFinalDamage的错误，同时最终能够等于怪物最大生命值避免伤害误差
                 this.handle.add(player.getName(), lastAttackHealth.get(sure.getEntity())-sure.getEntity().getHealth());
-                //记录最后血量
+                //记录最后血量，注意，当使用外部entity.attack可能会引起一位浮点的伤害误差
                 lastAttackHealth.put(sure.getEntity(),sure.getEntity().getHealth());
             }
             return;

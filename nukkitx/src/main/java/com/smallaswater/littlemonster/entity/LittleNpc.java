@@ -191,9 +191,9 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
     public void onUpdata() {
         if (cacheAge >= 20) {
             age++;
-            cacheAge = 0;
+            cacheAge = 0;//秒实现
         } else {
-            cacheAge++;
+            cacheAge++;//tick实现
         }
         if (liveTime != -1 && age >= liveTime) {
             this.getLevel().addParticleEffect(this, ParticleEffect.BASIC_SMOKE);
