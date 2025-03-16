@@ -7,27 +7,19 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.data.Skin;
 import cn.nukkit.entity.mob.EntityMob;
-import cn.nukkit.entity.projectile.EntityArrow;
-import cn.nukkit.entity.projectile.EntityProjectile;
-import cn.nukkit.event.entity.*;
+import cn.nukkit.event.entity.EntityDamageByEntityEvent;
+import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.event.entity.EntityDeathEvent;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.ItemID;
 import cn.nukkit.level.ParticleEffect;
-import cn.nukkit.level.Sound;
 import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.level.particle.DestroyBlockParticle;
-import cn.nukkit.level.particle.HugeExplodeSeedParticle;
-import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
-import cn.nukkit.network.protocol.EntityEventPacket;
-import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.TextFormat;
 import com.smallaswater.littlemonster.LittleMonsterMainClass;
-import com.smallaswater.littlemonster.common.EntityTool;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntityMove;
 import com.smallaswater.littlemonster.events.entity.LittleMonsterEntityDeathDropExpEvent;
-import com.smallaswater.littlemonster.handle.DamageHandle;
 import com.smallaswater.littlemonster.items.BaseItem;
 import com.smallaswater.littlemonster.items.DeathCommand;
 import com.smallaswater.littlemonster.items.DropItem;
@@ -42,7 +34,9 @@ import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.UUID;
 
 /**
  * @author SmallasWater
@@ -406,9 +400,9 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
         ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
         for (BaseSkillManager skillManager : getSkillManagers()) {
             if (skillManager.health < health) continue;
-            if (!healthList.contains(skillManager.health)) {
+            if (!healthList.contains(skillManager)) {
                 skillManagers.add(skillManager);
-                healthList.add(skillManager.health);
+                healthList.add(skillManager);
             }
         }
         return skillManagers;

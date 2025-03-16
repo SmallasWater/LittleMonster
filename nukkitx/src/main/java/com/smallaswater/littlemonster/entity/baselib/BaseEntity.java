@@ -75,7 +75,7 @@ public abstract class BaseEntity extends EntityHuman {
 
     protected ArrayList<BaseSkillManager> skillManagers = new ArrayList<>();
 
-    protected ArrayList<Integer> healthList = new ArrayList<>();
+    protected ArrayList<BaseSkillManager> healthList = new ArrayList<>();
 
     protected int attackDelay = 0;
 
@@ -593,7 +593,7 @@ public abstract class BaseEntity extends EntityHuman {
     @Override
     public void heal(float amount) {
         if (getHealth() < getMaxHealth()) {
-            healthList.removeIf(i -> getHealth() + amount >= i);
+            healthList.removeIf(i -> getHealth() + amount >= i.health);
             if (getHealth() + amount >= getMaxHealth()) {
                 reset();
             }

@@ -220,3 +220,7 @@ autospawn: {}
 | @target    | NPC锁定的目标玩家/最后一击玩家 |
 | @targetAll | 攻击过NPC的所有在线玩家     |
 | @damage    | 伤害最高的玩家           |
+| {x}        | NPC所在坐标X          |
+| {y}        | NPC所在坐标Y          |
+| {z}        | NPC所在坐标Z          |
+| {level}    | NPC所在世界名称         |
