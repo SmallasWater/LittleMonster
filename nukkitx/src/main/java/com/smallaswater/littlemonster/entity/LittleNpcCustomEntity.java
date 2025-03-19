@@ -12,7 +12,6 @@ import cn.nukkit.level.format.FullChunk;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.SetEntityLinkPacket;
 import com.smallaswater.littlemonster.config.MonsterConfig;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * @author LT_Name
@@ -43,6 +42,11 @@ public class LittleNpcCustomEntity extends LittleNpc implements CustomEntity, IE
     @Override
     public int getNetworkId() {
         return this.getEntityDefinition().getRuntimeId();
+    }
+
+    @Override
+    protected float getBaseOffset() {
+        return 0.0f;
     }
 
     public void setIdentifier(String identifier) {
