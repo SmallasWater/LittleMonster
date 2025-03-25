@@ -8,7 +8,7 @@
     </parent>
 
     <artifactId>LittleMonster</artifactId>
-    <version>${parent.version}-NKMOT</version>
+    <version>NKMOT-${parent.version}</version>
     <packaging>jar</packaging>
 
     <properties>
