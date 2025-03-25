@@ -7,7 +7,9 @@ import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.EntityCreature;
 import cn.nukkit.entity.data.Skin;
 import cn.nukkit.entity.mob.EntityMob;
-import cn.nukkit.event.entity.*;
+import cn.nukkit.event.entity.EntityDamageByEntityEvent;
+import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.event.entity.EntityDeathEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Position;
 import cn.nukkit.level.format.FullChunk;
@@ -30,12 +32,13 @@ import com.smallaswater.littlemonster.events.entity.LittleMonsterEntityDeathDrop
 import com.smallaswater.littlemonster.items.BaseItem;
 import com.smallaswater.littlemonster.items.DeathCommand;
 import com.smallaswater.littlemonster.items.DropItem;
+import com.smallaswater.littlemonster.manager.BossBarManager;
 import com.smallaswater.littlemonster.skill.BaseSkillAreaManager;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import com.smallaswater.littlemonster.skill.defaultskill.AttributeHealthSkill;
 import com.smallaswater.littlemonster.skill.defaultskill.MessageHealthSkill;
 import com.smallaswater.littlemonster.skill.defaultskill.SummonHealthSkill;
-import com.smallaswater.littlemonster.manager.BossBarManager;
+import com.smallaswater.littlemonster.skill.defaultskill.SwitchAttackModeSkill;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Getter;
 import lombok.Setter;
@@ -121,7 +124,7 @@ public class VanillaNPC extends BaseVanillaNPC implements IEntity {
         this.setNameTagAlwaysVisible(true);
         this.loadSkill();
         vanillaNPC = this;
-        if (config.getAttackMode() == ATTACK_MODE_ARROW) {
+        if (this.getAttackMode() == ATTACK_MODE_ARROW) {
             shootAttackExecutor = new ShootAttackExecutor();
         }
     }
@@ -844,12 +847,12 @@ public class VanillaNPC extends BaseVanillaNPC implements IEntity {
                 } else {
                     if (skillManager instanceof AttributeHealthSkill) {
                         skillManager.display((Player) null);
-                    }
-                    if (skillManager instanceof SummonHealthSkill) {
+                    } else if (skillManager instanceof SummonHealthSkill) {
                         skillManager.display(this.getEntity());
-                    }
-                    if (skillManager instanceof MessageHealthSkill) {
+                    } else if (skillManager instanceof MessageHealthSkill) {
                         skillManager.display(getDamagePlayers().toArray(new Player[0]));
+                    } else if (skillManager instanceof SwitchAttackModeSkill) {
+                        skillManager.display(this.getEntity());
                     }
                 }
             }

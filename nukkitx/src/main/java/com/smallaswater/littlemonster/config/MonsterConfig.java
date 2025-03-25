@@ -227,13 +227,12 @@ public class MonsterConfig {
                 }
             }
 
-            BaseSkillManager skillManager;
             HashMap<String, List<Object>> skillConfig = config.get("技能", new HashMap<>());
             for (String health : skillConfig.keySet()) {
                 List<Object> list = skillConfig.get(health);
                 for (Object o : list) {
                     if (o instanceof HashMap) {
-                        skillManager = fromSkill(health, (HashMap<String, Object>) o);
+                        BaseSkillManager skillManager = fromSkill(health, (HashMap<String, Object>) o);
                         if (skillManager != null) {
                             monsterConfig.addSkill(skillManager);
                         }
@@ -265,7 +264,6 @@ public class MonsterConfig {
                 DropItem item = DropItem.toItem(map.get("id").toString(), Integer.parseInt(map.get("round").toString()));
                 if (item != null) {
                     items.add(item);
-
                 }
             }
             monsterConfig.setDeathItem(items);
@@ -339,8 +337,8 @@ public class MonsterConfig {
                 .replace("{名称}", vanillaNpc.getName())
                 .replace("{血量}", vanillaNpc.getHealth() + "")
                 .replace("{最大血量}", vanillaNpc.getMaxHealth() + ""));
-//        vanillaNpc.setConfig(this); // 不需要此处，因为 loadSkill 在实例化时需要读取 config，此时太晚了
         vanillaNpc.speed = (float) getMoveSpeed() * 10;
+        vanillaNpc.setAttackMode(getAttackMode());
         vanillaNpc.setAttackDamage(getDamage());
         vanillaNpc.setScale((float) getSize());
         vanillaNpc.routeMax = getSeeLine();
@@ -360,8 +358,8 @@ public class MonsterConfig {
                 .replace("{名称}", littleNpc.getName())
                 .replace("{血量}", littleNpc.getHealth() + "")
                 .replace("{最大血量}", littleNpc.getMaxHealth() + ""));
-//        littleNpc.setConfig(this);
         littleNpc.speed = (float) getMoveSpeed();
+        littleNpc.setAttackMode(getAttackMode());
         littleNpc.setAttackDamage(getDamage());
         littleNpc.setMaxHealth(getHealth());
         littleNpc.setHealth(getHealth());
@@ -388,8 +386,9 @@ public class MonsterConfig {
     private static BaseSkillManager fromSkill(String health, HashMap<String, Object> map) {
         BaseSkillManager skillManager = null;
         if (map.containsKey("技能名")) {
-            skillManager = fromSkillByName(map.get("技能名").toString());
+            skillManager = BaseSkillManager.fromSkillByName(map.get("技能名").toString());
             if (skillManager == null) {
+                LittleMonsterMainClass.getInstance().getLogger().warning("技能名 " + map.get("技能名").toString() + " 不存在！");
                 return null;
             }
 
@@ -433,78 +432,6 @@ public class MonsterConfig {
             }
         }
         return skillManager;
-    }
-
-    private static BaseSkillManager fromSkillByName(String name) {
-        BaseSkillManager skill = null;
-        int mode = 0;
-        switch (name) {
-            case "@药水":
-                skill = BaseSkillManager.get("Effect");
-                break;
-            case "@群体药水":
-                mode = 1;
-                skill = BaseSkillManager.get("Effect");
-                break;
-            case "@体型":
-                skill = BaseSkillManager.get("Attribute");
-                if (skill != null) {
-                    ((AttributeHealthSkill) skill).setAttributeType(AttributeHealthSkill.AttributeType.SCALE);
-                }
-                break;
-            case "@伤害":
-                skill = BaseSkillManager.get("Attribute");
-                if (skill != null) {
-                    ((AttributeHealthSkill) skill).setAttributeType(AttributeHealthSkill.AttributeType.DAMAGE);
-                }
-
-                break;
-            case "@攻速":
-                skill = BaseSkillManager.get("Attribute");
-                if (skill != null) {
-                    ((AttributeHealthSkill) skill).setAttributeType(AttributeHealthSkill.AttributeType.ATTACK_SPEED);
-                }
-                break;
-            case "@皮肤":
-                skill = BaseSkillManager.get("Attribute");
-                if (skill != null) {
-                    ((AttributeHealthSkill) skill).setAttributeType(AttributeHealthSkill.AttributeType.SKIN);
-                }
-                break;
-            case "@群体引燃":
-                mode = 1;
-                skill = BaseSkillManager.get("Fire");
-                break;
-            case "@引燃":
-                skill = BaseSkillManager.get("Fire");
-                break;
-            case "@群体冰冻":
-                mode = 1;
-                skill = BaseSkillManager.get("Ice");
-                break;
-            case "@冰冻":
-                skill = BaseSkillManager.get("Ice");
-                break;
-            case "@范围击退":
-                mode = 1;
-                skill = BaseSkillManager.get("KnockBack");
-                break;
-            case "@击退":
-                skill = BaseSkillManager.get("KnockBack");
-                break;
-            case "@信息":
-                skill = BaseSkillManager.get("Message");
-                break;
-            case "@生成":
-                skill = BaseSkillManager.get("Summon");
-                break;
-            default:
-                break;
-        }
-        if (skill != null) {
-            skill.mode = mode;
-        }
-        return skill;
     }
 
     public void resetEntity() {

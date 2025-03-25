@@ -9,7 +9,10 @@ import cn.nukkit.entity.mob.EntityMob;
 import cn.nukkit.entity.passive.EntityAnimal;
 import cn.nukkit.entity.passive.EntityBat;
 import cn.nukkit.entity.passive.EntityParrot;
-import cn.nukkit.event.entity.*;
+import cn.nukkit.event.entity.EntityDamageByEntityEvent;
+import cn.nukkit.event.entity.EntityDamageEvent;
+import cn.nukkit.event.entity.EntityInteractEvent;
+import cn.nukkit.event.entity.EntityRegainHealthEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Sound;
 import cn.nukkit.level.format.FullChunk;
@@ -64,6 +67,10 @@ public class BaseVanillaNPC extends MovingVanillaEntity {
     protected int damageDelay = 0;
 
     protected int healDelay = 0;
+
+    @Setter
+    @Getter
+    protected int attackMode = ATTACK_MODE_MELEE;
 
     /**
      * 攻击力
@@ -221,7 +228,7 @@ public class BaseVanillaNPC extends MovingVanillaEntity {
                 //近战模式忽略部分会飞的实体 防止乱跑
                 //触发事件模式无法确定插件是近战还是远程 当作近战处理
                 //TODO 使用权重功能处理飞行生物，降低飞行生物目标权重
-                if (this.getConfig().getAttackMode() == ATTACK_MODE_MELEE || this.getConfig().getAttackMode() == ATTACK_MODE_EVENT) {
+                if (this.getAttackMode() == ATTACK_MODE_MELEE || this.getAttackMode() == ATTACK_MODE_EVENT) {
                     //忽略蝙蝠 鹦鹉
                     if (entity.getNetworkId() == EntityBat.NETWORK_ID || entity.getNetworkId() == EntityParrot.NETWORK_ID) {
                         continue;
@@ -284,7 +291,7 @@ public class BaseVanillaNPC extends MovingVanillaEntity {
         }
 
         this.attackDelay = 0;
-        switch (this.getConfig().getAttackMode()) {
+        switch (this.getAttackMode()) {
             case ATTACK_MODE_RANGE:
                 playArmSwingAnimation(this);
                 LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, false);

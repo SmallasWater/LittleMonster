@@ -29,6 +29,7 @@ import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import com.smallaswater.littlemonster.skill.defaultskill.AttributeHealthSkill;
 import com.smallaswater.littlemonster.skill.defaultskill.MessageHealthSkill;
 import com.smallaswater.littlemonster.skill.defaultskill.SummonHealthSkill;
+import com.smallaswater.littlemonster.skill.defaultskill.SwitchAttackModeSkill;
 import com.smallaswater.littlemonster.threads.runnables.RouteFinderRunnable;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Getter;
@@ -430,12 +431,12 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
                 } else {
                     if (skillManager instanceof AttributeHealthSkill) {
                         skillManager.display((Player) null);
-                    }
-                    if (skillManager instanceof SummonHealthSkill) {
+                    } else if (skillManager instanceof SummonHealthSkill) {
                         skillManager.display(this.getEntity());
-                    }
-                    if (skillManager instanceof MessageHealthSkill) {
+                    } else if (skillManager instanceof MessageHealthSkill) {
                         skillManager.display(getDamagePlayers().toArray(new Player[0]));
+                    } else if (skillManager instanceof SwitchAttackModeSkill) {
+                        skillManager.display(this.getEntity());
                     }
                 }
             }

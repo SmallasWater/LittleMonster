@@ -89,6 +89,10 @@ public abstract class BaseEntity extends EntityHuman {
 
     boolean canAttack = true;
 
+    @Setter
+    @Getter
+    protected int attackMode = ATTACK_MODE_MELEE;
+
     /**
      * 攻击模式 近战
      */
@@ -334,7 +338,7 @@ public abstract class BaseEntity extends EntityHuman {
         if (this.attackDelay > getEntityAttackSpeed() && (entity.distance(this) <= getConfig().getAttackDistance() || entity.distance(this.add(0, this.getHealth(), 0)) <= getConfig().getAttackDistance())) {
             this.attackDelay = 0;
             this.waitTime = 0;
-            switch (getConfig().getAttackMode()) {
+            switch (this.getAttackMode()) {
                 case ATTACK_MODE_RANGE:
                     LinkedList<Entity> players = Utils.getAroundPlayers(this, config.getArea(), true, true, true);
                     for (Entity p : players) {
