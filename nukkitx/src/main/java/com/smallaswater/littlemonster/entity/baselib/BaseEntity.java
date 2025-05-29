@@ -439,45 +439,14 @@ public abstract class BaseEntity extends EntityHuman {
         }
     }
 
-    //private final ReentrantLock hasBlockInLineLock = new ReentrantLock();
-    //private int lastCheckBlockInLineTick = 0;
-    //private final AtomicBoolean isHasBlock = new AtomicBoolean();
-
-    //TODO 优化性能
     //判断中间是否有方块
     public boolean hasBlockInLine(Vector3 target) {
-//        if (target == null) {
-//            return false;
-//        }
-//        if(!this.hasBlockInLineLock.isLocked()) {
-//            int tick = Server.getInstance().getTick();
-//            if (tick - lastCheckBlockInLineTick < 300) {
-//                return isHasBlock.get();
-//            }
-//            this.lastCheckBlockInLineTick = tick;
-//            try {
-//                hasBlockInLineLock.lock();
-//                CompletableFuture.supplyAsync(() -> {
-
-        Block targetBlock = this.getTargetBlock(Math.min((int) this.distance(target), 10));
-        if (targetBlock != null) {
-            return !targetBlock.isTransparent();
+        for (Block block : this.getLineOfSight(Math.min((int) this.distance(target), 10))) {
+            if (!block.isTransparent()) {
+                return true;
+            }
         }
         return false;
-//                    return false;
-//                }, PluginMasterThreadPool.ASYNC_EXECUTOR).thenAccept(value -> {
-//                    this.isHasBlock.set(value);
-//                    hasBlockInLineLock.unlock();
-//                });
-//            } catch (Exception ignore) {
-//
-//            }finally {
-//                if(this.hasBlockInLineLock.isLocked()) {
-//                    this.hasBlockInLineLock.unlock();
-//                }
-//            }
-//        }
-//        return this.isHasBlock.get();
     }
 
     public float getMountedYOffset() {
@@ -533,9 +502,15 @@ public abstract class BaseEntity extends EntityHuman {
     @Override
     public void close() {
         super.close();
-        this.targetWeightedMap.clear();
-        this.skillManagers.clear();
-        this.healthList.clear();
+        if (this.targetWeightedMap != null) { //防止实体初始化时close导致报错
+            this.targetWeightedMap.clear();
+        }
+        if (this.skillManagers!= null) {
+            this.skillManagers.clear();
+        }
+        if (this.healthList!= null) {
+            this.healthList.clear();
+        }
     }
 
     /**
