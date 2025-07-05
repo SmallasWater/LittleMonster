@@ -92,8 +92,13 @@ public abstract class RouteFinder {
             return;
          }
          this.lastSetDestinationTick = tick;
-         this.originalDestination = destination.clone();
-         this.destination = destination.clone();
+         if (destination != null) {
+            this.originalDestination = destination.clone();
+            this.destination = destination.clone();
+         } else {
+            this.originalDestination = null;
+            this.destination = null;
+         }
          this.enableOffset = enableOffset;
          if (this.isFinished()) {
             this.finished = false;
@@ -188,7 +193,7 @@ public abstract class RouteFinder {
    public boolean hasArrivedNodeInaccurate(Vector3 vec) {
       try {
          lock.readLock().lock();
-         if (this.hasNext() &&  this.getCurrentNode().getVector3()!=null) {
+         if (this.hasNext() && this.getCurrentNode().getVector3() != null) {
             Vector3 cur = this.getCurrentNode().getVector3();
             return vec.getFloorX() == cur.getFloorX() && vec.getFloorZ() == cur.getFloorZ();
          }

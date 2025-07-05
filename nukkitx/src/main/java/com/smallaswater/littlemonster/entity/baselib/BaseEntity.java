@@ -199,7 +199,7 @@ public abstract class BaseEntity extends EntityHuman {
     }
 
     public boolean targetOption(Entity creature) {
-        return this.targetOption(creature, (this.followTarget != null ? this.distance(this.followTarget) : this.seeSize + 1));
+        return this.targetOption(creature, (creature != null ? this.distance(creature) : this.seeSize + 1));
     }
 
     /**

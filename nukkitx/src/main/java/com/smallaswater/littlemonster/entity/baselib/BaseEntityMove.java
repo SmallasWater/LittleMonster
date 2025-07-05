@@ -142,8 +142,14 @@ public abstract class BaseEntityMove extends BaseEntity {
         if (this.isKnockback()) {
             return;
         }
-
-        if(currentTick%15 == 0 || this.targetOption(this.followTarget)) {
+        boolean targetOption = false;
+        if(currentTick%15 == 0 || (targetOption = this.targetOption(this.followTarget))) {
+            if (targetOption) {
+                this.followTarget = null;
+                if (this.route != null) {
+                    this.route.setDestination(null);
+                }
+            }
             //扫描附近实体
             if (this.passengers.isEmpty()) {
                 //获取范围内可以攻击的生物
