@@ -1,8 +1,10 @@
 package com.smallaswater.littlemonster.skill;
 
 /**
+ * 范围技能接口
+ *
  * @author SmallasWater
- * Create on 2021/6/30 10:19
- * Package com.smallaswater.littlemonster.skill
  */
-public interface BaseSkillAreaManager {}
+public interface BaseSkillAreaManager {
+
+}

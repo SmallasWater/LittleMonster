@@ -394,6 +394,10 @@ public class MonsterConfig {
 
             skillManager.setHealth(Integer.parseInt(health));
             skillManager.setProbability(Integer.parseInt(map.getOrDefault("概率", 100).toString()));
+            Object delay = map.get("延迟");
+            if (delay instanceof Number) {
+                skillManager.setDelay(((Number) delay).intValue());
+            }
 
             Object effect = map.get("效果");
             if (skillManager instanceof AttributeHealthSkill) {
@@ -407,28 +411,31 @@ public class MonsterConfig {
                 } else {
                     skillManager.setEffect(Double.parseDouble(effect.toString()));
                 }
-            } else {
-                if (skillManager instanceof EffectHealthSkill) {
-                    if (map.containsKey("药水")) {
-                        ((EffectHealthSkill) skillManager).setEffects(Utils.effectFromString(Utils.asStringList((List) effect)));
-                    }
-                } else if (skillManager instanceof KnockBackHealthSkill) {
-                    skillManager.setEffect(Double.parseDouble(effect.toString()));
-                } else if (skillManager instanceof MessageHealthSkill) {
-                    if (map.containsKey("信息")) {
-                        skillManager.mode = Integer.parseInt(effect.toString());
-                        ((MessageHealthSkill) skillManager).setText(map.get("信息").toString());
-                    }
-                } else if (skillManager instanceof SummonHealthSkill) {
-                    ArrayList<String> npcs = new ArrayList<>();
-                    for (Object o : (List) effect) {
-                        npcs.add(o.toString());
-                    }
-                    ((SummonHealthSkill) skillManager).setLittleNpcs(npcs);
-                } else {
-                    skillManager.setEffect(Integer.parseInt(effect.toString()));
+            } else if (skillManager instanceof EffectHealthSkill) {
+                if (map.containsKey("药水")) {
+                    ((EffectHealthSkill) skillManager).setEffects(Utils.effectFromString(Utils.asStringList((List) effect)));
                 }
-
+            } else if (skillManager instanceof KnockBackHealthSkill) {
+                skillManager.setEffect(Double.parseDouble(effect.toString()));
+            } else if (skillManager instanceof MessageHealthSkill) {
+                if (map.containsKey("信息")) {
+                    skillManager.mode = Integer.parseInt(effect.toString());
+                    ((MessageHealthSkill) skillManager).setText(map.get("信息").toString());
+                }
+            } else if (skillManager instanceof SummonHealthSkill) {
+                ArrayList<String> npcs = new ArrayList<>();
+                for (Object o : (List) effect) {
+                    npcs.add(o.toString());
+                }
+                ((SummonHealthSkill) skillManager).setLittleNpcs(npcs);
+            } else if (skillManager instanceof CommandHealthSkill) {
+                ArrayList<String> cmd = new ArrayList<>();
+                for (Object o : (List) effect) {
+                    cmd.add(o.toString());
+                }
+                ((CommandHealthSkill) skillManager).setCommands(cmd);
+            } else {
+                skillManager.setEffect(Integer.parseInt(effect.toString()));
             }
         }
         return skillManager;

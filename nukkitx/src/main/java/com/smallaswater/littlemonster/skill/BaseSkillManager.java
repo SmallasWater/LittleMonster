@@ -1,6 +1,8 @@
 package com.smallaswater.littlemonster.skill;
 
+import cn.nukkit.Server;
 import cn.nukkit.entity.Entity;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.skill.defaultskill.*;
 import com.smallaswater.littlemonster.utils.Utils;
@@ -35,6 +37,10 @@ public abstract class BaseSkillManager implements Cloneable {
     @Setter
     private int probability;
 
+    @Getter
+    @Setter
+    private int delay = 0;
+
     public BaseSkillManager(String name) {
         this.name = name;
     }
@@ -50,6 +56,7 @@ public abstract class BaseSkillManager implements Cloneable {
         register("Summon", new SummonHealthSkill("Summon"));
         register("Effect", new EffectHealthSkill("Effect"));
         register("SwitchAttackMode", new SwitchAttackModeSkill("SwitchAttackMode"));
+        register("@命令", new CommandHealthSkill("@命令"));
     }
 
     /**
@@ -149,6 +156,7 @@ public abstract class BaseSkillManager implements Cloneable {
             case "@切换攻击模式":
                 skill = BaseSkillManager.get("SwitchAttackMode");
             default:
+                skill = BaseSkillManager.get(name);
                 break;
         }
         if (skill != null) {
@@ -167,7 +175,15 @@ public abstract class BaseSkillManager implements Cloneable {
 
     public void display(Entity... player) {
         if (this.probability >= Utils.rand(1, 100)) {
-            this.privateDisplay(player);
+            if (this.delay > 0) {
+                Server.getInstance().getScheduler().scheduleDelayedTask(
+                        LittleMonsterMainClass.getInstance(),
+                        () -> this.privateDisplay(player),
+                        this.delay
+                );
+            } else {
+                this.privateDisplay(player);
+            }
         }
     }
 
