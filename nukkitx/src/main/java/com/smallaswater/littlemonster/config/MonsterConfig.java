@@ -423,11 +423,15 @@ public class MonsterConfig {
                     ((MessageHealthSkill) skillManager).setText(map.get("信息").toString());
                 }
             } else if (skillManager instanceof SummonHealthSkill) {
+                SummonHealthSkill summonHealthSkill = (SummonHealthSkill) skillManager;
                 ArrayList<String> npcs = new ArrayList<>();
                 for (Object o : (List) effect) {
                     npcs.add(o.toString());
                 }
-                ((SummonHealthSkill) skillManager).setLittleNpcs(npcs);
+                summonHealthSkill.setLittleNpcs(npcs);
+                if (map.containsKey("存在时长限制")) {
+                    summonHealthSkill.setLifeTime((int) map.get("存在时长限制"));
+                }
             } else if (skillManager instanceof CommandHealthSkill) {
                 ArrayList<String> cmd = new ArrayList<>();
                 for (Object o : (List) effect) {

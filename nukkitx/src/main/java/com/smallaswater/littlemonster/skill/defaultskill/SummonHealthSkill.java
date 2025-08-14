@@ -8,6 +8,8 @@ import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
 import com.smallaswater.littlemonster.utils.Utils;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 
@@ -16,16 +18,15 @@ import java.util.ArrayList;
  * Create on 2021/6/29 20:08
  * Package com.smallaswater.littlemonster.skill.defaultskill
  */
+@Setter
+@Getter
 public class SummonHealthSkill extends BaseSkillManager {
 
     private ArrayList<String> littleNpcs = new ArrayList<>();
+    private int lifeTime = -1;
 
     public SummonHealthSkill(String name) {
         super(name);
-    }
-
-    public void setLittleNpcs(ArrayList<String> littleNpcs) {
-        this.littleNpcs = littleNpcs;
     }
 
     @Override
@@ -36,7 +37,7 @@ public class SummonHealthSkill extends BaseSkillManager {
         for (String littleNpcName : littleNpcs) {
             MonsterConfig config = LittleMonsterMainClass.getInstance().monsters.get(littleNpcName);
             if (config != null) {
-                IEntity littleNpc = config.spawn(getMaster().getEntity().add(Utils.rand() ? 1 : -1, 0, Utils.rand() ? 1 : -1));
+                IEntity littleNpc = config.spawn(getMaster().getEntity().add(Utils.rand() ? 1 : -1, 0, Utils.rand() ? 1 : -1), this.lifeTime);
                 littleNpc.setDeathFollowMaster(true);
                 littleNpc.setMasterHuman((EntityHuman) entities[0]);
             }
