@@ -155,6 +155,12 @@ public class MonsterConfig {
      */
     public static final HashMap<String, EntityDefinition> CUSTOM_ENTITY_DEFINITIONS = new HashMap<>();
 
+    // 自定义实体碰撞箱大小
+    private boolean enableCustomCollisionSize;
+    private float customCollisionSizeWidth;
+    private float customCollisionSizeLength;
+    private float customCollisionSizeHeight;
+
     private MonsterConfig(String name) {
         this.name = name;
     }
@@ -227,6 +233,14 @@ public class MonsterConfig {
                 }
             }
 
+            // 自定义实体碰撞箱大小
+            if (config.getBoolean("CustomCollisionSize.enable")) {
+                monsterConfig.setEnableCustomCollisionSize(true);
+                monsterConfig.setCustomCollisionSizeWidth((float) config.getDouble("CustomCollisionSize.width"));
+                monsterConfig.setCustomCollisionSizeLength((float) config.getDouble("CustomCollisionSize.length"));
+                monsterConfig.setCustomCollisionSizeHeight((float) config.getDouble("CustomCollisionSize.height"));
+            }
+
             HashMap<String, List<Object>> skillConfig = config.get("技能", new HashMap<>());
             for (String health : skillConfig.keySet()) {
                 List<Object> list = skillConfig.get(health);
@@ -297,11 +311,11 @@ public class MonsterConfig {
 
         IEntity littleNpc;
         if (this.enableCustomEntity) {
-            if(this.networkId >= 10 ){
-                if(this.networkId == 37){
+            if (this.networkId >= 10) {
+                if (this.networkId == 37) {
                     littleNpc = new EntitySlime(spawn.getChunk(), Entity.getDefaultNBT(spawn), this);
-                }else{
-                    littleNpc = new VanillaNPCCustomEntity(spawn.getChunk(), nbt, this,false);
+                } else {
+                    littleNpc = new VanillaNPCCustomEntity(spawn.getChunk(), nbt, this, false);
                 }
                 this.vanillaSetting((VanillaNPC) littleNpc);
             } else {

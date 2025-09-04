@@ -1,5 +1,6 @@
 package com.smallaswater.littlemonster.entity;
 
+import cn.lanink.gamecore.utils.EntityUtils;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.BlockRedstone;
@@ -75,6 +76,33 @@ public class LittleNpc extends BaseEntityMove implements IEntity {
         }
         uuid = UUID.randomUUID();
         RouteFinderRunnable.addRoute(this);
+
+        if (config.isEnableCustomCollisionSize()) {
+            this.dataProperties.putFloat(EntityUtils.getEntityField("DATA_BOUNDING_BOX_HEIGHT", DATA_BOUNDING_BOX_HEIGHT), this.getHeight());
+            this.dataProperties.putFloat(EntityUtils.getEntityField("DATA_BOUNDING_BOX_WIDTH", DATA_BOUNDING_BOX_WIDTH), this.getWidth());
+        }
+    }
+
+    @Override
+    public float getWidth() {
+        if (this.config != null && this.config.isEnableCustomCollisionSize()) {
+            return this.config.getCustomCollisionSizeWidth();
+        }
+        return super.getWidth();
+    }
+
+    public float getLength() {
+        if (this.config != null && this.config.isEnableCustomCollisionSize()) {
+            return this.config.getCustomCollisionSizeLength();
+        }
+        return super.getLength();
+    }
+
+    public float getHeight() {
+        if (this.config != null && this.config.isEnableCustomCollisionSize()) {
+            return this.config.getCustomCollisionSizeHeight();
+        }
+        return super.getHeight();
     }
 
     private void disCommand(String cmd) {

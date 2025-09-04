@@ -102,7 +102,12 @@ public class VanillaNPC extends BaseVanillaNPC implements IEntity {
         this.networkId = config.getNetworkId();
         if (skip) return;
         Entity temp = Entity.createEntity(String.valueOf(config.getNetworkId()), chunk, nbt);
-        if (temp != null) {
+        if (config.isEnableCustomCollisionSize()) {
+            width = config.getCustomCollisionSizeWidth();
+            length = config.getCustomCollisionSizeLength();
+            height = config.getCustomCollisionSizeHeight();
+            halfWidth = width / 2;
+        } else if (temp != null) {
             width = temp.getWidth();
             length = temp.getLength();
             height = temp.getHeight();

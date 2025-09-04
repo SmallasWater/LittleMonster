@@ -13,9 +13,9 @@
 
 5. 问题反馈：https://github.com/SmallasWater/LittleMonster/issues
 
-   
 
-**<u>指令/lt help</u>** 
+
+**<u>指令/lt help</u>**
 
 #### 怪物配置文件
 
@@ -23,11 +23,25 @@
 头部显示:  "§e{名称} §c❤§7[§a{血量}§e/§b{最大血量}§7]"
 皮肤: "粉蓝双瞳猫耳少女"
 BOSS血条: false
+# 实体NetworkId 不为-1时将采用对应NetworkId的实体生成
+# 实体NetworkId参考：https://zh.minecraft.wiki/w/%E5%9F%BA%E5%B2%A9%E7%89%88%E6%95%B0%E6%8D%AE%E5%80%BC#%E5%AE%9E%E4%BD%93ID
 实体NetworkId: -1
+# 使用自定义实体方式生成
+# 自定义实体需配合材质包使用，新添加的自定义实体需重启服务器后才能生效
 CustomEntity:
+  # 是否启用
   enable: false
+  # 自定义实体标识符
   identifier: "LittleMonsterCustomEntity"
+  # 自定义实体变种ID
   skinId: 0
+# 自定义实体碰撞箱大小
+CustomCollisionSize:
+  # 是否启用
+  enable: false
+  width: 0.6
+  length: 0.6
+  height: 1.8
 是否可移动: true
 攻击力: 1
 血量: 50
@@ -94,15 +108,15 @@ CustomEntity:
       概率: 100
       延迟: 0
     - 技能名: "@命令"
-      效果: 
+      效果:
         - "say 触发命令技能&con" # &con后缀使用控制台权限执行 此命令执行一次
         - "give @p 260 1&con" # @p变量自动替换为玩家名称，此命令针对所有范围内玩家单独执行一次
       概率: 100
       延迟: 0
 
 死亡掉落:
- # 若为nbt物品则 id: "保存的名称:数量@nbt"
- # 数量可不填 id: "保存的名称@nbt"
+  # 若为nbt物品则 id: "保存的名称:数量@nbt"
+  # 数量可不填 id: "保存的名称@nbt"
   # round 为执行概率 可填范围为0-100 对应0%-100%
   item:
     - id: "264:0:1@item"
@@ -156,12 +170,12 @@ CustomEntity:
   复活提醒: "&e[ &bBOSS提醒 &e] &a{name} 已复活"
 刷怪点标题: "§a>>§l§o LittleMonster §r§a<< "
 刷怪点浮空字: |-
-      §e>>§a-----------------§e<<
-      §e>>§f{名称} §d的刷怪点       §e<<
-      §e>>§f数量: §a{数量} §e/§c {上限} §e<<
-      §e>>§f刷新时间: §b{time} 秒   §e<<
-      §e>> {name} 努力挑战吧<<
-      §e>>§a-----------------§e<<
+  §e>>§a-----------------§e<<
+  §e>>§f{名称} §d的刷怪点       §e<<
+  §e>>§f数量: §a{数量} §e/§c {上限} §e<<
+  §e>>§f刷新时间: §b{time} 秒   §e<<
+  §e>> {name} 努力挑战吧<<
+  §e>>§a-----------------§e<<
 
 ```
 #### config.yml 配置文件
