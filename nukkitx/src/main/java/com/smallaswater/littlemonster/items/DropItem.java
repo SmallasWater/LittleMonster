@@ -77,8 +77,19 @@ public class DropItem extends BaseItem {
 
     @Override
     public String toString() {
+        Object id = item.getId();
+        if (stringItemClass != null && stringItemClass.isInstance(item) && getNamespaceIdMethod != null) {
+            try {
+                id = getNamespaceIdMethod.invoke(item);
+                return item.hasCompoundTag() ?
+                        id + ":" + item.getCount() + "@nbt" :
+                        id + ":" + item.getCount() + "@item";
+            } catch (Exception e) {
+                LittleMonsterMainClass.getInstance().getLogger().error("获取物品命名空间ID失败：", e);
+            }
+        }
         return item.hasCompoundTag() ?
-                item.getId() + ":" + item.getDamage() + ":" + item.getCount() + "@nbt" :
-                item.getId() + ":" + item.getDamage() + ":" + item.getCount() + "@item";
+                id + ":" + item.getDamage() + ":" + item.getCount() + "@nbt" :
+                id + ":" + item.getDamage() + ":" + item.getCount() + "@item";
     }
 }
