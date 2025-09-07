@@ -59,7 +59,7 @@
                         </goals>
                         <configuration>
                             <includes>
-                                <include>${project.basedir}/nukkit-mot/src/main/resources/plugin.yml</include>
+                                <include>${project.basedir}/src/main/resources/plugin.yml</include>
                             </includes>
                             <replacements>
                                 <replacement>
