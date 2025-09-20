@@ -370,19 +370,21 @@ public class VanillaNPC extends BaseVanillaNPC implements IEntity {
     private final Map<Entity, Float> lastAttackHealth = new HashMap<>();//Entity血量存储
     public void onAttack(EntityDamageEvent sure) {
         //此处开始记录entity初始生命值
-        if(!lastAttackHealth.containsKey(sure.getEntity())){
-            lastAttackHealth.put(sure.getEntity(),sure.getEntity().getMaxHealth()/1f);
+        Float lah = lastAttackHealth.get(sure.getEntity());
+        if (lah == null) {
+            lah = (float) sure.getEntity().getMaxHealth();
+            lastAttackHealth.put(sure.getEntity(), lah);
         }
         //如果血量为0则清除该entity的记录
-        if(lastAttackHealth.get(sure.getEntity()) == 0){
+        if (lah == 0) {
             lastAttackHealth.remove(sure.getEntity());
         }
         //该if是为能够解决由外部插件entity.attack引起的血量重置问题
-        if(sure.getDamage()!=0 && lastAttackHealth.containsKey(sure.getEntity())
-                && sure.getEntity().getHealth()>lastAttackHealth.get(sure.getEntity())){
-            float lastHealth = lastAttackHealth.get(sure.getEntity());
+        if (sure.getDamage() != 0 && lastAttackHealth.containsKey(sure.getEntity())
+                && sure.getEntity().getHealth() > lah) {
+            float lastHealth = lah;
             float maxHealth = sure.getEntity().getMaxHealth();
-            sure.getEntity().setHealth((maxHealth-(maxHealth-lastHealth)-sure.getDamage()));
+            sure.getEntity().setHealth((maxHealth - (maxHealth - lastHealth) - sure.getDamage()));
         }
         if (isImmobile() && !config.isImmobile() && !LittleMonsterMainClass.hasRcRPG) {
             sure.setCancelled();
@@ -415,12 +417,12 @@ public class VanillaNPC extends BaseVanillaNPC implements IEntity {
             if (LittleMonsterMainClass.hasRcRPG) {
                 return;// 有 RcRPG 时无需处理攻击事件
             }
-            if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player) {
+            if (((EntityDamageByEntityEvent) sure).getDamager() instanceof Player && lah > 0) {
                 Player player = (Player) ((EntityDamageByEntityEvent) sure).getDamager();
                 //此处通过怪物血量来记录玩家伤害值，避免getFinalDamage的错误，同时最终能够等于怪物最大生命值避免伤害误差
-                this.handle.add(player.getName(), lastAttackHealth.get(sure.getEntity())-sure.getEntity().getHealth());
+                this.handle.add(player.getName(), lah - sure.getEntity().getHealth());
                 //记录最后血量
-                lastAttackHealth.put(sure.getEntity(),sure.getEntity().getHealth());
+                lastAttackHealth.put(sure.getEntity(), sure.getEntity().getHealth());
             }
             return;
         }

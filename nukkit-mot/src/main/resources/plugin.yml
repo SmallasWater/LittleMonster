@@ -1,6 +1,6 @@
 name: LittleMonster
 main: com.smallaswater.littlemonster.LittleMonsterMainClass
-version: "NKMOT-1.8.0"
+version: "NKMOT-1.8.1-SNAPSHOT"
 authors:
   - 若水
   - LT_Name
