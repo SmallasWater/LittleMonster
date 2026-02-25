@@ -93,7 +93,7 @@ public class LittleMonsterMainClass extends PluginBase {
             this.getLogger().warning("§c Warning: You have turned on debug mode!");
             this.getLogger().warning("§c=========================================");
             try {
-                Thread.sleep(5000);
+                Thread.sleep(3000);
             } catch (InterruptedException ignored) {
 
             }

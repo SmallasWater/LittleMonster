@@ -103,14 +103,14 @@ public class VanillaNPC extends BaseVanillaNPC implements IEntity {
         if (skip) return;
         Entity temp = Entity.createEntity(String.valueOf(config.getNetworkId()), chunk, nbt);
         if (config.isEnableCustomCollisionSize()) {
-            width = config.getCustomCollisionSizeWidth();
-            length = config.getCustomCollisionSizeLength();
-            height = config.getCustomCollisionSizeHeight();
+            setWidth(config.getCustomCollisionSizeWidth());
+            setLength(config.getCustomCollisionSizeLength());
+            setHeight(config.getCustomCollisionSizeHeight());
             halfWidth = width / 2;
         } else if (temp != null) {
-            width = temp.getWidth();
-            length = temp.getLength();
-            height = temp.getHeight();
+            setWidth(temp.getWidth());
+            setLength(temp.getLength());
+            setHeight(temp.getHeight());
             // length 可能为0，详见 `AxisAlignedBB bb` 计算
             if (length == 0) {
                 length = width;
@@ -119,8 +119,7 @@ public class VanillaNPC extends BaseVanillaNPC implements IEntity {
             halfWidth = this.getWidth() / 2;
             temp.close();
         }
-        this.dataProperties.putFloat(DATA_BOUNDING_BOX_HEIGHT, getHeight());
-        this.dataProperties.putFloat(DATA_BOUNDING_BOX_WIDTH, getWidth());
+        this.recalculateBoundingBox();
 
         this.setMaxHealth(config.getHealth());
         this.setHealth(config.getHealth());
@@ -129,9 +128,6 @@ public class VanillaNPC extends BaseVanillaNPC implements IEntity {
         this.setNameTagAlwaysVisible(true);
         this.loadSkill();
         vanillaNPC = this;
-        if (this.getAttackMode() == ATTACK_MODE_ARROW) {
-            shootAttackExecutor = new ShootAttackExecutor();
-        }
     }
 
     @Override

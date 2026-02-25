@@ -20,6 +20,7 @@ import cn.nukkit.level.particle.HugeExplodeSeedParticle;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.potion.Effect;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.EntityCommandSender;
 import com.smallaswater.littlemonster.entity.IEntity;
@@ -68,7 +69,6 @@ public class BaseVanillaNPC extends MovingVanillaEntity {
 
     protected int healDelay = 0;
 
-    @Setter
     @Getter
     protected int attackMode = ATTACK_MODE_MELEE;
 
@@ -106,6 +106,17 @@ public class BaseVanillaNPC extends MovingVanillaEntity {
     public BaseVanillaNPC(FullChunk chunk, CompoundTag nbt, MonsterConfig config) {
         super(chunk, nbt);
         this.setConfig(config);
+    }
+
+    public void setAttackMode(int mode) {
+        this.attackMode = mode;
+        if (mode == ATTACK_MODE_ARROW) {
+            if (this.shootAttackExecutor == null) {
+                this.shootAttackExecutor = new ShootAttackExecutor();
+            }
+        } else {
+            this.shootAttackExecutor = null;
+        }
     }
 
     /**
@@ -308,6 +319,10 @@ public class BaseVanillaNPC extends MovingVanillaEntity {
                 entity.getLevel().addSound(entity, Sound.RANDOM_EXPLODE);
                 break;
             case ATTACK_MODE_ARROW:
+                if (this.shootAttackExecutor == null) {
+                    this.shootAttackExecutor = new ShootAttackExecutor();
+                    LittleMonsterMainClass.getInstance().getLogger().warning("[debug] ShootAttackExecutor was null in attackEntity, lazy init. entityId=" + getId() + " config=" + (config != null ? config.getName() : "null"));
+                }
                 shootAttackExecutor.execute(this.vanillaNPC, entity);
                 break;
             case ATTACK_MODE_EVENT: //触发EntityInteractEvent
