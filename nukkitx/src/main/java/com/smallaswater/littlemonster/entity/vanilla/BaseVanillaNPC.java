@@ -467,9 +467,15 @@ public class BaseVanillaNPC extends MovingVanillaEntity {
 
         //如果在类实例化时调用onClose方法 这些变量可能为null
         //noinspection ConstantConditions
-        this.targetWeightedMap.clear();
-        this.skillManagers.clear();
-        this.healthList.clear();
+        if (this.targetWeightedMap != null) {
+            this.targetWeightedMap.clear();
+        }
+        if (this.skillManagers != null) {
+            this.skillManagers.clear();
+        }
+        if (this.healthList != null) {
+            this.healthList.clear();
+        }
 
         this.handle = null;
         this.route = null;
