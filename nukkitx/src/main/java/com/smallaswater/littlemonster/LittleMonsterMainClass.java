@@ -1,14 +1,12 @@
 package com.smallaswater.littlemonster;
 
 import cn.nukkit.Server;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.entity.data.Skin;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
 import com.smallaswater.littlemonster.commands.LittleNpcSpawnCommand;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.config.PositionConfig;
-import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.events.LittleMasterListener;
 import com.smallaswater.littlemonster.manager.PlayerFlotTextManager;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
@@ -81,7 +79,6 @@ public class LittleMonsterMainClass extends PluginBase {
         hasMobPlugin = Server.getInstance().getPluginManager().getPlugin("MobPlugin") != null;
         hasSquarePet = Server.getInstance().getPluginManager().getPlugin("SquarePet") != null;
 
-        Entity.registerEntity("LittleNpc", LittleNpc.class);
         BaseSkillManager.initSkill();
         saveDefaultConfig();
         reloadConfig();
