@@ -1,6 +1,7 @@
 package com.smallaswater.littlemonster.entity.baselib;
 
 
+import cn.lanink.gamecore.utils.NukkitTypeUtils;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
@@ -24,6 +25,7 @@ import cn.nukkit.network.protocol.PlayerSkinPacket;
 import cn.nukkit.network.protocol.RemoveEntityPacket;
 import cn.nukkit.network.protocol.SetEntityLinkPacket;
 import cn.nukkit.potion.Effect;
+import com.smallaswater.littlemonster.LittleMonsterMainClass;
 import com.smallaswater.littlemonster.common.EntityTool;
 import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.LittleNpc;
@@ -262,6 +264,21 @@ public abstract class BaseEntity extends EntityHuman {
             pkk.immediate = 1;
             player.dataPacket(pkk);
         }
+
+        NukkitTypeUtils.NukkitType nukkitType = NukkitTypeUtils.getNukkitType();
+        if (nukkitType == NukkitTypeUtils.NukkitType.MOT || nukkitType == NukkitTypeUtils.NukkitType.PM1E) {
+            try {
+                Class.forName("cn.nukkit.GameVersion");
+                Object gameVersion = player.getClass().getMethod("getGameVersion").invoke(player);
+                boolean isNetEase = (boolean) gameVersion.getClass().getMethod("isNetEase").invoke(gameVersion);
+                if (isNetEase) {
+                    Server.getInstance().getScheduler().scheduleDelayedTask(LittleMonsterMainClass.getInstance(), () -> {
+                        this.sendSkin(null);
+                    }, 10, true);
+                }
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     @Override
@@ -488,16 +505,21 @@ public abstract class BaseEntity extends EntityHuman {
 
     @Override
     public void setSkin(Skin skin) {
-        PlayerSkinPacket packet = new PlayerSkinPacket();
-        packet.skin = skin;
-        packet.newSkinName = skin.getSkinId();
-        packet.oldSkinName = this.getSkin() != null ? this.getSkin().getSkinId() : new Skin().getSkinId();
-        packet.uuid = this.getUniqueId();
-        for (Player player : this.getViewers().values()) {
-            player.dataPacket(packet);
-        }
-
+        Skin oldSkin = this.getSkin();
         super.setSkin(skin);
+        this.sendSkin(oldSkin);
+    }
+
+    protected void sendSkin(Skin oldSkin) {
+        PlayerSkinPacket packet = new PlayerSkinPacket();
+        packet.skin = this.getSkin();
+        packet.newSkinName = this.getSkin().getSkinId();
+        packet.oldSkinName = oldSkin != null ? oldSkin.getSkinId() : "old";
+        packet.uuid = this.getUniqueId();
+        HashSet<Player> players = new HashSet<>(this.getViewers().values());
+        if (!players.isEmpty()) {
+            Server.broadcastPacket(players, packet);
+        }
     }
 
     @Override
