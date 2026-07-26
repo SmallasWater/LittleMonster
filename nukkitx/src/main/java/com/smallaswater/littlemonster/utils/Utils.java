@@ -53,6 +53,62 @@ public class Utils {
         return random.nextBoolean();
     }
 
+    /**
+     * 把秒数格式化为 "X天X时X分X秒" 形式。
+     * <ul>
+     *   <li>不足 1 小时：自动省略值为 0 的段（最高非零段以下的 0 不补）。</li>
+     *   <li>达到 1 小时及以上：显示"时"段后，分/秒固定两位补零（避免倒计时每秒文本长度跳变）；
+     *       若还有"天"段，时/分/秒一律两位补零。</li>
+     * </ul>
+     * <p>例：
+     * <ul>
+     *   <li>3661  -> "1时01分01秒"</li>
+     *   <li>3600  -> "1时00分00秒"</li>
+     *   <li>900   -> "15分"</li>
+     *   <li>59    -> "59秒"</li>
+     *   <li>86401 -> "1天00时00分01秒"</li>
+     *   <li>0     -> "0秒"</li>
+     * </ul>
+     *
+     * @param seconds 总秒数（&lt;0 视为 0）
+     * @return 格式化后的字符串
+     */
+    public static String formatSeconds(int seconds) {
+        if (seconds < 0) {
+            seconds = 0;
+        }
+        int days = seconds / 86400;
+        int hours = seconds % 86400 / 3600;
+        int minutes = seconds % 3600 / 60;
+        int secs = seconds % 60;
+        StringBuilder sb = new StringBuilder();
+        if (days > 0) {
+            // 有"天"：其下时/分/秒一律两位补零
+            sb.append(days).append("天")
+                    .append(twoDigits(hours)).append("时")
+                    .append(twoDigits(minutes)).append("分")
+                    .append(twoDigits(secs)).append("秒");
+        } else if (hours > 0) {
+            // 有"时"无"天"：分/秒两位补零
+            sb.append(hours).append("时")
+                    .append(twoDigits(minutes)).append("分")
+                    .append(twoDigits(secs)).append("秒");
+        } else if (minutes > 0) {
+            // 不足 1 小时：省略值为 0 的段
+            sb.append(minutes).append("分");
+            if (secs > 0) {
+                sb.append(secs).append("秒");
+            }
+        } else {
+            sb.append(secs).append("秒");
+        }
+        return sb.toString();
+    }
+
+    private static String twoDigits(int n) {
+        return n < 10 ? "0" + n : Integer.toString(n);
+    }
+
     public static double calLinearFunction(Vector3 pos1, Vector3 pos2, double element, int type) {
         if (pos1.getFloorY() != pos2.getFloorY()) {
             return 1.7976931348623157E308D;

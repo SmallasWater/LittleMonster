@@ -40,7 +40,12 @@ public class PositionConfig {
 
     private int count;
 
-    private int round;
+    /**
+     * 刷新规则（固定间隔或定时刷新）。
+     * <p>取代旧版标量 {@code round}（刷怪间隔秒数）。旧配置会在
+     * {@link SpawnRule#load(Config)} 中自动升级为 FIXED 规则。
+     */
+    private SpawnRule spawnRule;
 
     private int maxCount;
 
@@ -54,10 +59,34 @@ public class PositionConfig {
 
     public int time = -1;
 
+    /** 配置文件中保存剩余刷新秒数的 key（单位：秒） */
+    private static final String REMAINING_TIME_KEY = "刷怪剩余秒数";
+
 
     private PositionConfig(String name, Config config){
         this.name = name;
         this.config = config;
+    }
+
+    /**
+     * 将当前剩余刷新秒数持久化到配置文件。
+     * 在服务器关闭（onDisable）时调用，保证重启后从剩余秒数继续倒计时。
+     * <p>仅在 time &gt; 0 时写入；time &le; 0（未开始倒计时）则移除历史 key，
+     * 避免把无意义的 -1 写入用户可见的配置文件。
+     * <p><b>仅 FIXED 规则持久化</b>：SCHEDULED 规则的 time 是相对墙钟的绝对时刻换算值，
+     * 停机期间不计时，重启后必须基于当前时间重算（见 {@link #loadPosition}），
+     * 否则会把"定时刷新"错位成"重启后 N 秒刷新"。
+     */
+    public void saveTime() {
+        if (this.config == null) {
+            return;
+        }
+        if (this.spawnRule != null && this.spawnRule.getType() == SpawnRule.Type.FIXED && this.time > 0) {
+            this.config.set(REMAINING_TIME_KEY, this.time);
+        } else {
+            this.config.remove(REMAINING_TIME_KEY);
+        }
+        this.config.save();
     }
 
     public boolean isDispalFloat() {
@@ -105,7 +134,8 @@ public class PositionConfig {
                         "  §e>>§a----------------------§e<<"));
         entity.setTitle(config.getString("刷怪点标题","§a>>§l§o LittleMonster §r§a<< "));
         entity.setMaxCount(config.getInt("刷怪上限"));
-        entity.setRound(config.getInt("刷怪间隔"));
+        // 解析刷新规则：旧版标量「刷怪间隔」会被自动升级为新版「刷新规则」map 并写回文件
+        entity.setSpawnRule(SpawnRule.load(config));
         entity.setCount(config.getInt("刷怪数量"));
         Map pos = (Map) config.get("刷怪点");
         String levelName = ((String) pos.get("level")).trim();
@@ -120,6 +150,30 @@ public class PositionConfig {
         Position position = new Position((double) pos.get("x"),(double) pos.get("y"),(double) pos.get("z"),level);
         entity.setPos(position);
         entity.setPosOffset(config.getInt("刷怪随机偏移距离"));
+        // 读取上次关闭时保存的剩余秒数。
+        // 仅 FIXED 规则使用持久化秒数：它的 time 就是「固定间隔剩余」语义，停机不计时符合预期。
+        // SCHEDULED 规则的 time 是相对墙钟算出的「到下一个绝对触发时刻的剩余」，停机后已失效。
+        boolean removedStale = false;
+        int savedTime = config.getInt(REMAINING_TIME_KEY, -1);
+        if (savedTime > 0 && entity.spawnRule != null && entity.spawnRule.getType() == SpawnRule.Type.FIXED) {
+            entity.time = savedTime;
+        } else if (savedTime > 0) {
+            // 历史残留（规则曾为 FIXED 后切换为 SCHEDULED 等）：清理避免误导
+            config.remove(REMAINING_TIME_KEY);
+            removedStale = true;
+        }
+        // SCHEDULED 规则不依赖持久化秒数（停机后已失效），主动按当前墙钟算出初值，
+        // 避免 SpawnMonsterTask 首次 tick 前仍为 -1 导致 FlotTask 短暂显示 "0秒"。
+        // tickScheduled 的触发判定 (previous>0 && remaining>previous) 不受影响：
+        // 首次 tick 的 remaining 仅会更小（未越界）或明显变大（越界=到点该刷）。
+        if (entity.spawnRule != null && entity.spawnRule.getType() == SpawnRule.Type.SCHEDULED) {
+            entity.time = entity.spawnRule.nextTriggerSeconds(System.currentTimeMillis());
+        }
+        // 残留 key 的 remove 发生在 SpawnRule.load() 之后，writeBack 的 save 无法覆盖它；
+        // 单独 save 确保清理持久化（SCHEDULED 场景尤其重要，否则残留会永久留存）。
+        if (removedStale) {
+            config.save();
+        }
         return entity;
     }
 }

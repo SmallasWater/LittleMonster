@@ -49,7 +49,7 @@ public class FlotTask extends BasePluginThreadTask {
                                     .replace("{名称}", positionConfig.getLittleNpc().getName())
                                     .replace("{数量}", entityCount + "")
                                     .replace("{上限}", positionConfig.getMaxCount() + "")
-                                    .replace("{time}", (entityCount >= positionConfig.getMaxCount() ? "已刷新" : String.valueOf(positionConfig.time)))
+                                    .replace("{time}", (entityCount >= positionConfig.getMaxCount() ? "已刷新" : Utils.formatSeconds(positionConfig.time)))
                                     .replace("{name}", player.getName());
                             particle.setText(text);
                             particle.toUpData();

@@ -116,6 +116,25 @@ public class LittleMonsterMainClass extends PluginBase {
         this.getLogger().info("GitHub: https://github.com/SmallasWater/LittleMonster");
     }
 
+    @Override
+    public void onDisable() {
+        try {
+            PluginMasterThreadPool.shutdownAndAwait(3);
+        } catch (Exception e) {
+            this.getLogger().warning("关闭工作线程池失败: " + e.getMessage());
+        }
+
+        if (this.positions != null) {
+            for (PositionConfig positionConfig : this.positions.values()) {
+                try {
+                    positionConfig.saveTime();
+                } catch (Exception e) {
+                    this.getLogger().warning("保存刷怪点 " + positionConfig.getName() + " 的剩余时间失败: " + e.getMessage());
+                }
+            }
+        }
+    }
+
     public void init() {
         loadDefaultSkin();
         this.getLogger().info("开始读取皮肤");
