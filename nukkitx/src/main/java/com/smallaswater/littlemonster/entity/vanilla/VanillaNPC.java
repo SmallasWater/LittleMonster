@@ -26,7 +26,6 @@ import com.smallaswater.littlemonster.config.MonsterConfig;
 import com.smallaswater.littlemonster.entity.IEntity;
 import com.smallaswater.littlemonster.entity.LittleNpc;
 import com.smallaswater.littlemonster.entity.baselib.BaseEntity;
-import com.smallaswater.littlemonster.entity.vanilla.ai.ShootAttackExecutor;
 import com.smallaswater.littlemonster.entity.vanilla.ai.route.AdvancedRouteFinder;
 import com.smallaswater.littlemonster.events.entity.LittleMonsterEntityDeathDropExpEvent;
 import com.smallaswater.littlemonster.items.BaseItem;
@@ -35,18 +34,13 @@ import com.smallaswater.littlemonster.items.DropItem;
 import com.smallaswater.littlemonster.manager.BossBarManager;
 import com.smallaswater.littlemonster.skill.BaseSkillAreaManager;
 import com.smallaswater.littlemonster.skill.BaseSkillManager;
-import com.smallaswater.littlemonster.skill.defaultskill.AttributeHealthSkill;
-import com.smallaswater.littlemonster.skill.defaultskill.MessageHealthSkill;
-import com.smallaswater.littlemonster.skill.defaultskill.SummonHealthSkill;
-import com.smallaswater.littlemonster.skill.defaultskill.SwitchAttackModeSkill;
+import com.smallaswater.littlemonster.skill.defaultskill.*;
 import com.smallaswater.littlemonster.utils.Utils;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-
-import static com.smallaswater.littlemonster.entity.baselib.BaseEntity.ATTACK_MODE_ARROW;
 
 public class VanillaNPC extends BaseVanillaNPC implements IEntity {
     public static final String TAG = "LittleMonster";
@@ -856,6 +850,8 @@ public class VanillaNPC extends BaseVanillaNPC implements IEntity {
                         skillManager.display(getDamagePlayers().toArray(new Player[0]));
                     } else if (skillManager instanceof SwitchAttackModeSkill) {
                         skillManager.display(this.getEntity());
+                    } else if (skillManager instanceof CommandHealthSkill) {
+                        skillManager.display(Utils.getAroundPlayers(this, config.getArea(), true, true, true).toArray(new Entity[0]));
                     }
                 }
             }

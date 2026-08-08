@@ -153,6 +153,10 @@ public abstract class BaseSkillManager implements Cloneable {
             case "@生成":
                 skill = BaseSkillManager.get("Summon");
                 break;
+            case "@命令":
+                mode = 1;
+                skill = BaseSkillManager.get("@命令");
+                break;
             case "@切换攻击模式":
                 skill = BaseSkillManager.get("SwitchAttackMode");
                 break;
